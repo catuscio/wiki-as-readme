@@ -70,38 +70,83 @@ Add this workflow to your repository to automatically update a `WIKI.md` file wh
 
     ```yaml
     name: Update Wiki README
+
     on:
       push:
-        branches: [ main ]
-        paths-ignore: ['WIKI.md', '.github/workflows/**']
+        branches:
+          - main
+        paths-ignore:
+          - 'README.md'
+          - 'WIKI.md'
+          - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
       workflow_dispatch:
-
-    permissions:
-      contents: write
-
+    
     jobs:
       generate-and-commit:
         runs-on: ubuntu-latest
+        permissions:
+          contents: write
+    
+        env:
+          OUTPUT_FILE: "WIKI.md"
+    
         steps:
-          - uses: actions/checkout@v4
-          
-          - name: Generate Wiki
+          - name: Checkout code
+            uses: actions/checkout@v4
+    
+          # -----------------------------------------------------------------------
+          # [OPTIONAL] GCP Credentials Setup
+          # Remove or comment out this step if you are NOT using Google Cloud (Vertex AI).
+          # -----------------------------------------------------------------------
+          - name: Create GCP Credentials File
+            env:
+              GCP_KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+            run: |
+              echo "$GCP_KEY" > ./gcp-key.json
+    
+          # 1. Generate Wiki Content
+          - name: Generate Wiki Content
             uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
             env:
-              OUTPUT_FILE: "WIKI.md"
-              LANGUAGE: "en" # or ko, ja
-              LLM_PROVIDER: "google" # or openai, anthropic, etc.
-              MODEL_NAME: "gemini-2.0-flash-exp"
-              # Add your API keys as secrets to your repository
+              # --- Basic Settings ---
+              LANGUAGE: "en"
+              OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
+              
+              # --- LLM Provider and Model Settings ---
+              LLM_PROVIDER: "google"   # Options: google, openai, anthropic, etc.
+              MODEL_NAME: "gemini-2.5-flash"
+              
+              # --- API Key Settings ---
+              
+              # [GCP / Vertex AI]
+              # These settings are only required if LLM_PROVIDER is "google".
+              # Comment them out if using other providers (OpenAI, Anthropic, etc.).
               GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
               GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
-              GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+              GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json
+              
+              # [Other Providers]
+              # Uncomment and set the API key for your chosen provider.
               # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
-          - uses: stefanzweifel/git-auto-commit-action@v5
+              # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+              
+              # --- GitHub Token ---
+              GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+          # -----------------------------------------------------------------------
+          # [OPTIONAL] GCP Credentials Cleanup
+          # Remove or comment out this step if you are NOT using Google Cloud.
+          # -----------------------------------------------------------------------
+          - name: Remove GCP Credentials File
+            if: always()
+            run: rm -f ./gcp-key.json
+    
+          # 2. Commit and Push Changes
+          - name: Commit and Push changes
+            uses: stefanzweifel/git-auto-commit-action@v5
             with:
-              commit_message: "docs: Update WIKI.md via Wiki-As-Readme"
-              file_pattern: "WIKI.md"
+              commit_message: "docs: ✨Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action"
+              file_pattern: ${{ env.OUTPUT_FILE }}
     ```
 
 ### 2. Docker Compose (Local)

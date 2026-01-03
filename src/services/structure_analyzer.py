@@ -214,7 +214,7 @@ class WikiStructureDeterminer:
             return wiki_structure
 
         except Exception as error:
-            logger.error(f"Structure determination failed: {error}", exc_info=True)
+            logger.error("Structure determination failed: {}", error, exc_info=True)
             self.error = str(error)
             self.is_loading = False
             return None

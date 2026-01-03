@@ -5,7 +5,7 @@ name: Update Wiki README
 on:
   push:
     branches:
-      - main    # or master, devlop, etc
+      - main
     paths-ignore:
       - 'README.md'
       - 'WIKI.md'
@@ -25,47 +25,56 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1. Generate Wiki Content (Run Docker image directly)
+      # -----------------------------------------------------------------------
+      # [OPTIONAL] GCP Credentials Setup
+      # Remove or comment out this step if you are NOT using Google Cloud (Vertex AI).
+      # -----------------------------------------------------------------------
+      - name: Create GCP Credentials File
+        env:
+          GCP_KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo "$GCP_KEY" > ./gcp-key.json
+
+      # 1. Generate Wiki Content
       - name: Generate Wiki Content
         uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
         env:
           # --- Basic Settings ---
-          LANGUAGE: "en"
+          LANGUAGE: "ko"
           OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
           
           # --- LLM Provider and Model Settings ---
-          LLM_PROVIDER: "google"   # google, openai, anthropic, openrouter, xai, ollama
+          LLM_PROVIDER: "google"   # Options: google, openai, anthropic, etc.
           MODEL_NAME: "gemini-2.5-flash"
           
-          # --- API Key Settings (Uncomment and set only for the services you use) ---
-          # Google Cloud (Vertex AI)
+          # --- API Key Settings ---
+          
+          # [GCP / Vertex AI]
+          # These settings are only required if LLM_PROVIDER is "google".
+          # Comment them out if using other providers (OpenAI, Anthropic, etc.).
           GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
           GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json
           
-          # OpenAI / Anthropic / Others
+          # [Other Providers]
+          # Uncomment and set the API key for your chosen provider.
           # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           
-          # --- GitHub Token (for analyzing private repos and pushing) ---
+          # --- GitHub Token ---
           GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          # --- Advanced LLM Settings (Uncomment if needed) ---
-          # LLM_BASE_URL: "https://your-proxy-url.com"
-          # USE_STRUCTURED_OUTPUT: "true"
-          # TEMPERATURE: "0.0"
-          # MAX_RETRIES: "3"
-          # MAX_CONCURRENCY: "5"
-          
-          # Exclude specific files/folders (JSON array format)
-          # IGNORED_PATTERNS: '["*.log", "dist/**", "build/**", "examples", "uv.lock", "public"]'
+      # -----------------------------------------------------------------------
+      # [OPTIONAL] GCP Credentials Cleanup
+      # Remove or comment out this step if you are NOT using Google Cloud.
+      # -----------------------------------------------------------------------
+      - name: Remove GCP Credentials File
+        if: always()
+        run: rm -f ./gcp-key.json
 
       # 2. Commit and Push Changes
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          # Must match OUTPUT_FILE set above.
           commit_message: "docs: ✨Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action"
           file_pattern: ${{ env.OUTPUT_FILE }}
