@@ -1,25 +1,24 @@
-# Wiki As Readme 프로젝트 위키
+# Wiki As Readme Documentation
 
-코드베이스를 포괄적인 위키로 변환하는 유연한 AI 문서화 도구입니다. 모든 LLM, 모든 Git 플랫폼, 모든 배포 환경을 지원합니다.
+Comprehensive documentation for Wiki As Readme, a flexible AI documentation tool that turns codebases into wikis. It supports various LLMs, Git platforms, and deployment methods.
 
 ## Table of Contents
 
-- [프로젝트 소개](#프로젝트-소개)
-- [핵심 기능](#핵심-기능)
-- [GitHub 액션으로 사용하기](#github-액션으로-사용하기)
-- [Docker Compose로 로컬에서 실행](#docker-compose로-로컬에서-실행)
-- [로컬 개발 환경 설정](#로컬-개발-환경-설정)
-- [서버 및 웹훅 배포](#서버-및-웹훅-배포)
-- [아키텍처 개요](#아키텍처-개요)
-- [LLM 통합 및 설정](#llm-통합-및-설정)
-- [주요 서비스 컴포넌트](#주요-서비스-컴포넌트)
-- [API 엔드포인트 참조](#api-엔드포인트-참조)
-- [환경 설정 가이드](#환경-설정-가이드)
-- [기여 가이드](#기여-가이드)
+- [Introduction to Wiki As Readme](#introduction-to-wiki-as-readme)
+- [Core Features](#core-features)
+- [Universal Compatibility](#universal-compatibility)
+- [Using as a GitHub Action](#using-as-a-github-action)
+- [Docker Compose & Local Development](#docker-compose-&-local-development)
+- [Deploying as a Server with Webhooks](#deploying-as-a-server-with-webhooks)
+- [Configuration Reference](#configuration-reference)
+- [API Endpoints](#api-endpoints)
+- [System Architecture](#system-architecture)
+- [Core Components Overview](#core-components-overview)
+- [Contributing to Wiki As Readme](#contributing-to-wiki-as-readme)
 
 ---
 
-<a name="프로젝트-소개"></a>
+<a name="introduction-to-wiki-as-readme"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -31,408 +30,58 @@ The following files were used as context for generating this wiki page:
 - [pyproject.toml](pyproject.toml)
 </details>
 
-# 프로젝트 소개
+# Introduction to Wiki As Readme
 
-## 📚 Wiki As Readme 프로젝트 개요
+**Wiki As Readme** is a versatile AI-powered documentation tool designed to transform any codebase into a comprehensive wiki or `README.md` file rapidly. It emphasizes universal compatibility, adapting to various LLM providers, Git platforms, and deployment environments. The tool aims to provide a "drop-in" solution for automated documentation, generating detailed content, including architecture overviews, installation guides, API references, and visual diagrams.
 
-**Wiki As Readme**는 코드베이스를 포괄적인 위키 문서로 자동 변환해주는 유연한 AI 문서화 도구입니다. 이 프로젝트는 어떤 LLM(대규모 언어 모델)이든, 어떤 코드 저장소든, 어떤 환경에서든 작동하도록 설계되어 개발자들이 손쉽게 프로젝트 문서를 생성하고 관리할 수 있도록 돕습니다. 로컬 Ollama를 통해 Llama 3 모델을 실행하든, Google Gemini Pro를 사용하든, OpenAI API를 호출하든, 이 도구는 사용자의 기술 스택에 맞춰 유연하게 작동합니다. 또한 GitHub, GitLab, Bitbucket과 같은 모든 Git 플랫폼 또는 로컬 폴더와 원활하게 통합되어 궁극적인 "드롭인" 문서화 솔루션을 제공합니다.
+This project leverages modern asynchronous programming with FastAPI and Streamlit for its backend and frontend, respectively, and integrates with a wide array of Large Language Models (LLMs) through LiteLLM. It supports multiple usage modes, from CI/CD integration via GitHub Actions to local development and long-running API services.
 
-이 도구는 코드 분석을 통해 프로젝트 아키텍처를 이해하고, 논리적인 문서 계층 구조를 자동으로 생성하며, 아키텍처 개요, 설치 가이드, API 참조 등 상세한 내용을 작성합니다. 특히, Mermaid.js 다이어그램을 자동으로 생성하여 아키텍처를 시각화하는 기능을 제공하며, 개별 Markdown 파일과 단일 통합 `README.md` 파일을 모두 생성할 수 있습니다. FastAPI와 AsyncIO를 기반으로 구축되어 대규모 문서 생성에도 비차단적이고 효율적인 성능을 보장합니다.
+## Core Philosophy and Universal Compatibility
 
-## ✨ 주요 특징
+Wiki As Readme is built on the principle of being "truly pluggable," offering unparalleled flexibility across its operational stack. This ensures it can integrate into virtually any development workflow or infrastructure.
 
-Wiki As Readme는 다음과 같은 핵심 기능을 제공하여 문서화 프로세스를 혁신합니다.
+### Model Agnostic (Powered by LiteLLM)
+The tool's LLM integration is handled by LiteLLM, providing a unified interface to over 100 different language models. This allows users to choose their preferred model without changing the core application logic.
+*   **Commercial APIs:** Supports major providers like Google Vertex AI (Gemini), OpenAI (GPT-4), Anthropic (Claude), and xAI (Grok).
+*   **Open/Local Models:** Integrates with platforms like Ollama, OpenRouter, and HuggingFace for local or community-driven models.
+*   **On-Premise:** Can connect securely to private, self-hosted LLM endpoints.
+Sources: [README.md](Model Agnostic (Powered by LiteLLM))
 
-*   **🧠 심층 컨텍스트 분석 (Deep Context Analysis):** 파일 구조와 관계를 분석하여 문서 작성 전에 프로젝트의 아키텍처를 깊이 이해합니다.
-    *   Sources: [README.md](Core Features)
-*   **📦 스마트 구조 생성 (Smart Structure Generation):** 문서에 대한 논리적인 계층 구조(섹션 > 페이지)를 자동으로 결정합니다.
-    *   Sources: [README.md](Core Features)
-*   **🔍 포괄적인 콘텐츠 (Comprehensive Content):** 아키텍처 개요, 설치 가이드, API 참조를 포함한 상세한 페이지를 작성합니다.
-    *   Sources: [README.md](Core Features)
-*   **📊 자동 다이어그램 생성 (Automatic Diagrams):** 아키텍처를 시각화하기 위해 Mermaid.js 다이어그램(플로우차트, 시퀀스 다이어그램, 클래스 다이어그램)을 생성합니다.
-    *   Sources: [README.md](Core Features)
-*   **🚗 하이브리드 출력 (Hybrid Output):** 위키를 위한 개별 Markdown 파일과 단일 통합 `README.md` 파일을 모두 생성합니다.
-    *   Sources: [README.md](Core Features)
-*   **⚡ 비동기 및 확장 가능 (Async & Scalable):** FastAPI 및 AsyncIO로 구축되어 대규모 문서 생성을 위한 비차단적이고 효율적인 성능을 제공합니다.
-    *   Sources: [README.md](Core Features)
+### Platform Agnostic
+Wiki As Readme can analyze code from various sources, making it adaptable to different repository hosting solutions.
+*   **Cloud Repositories:** Seamlessly works with GitHub, GitLab, and Bitbucket.
+*   **Local Development:** Capable of analyzing code directly from a local file system, eliminating the need to push changes to a remote repository.
+*   **Private/Enterprise:** Offers full support for private instances and self-hosted Git servers.
+Sources: [README.md](Platform Agnostic)
 
-## 🌐 범용 호환성
+### Deployment Agnostic
+The tool is designed for flexible deployment, fitting into diverse operational contexts.
+*   **CI/CD Integration:** Can be easily incorporated into CI/CD pipelines, such as GitHub Actions, for automated documentation updates.
+*   **Containerization:** Deployable via Docker Compose for isolated and reproducible environments.
+*   **Service Deployment:** Can run as a long-running API server, supporting webhooks for event-driven documentation generation.
+*   **CLI:** Provides a command-line interface for local, on-demand documentation generation during development.
+Sources: [README.md](Deployment Agnostic)
 
-이 프로젝트는 **진정으로 플러그인 가능**하도록 설계되어 사용자가 실행 방식, 실행 위치, 구동 방식을 자유롭게 선택할 수 있습니다.
+## Key Features
 
-### 🧠 1. 모델 독립성 (Model Agnostic)
+Wiki As Readme provides a robust set of features to ensure high-quality and comprehensive documentation.
 
-LiteLLM을 기반으로 다양한 LLM 제공업체와 모델을 지원합니다.
-*   **상용 API:** Google Vertex AI (Gemini), OpenAI (GPT-4), Anthropic (Claude), xAI (Grok).
-*   **오픈/로컬 모델:** Ollama, OpenRouter, HuggingFace.
-*   **온프레미스:** 자체 프라이빗 LLM 엔드포인트에 안전하게 연결할 수 있습니다.
-    *   Sources: [README.md](Model Agnostic)
+*   **🧠 Deep Context Analysis:** The tool analyzes the project's file structure and inter-file relationships to build a comprehensive understanding of the codebase architecture before generating content.
+*   **📦 Smart Structure Generation:** It automatically determines a logical hierarchy for the documentation, organizing content into sections and pages for optimal readability.
+*   **🔍 Comprehensive Content:** Generates detailed documentation pages, including architecture overviews, installation guides, API references, and core concept explanations.
+*   **📊 Automatic Diagrams:** Integrates Mermaid.js to automatically generate visual diagrams (Flowcharts, Sequence diagrams, Class diagrams) that illustrate project architecture and data flows.
+*   **🚗 Hybrid Output:** Produces both individual Markdown files suitable for a wiki and a single consolidated `README.md` file.
+*   **⚡ Async & Scalable:** Built with FastAPI and AsyncIO, ensuring non-blocking, efficient generation of documentation, even for large projects.
+Sources: [README.md](Core Features)
 
-### 🚉 2. 플랫폼 독립성 (Platform Agnostic)
+## Usage Modes
 
-다양한 코드 저장소 플랫폼과 로컬 환경을 지원합니다.
-*   **클라우드 저장소:** GitHub, GitLab, Bitbucket과 원활하게 작동합니다.
-*   **로컬 개발:** 코드를 푸시하지 않고 로컬 파일 시스템에서 직접 코드를 분석합니다.
-*   **프라이빗/엔터프라이즈:** 프라이빗 인스턴스 및 자체 호스팅 Git 서버를 완벽하게 지원합니다.
-    *   Sources: [README.md](Platform Agnostic)
+Wiki As Readme offers several distinct usage modes to cater to different user needs and integration points.
 
-### 🛠️ 3. 배포 독립성 (Deployment Agnostic)
+### 1. GitHub Action (Recommended)
+This mode automates documentation updates within a CI/CD pipeline. A GitHub Actions workflow can be configured to trigger documentation generation on specific events, such as pushes to the `main` branch.
 
-다양한 배포 환경에 통합될 수 있습니다.
-*   **CI/CD:** GitHub Actions에 통합하여 사용할 수 있습니다.
-*   **컨테이너:** Docker Compose를 통해 실행할 수 있습니다.
-*   **서비스:** 웹훅을 지원하는 장기 실행 API 서버로 배포할 수 있습니다.
-*   **CLI:** 코딩 중에 로컬에서 실행할 수 있습니다.
-    *   Sources: [README.md](Deployment Agnostic)
-
-## 🚀 사용 모드
-
-이 프로젝트는 사용자의 필요에 따라 여러 가지 방식으로 활용될 수 있도록 **플러그인 가능**하게 설계되었습니다.
-
-1.  **GitHub Action (권장):** CI/CD 파이프라인에서 문서 업데이트를 자동화합니다.
-    *   `.github/workflows/update-wiki.yml` 파일을 생성하여 `push` 이벤트 시 `WIKI.md` 파일을 자동으로 업데이트하도록 설정할 수 있습니다.
-    *   Sources: [README.md](GitHub Action), [action.yml](action.yml)
-2.  **Docker Compose (로컬):** Python 종속성을 설치할 필요 없이 전체 UI/API를 로컬에서 실행합니다.
-    *   `.env` 파일을 설정한 후 `docker-compose up --build` 명령으로 실행합니다.
-    *   Sources: [README.md](Docker Compose (Local))
-3.  **로컬 Python 개발:** 소스 코드를 수정하거나 Docker 없이 실행하려는 개발자를 위한 모드입니다.
-    *   Python 3.12+ 및 `uv`가 필요하며, `uv sync`로 종속성을 설치한 후 백엔드(FastAPI)와 프론트엔드(Streamlit)를 별도로 실행합니다.
-    *   Sources: [README.md](Local Python Development), [pyproject.toml](pyproject.toml)
-4.  **서버 및 웹훅:** API 서버를 배포하여 요청 또는 웹훅(예: GitHub)을 처리합니다.
-    *   `POST /api/v1/webhook/github` 엔드포인트는 GitHub 푸시 이벤트 페이로드를 받아 위키 생성을 트리거합니다.
-    *   Sources: [README.md](Server & Webhooks)
-
-### GitHub Action 워크플로우 예시
-
-```mermaid
-graph TD
-    A["GitHub Push Event (main branch)"] --> B{"paths-ignore 조건 만족?"}
-    B -- "예" --> C["워크플로우 시작"]
-    C --> D["코드 체크아웃"]
-    D --> E["GCP 자격 증명 파일 생성 (선택 사항)"]
-    E --> F["Wiki 콘텐츠 생성 (Docker Action)"]
-    F -- "환경 변수 설정" --> G["LLM_PROVIDER, MODEL_NAME, API_KEY 등"]
-    F --> H["GCP 자격 증명 파일 삭제 (선택 사항)"]
-    H --> I["변경 사항 커밋 및 푸시"]
-    I --> J["WIKI.md 업데이트 완료"]
-```
-Sources: [README.md](1. GitHub Action (Recommended)), [action.yml](action.yml)
-
-## 🛠️ 아키텍처
-
-Wiki As Readme는 다음과 같은 기술 스택으로 구성되어 있습니다.
-
-```mermaid
-graph TD
-    A["사용자"] --> B["프론트엔드 (Streamlit)"]
-    B --> C["백엔드 (FastAPI)"]
-    C --> D["LLM 통합 (LiteLLM)"]
-    D --> E["LLM 제공업체 (OpenAI, Google, Ollama 등)"]
-    C --> F["데이터 모델 (Pydantic)"]
-    C --> G["다이어그램 생성 (Mermaid.js)"]
-    H["Git 저장소 (GitHub, GitLab 등)"] --> C
-    C --> H["Git 저장소 (업데이트된 문서 커밋)"]
-```
-Sources: [README.md](Architecture), [pyproject.toml](project.dependencies)
-
-*   **프론트엔드:** [Streamlit](https://streamlit.io/) (사용자 인터페이스)
-*   **백엔드:** [FastAPI](https://fastapi.tiangolo.com/) (REST API, 백그라운드 작업)
-*   **LLM 통합:** [LiteLLM](https://docs.litellm.ai/) (100개 이상의 LLM을 위한 통합 인터페이스)
-*   **데이터 모델:** [Pydantic](https://docs.pydantic.dev/) (타입 안전성 및 구조화된 출력 유효성 검사)
-*   **다이어그램:** Mermaid.js
-    *   Sources: [README.md](Architecture)
-
-### 주요 Python 종속성
-
-`pyproject.toml` 파일에 명시된 주요 종속성은 다음과 같습니다.
-
-*   `litellm`: LLM 통합을 위한 핵심 라이브러리.
-*   `fastapi`, `uvicorn`, `gunicorn`: 백엔드 API 서버 구축 및 실행.
-*   `streamlit`: 웹 UI 구축.
-*   `pydantic`, `pydantic-settings`: 데이터 모델 정의 및 설정 관리.
-*   `httpx`, `requests`: HTTP 요청 처리.
-*   `google-auth`: Google Cloud 인증.
-*   `loguru`: 로깅.
-*   `python-dotenv`: 환경 변수 관리.
-*   `jinja2`, `pyyaml`: 템플릿 및 YAML 처리.
-    *   Sources: [pyproject.toml](project.dependencies)
-
-## 🔌 API 참조
-
-백엔드 API는 FastAPI로 구축되었습니다. 서버가 실행 중일 때 `http://localhost:8000/docs`에서 대화형 Swagger 문서를 확인할 수 있습니다.
-
-### 위키 생성 엔드포인트
-
-| HTTP 메서드 | 경로 | 설명 |
-|---|---|---|
-| `POST` | `/api/v1/wiki/generate/file` | 위키 생성을 위한 백그라운드 작업을 시작하고, 생성된 위키를 서버에 Markdown 파일로 저장합니다. |
-| `POST` | `/api/v1/wiki/generate/text` | 위키 생성을 위한 백그라운드 작업을 시작합니다. 결과 텍스트는 작업 상태에 저장됩니다. |
-| `GET` | `/api/v1/wiki/status/{task_id}` | 특정 생성 작업의 상태와 결과를 검색합니다. |
-    *   Sources: [README.md](API Reference)
-
-### 웹훅 엔드포인트
-
-| HTTP 메서드 | 경로 | 설명 |
-|---|---|---|
-| `POST` | `/api/v1/webhook/github` | GitHub 웹훅(푸시 이벤트)을 위한 엔드포인트입니다. `main` 브랜치에 푸시될 때 자동 위키 생성을 트리거합니다. |
-    *   Sources: [README.md](API Reference)
-
-## ⚙️ 설정 참조 (`.env`)
-
-로컬 또는 Docker 환경에서 애플리케이션을 실행할 때 환경 변수를 통해 앱을 구성합니다.
-
-| 카테고리 | 변수 | 설명 | 예시 |
-|---|---|---|---|
-| **LLM 제공업체** | `LLM_PROVIDER` | LLM 제공업체 (`google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama`) | `google` |
-| | `MODEL_NAME` | 사용할 특정 모델 식별자 | `gemini-2.5-flash` |
-| **인증** | `OPENAI_API_KEY` | OpenAI API 키 | `sk-...` |
-| | `GCP_PROJECT_NAME` | Vertex AI 프로젝트 ID | `my-genai-project` |
-| | `GCP_MODEL_LOCATION` | GCP 모델 위치 | `us-central1` |
-| | `GOOGLE_APPLICATION_CREDENTIALS` | GCP 서비스 계정 JSON 키 파일 경로 | `/github/workspace/gcp-key.json` |
-| | `GIT_API_TOKEN` | 프라이빗 저장소 접근을 위한 GitHub/GitLab API 토큰 | `ghp_...` |
-| **고급 설정** | `USE_STRUCTURED_OUTPUT` | 네이티브 JSON 모드 사용 여부 | `true` |
-| | `TEMPERATURE` | LLM 온도 (0.0 ~ 1.0) | `0.0` |
-| | `MAX_RETRIES` | 최대 재시도 횟수 | `3` |
-| | `MAX_CONCURRENCY` | 최대 병렬 LLM 호출 수 | `5` |
-| | `LLM_BASE_URL` | LLM API의 사용자 정의 기본 URL | `http://localhost:11434/v1` |
-| **필터링** | `IGNORED_PATTERNS` | 제외할 glob 패턴의 **JSON 배열** | `'["*.log", "node_modules/*"]'` |
-| **기타** | `LANGUAGE` | 생성될 콘텐츠의 언어 (`ko`, `en`) | `ko` |
-| | `OUTPUT_FILE` | 생성된 콘텐츠를 저장할 파일 이름 | `WIKI.md` |
-    *   Sources: [README.md](Configuration Reference (.env)), [action.yml](inputs)
-
-## 🤝 기여
-
-기여는 언제나 환영합니다. Pull Request를 제출해 주세요.
-1.  프로젝트를 포크합니다.
-2.  기능 브랜치를 생성합니다 (`git checkout -b feature/AmazingFeature`).
-3.  변경 사항을 커밋합니다 (`git commit -m 'Add some AmazingFeature'`).
-4.  브랜치에 푸시합니다 (`git push origin feature/AmazingFeature`).
-5.  Pull Request를 엽니다.
-    *   Sources: [README.md](Contributing)
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스에 따라 라이선스가 부여됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하십시오.
-    *   Sources: [README.md](License)
-
----
-
-<a name="핵심-기능"></a>
-
-<details>
-<summary>Relevant source files</summary>
-
-The following files were used as context for generating this wiki page:
-
-- [README.md](README.md)
-- [src/services/structure_analyzer.py](src/services/structure_analyzer.py)
-- [src/services/wiki_generator.py](src/services/wiki_generator.py)
-- [src/prompts/wiki_structure_generator.yaml](src/prompts/wiki_structure_generator.yaml)
-- [src/prompts/wiki_contents_generator.yaml](src/prompts/wiki_contents_generator.yaml)
-</details>
-
-# 핵심 기능
-
-## 1. 소개
-
-**Wiki As Readme**는 코드베이스를 포괄적인 위키 문서로 자동 변환하는 유연한 AI 문서화 도구입니다. 이 도구는 다양한 LLM(대규모 언어 모델)과 Git 플랫폼, 배포 환경에 구애받지 않고 작동하도록 설계되어, 개발자가 어떤 스택을 사용하든 쉽게 문서화를 자동화할 수 있도록 지원합니다. 핵심 기능은 프로젝트의 아키텍처를 이해하고, 논리적인 문서 구조를 생성하며, 상세한 내용을 작성하고, 시각적인 다이어그램까지 포함하는 포괄적인 문서화 프로세스를 제공하는 데 중점을 둡니다.
-
-## 2. 주요 기능 상세
-
-Wiki As Readme의 핵심 기능은 다음과 같은 주요 영역으로 나눌 수 있습니다.
-
-### 2.1. 범용 호환성 (Universal Compatibility)
-
-이 프로젝트는 진정으로 "플러그인 가능한" 방식으로 설계되어 사용자가 실행 방식, 위치, 구동 기술을 자유롭게 선택할 수 있습니다.
-
-#### 2.1.1. 모델 불가지론 (Model Agnostic)
-LiteLLM을 기반으로 100개 이상의 LLM을 지원하여, 사용자가 선호하는 모델을 유연하게 선택할 수 있습니다.
-*   **상용 API**: Google Vertex AI (Gemini), OpenAI (GPT-4), Anthropic (Claude), xAI (Grok) 등
-*   **오픈/로컬 모델**: Ollama, OpenRouter, HuggingFace 등
-*   **온프레미스**: 자체 프라이빗 LLM 엔드포인트에 안전하게 연결 가능
-
-#### 2.1.2. 플랫폼 불가지론 (Platform Agnostic)
-다양한 코드 저장소 플랫폼과 로컬 환경을 지원하여, 어디서든 코드 분석이 가능합니다.
-*   **클라우드 저장소**: GitHub, GitLab, Bitbucket과 원활하게 연동
-*   **로컬 개발**: 로컬 파일 시스템에서 직접 코드 분석
-*   **프라이빗/엔터프라이즈**: 프라이빗 인스턴스 및 자체 호스팅 Git 서버 완벽 지원
-
-#### 2.1.3. 배포 불가지론 (Deployment Agnostic)
-다양한 배포 및 실행 방식을 지원하여, 사용자의 워크플로우에 통합하기 용이합니다.
-*   **CI/CD**: GitHub Actions에 통합하여 자동화된 문서 업데이트
-*   **컨테이너**: Docker Compose를 통한 손쉬운 배포 및 실행
-*   **서비스**: 웹훅을 지원하는 장기 실행 API 서버로 배포
-*   **CLI**: 로컬에서 코딩 중 직접 실행
-
-### 2.2. 핵심 문서 생성 기능 (Core Features)
-
-문서 생성 과정에서 프로젝트의 깊은 이해를 바탕으로 고품질의 문서를 자동으로 생성합니다.
-*   **🧠 심층 컨텍스트 분석 (Deep Context Analysis)**: 파일 구조와 관계를 분석하여 문서 작성 전에 프로젝트 아키텍처를 이해합니다.
-*   **📦 스마트 구조 생성 (Smart Structure Generation)**: 문서에 대한 논리적인 계층 구조(섹션 > 페이지)를 자동으로 결정합니다.
-*   **🔍 포괄적인 콘텐츠 (Comprehensive Content)**: 아키텍처 개요, 설치 가이드, API 참조를 포함한 상세 페이지를 작성합니다.
-*   **📊 자동 다이어그램 (Automatic Diagrams)**: 아키텍처를 시각화하기 위해 Mermaid.js 다이어그램(플로우차트, 시퀀스 다이어그램, 클래스 다이어그램)을 생성합니다.
-*   **🚗 하이브리드 출력 (Hybrid Output)**: 위키를 위한 개별 Markdown 파일과 단일 통합 `README.md` 파일을 모두 생성합니다.
-*   **⚡ 비동기 및 확장 가능 (Async & Scalable)**: 대규모 문서 생성을 위한 논블로킹 및 효율적인 처리를 위해 FastAPI 및 AsyncIO로 구축되었습니다.
-
-### 2.3. 위키 생성 워크플로우 (Wiki Generation Workflow)
-
-Wiki As Readme의 핵심은 `WikiGenerationService`와 `WikiStructureDeterminer`를 중심으로 한 체계적인 문서 생성 파이프라인입니다.
-
-#### 2.3.1. `WikiGenerationService` (src/services/wiki_generator.py)
-이 서비스는 전체 위키 생성 파이프라인을 조율하는 역할을 합니다.
-*   **요청 유효성 검사**: 입력된 `WikiGenerationRequest`의 유효성을 확인합니다.
-*   **초기화 및 구조 결정**: `RepositoryFetcher`를 사용하여 저장소 구조를 가져오고, `WikiStructureDeterminer`를 초기화하여 위키 구조를 결정합니다.
-*   **콘텐츠 생성 조율**: `WikiStructureDeterminer`가 페이지 콘텐츠 생성을 시작하도록 지시하고, 완료될 때까지 기다립니다.
-*   **결과 통합**: `WikiFormatter`를 사용하여 생성된 위키 구조와 페이지 콘텐츠를 단일 Markdown 문서로 통합합니다.
-*   **파일 저장**: 생성된 Markdown 콘텐츠를 지정된 경로에 파일로 저장합니다.
-
-#### 2.3.2. `WikiStructureDeterminer` (src/services/structure_analyzer.py)
-이 서비스는 LLM을 활용하여 위키의 구조를 결정하고 각 페이지의 콘텐츠를 생성하는 핵심 로직을 담당합니다.
-*   **위키 구조 결정 (`determine_wiki_structure`)**:
-    *   `src/prompts/wiki_structure_generator.yaml` 프롬프트 템플릿을 사용하여 LLM에 저장소의 파일 트리와 README를 제공합니다.
-    *   LLM은 `WikiStructure` Pydantic 모델에 따라 위키의 섹션, 페이지, 각 페이지에 필요한 파일 경로 등을 JSON 형식으로 반환합니다.
-    *   Sources: [src/services/structure_analyzer.py](determine_wiki_structure function), [src/prompts/wiki_structure_generator.yaml](template)
-*   **페이지 콘텐츠 생성 (`generate_page_content`)**:
-    *   `src/prompts/wiki_contents_generator.yaml` 프롬프트 템플릿을 사용하여 LLM에 특정 페이지의 제목과 해당 페이지와 관련된 소스 파일의 내용을 제공합니다.
-    *   LLM은 제공된 소스 코드만을 기반으로 상세한 Markdown 형식의 페이지 콘텐츠를 생성합니다.
-    *   동시성 제어(Semaphore)를 사용하여 여러 페이지의 콘텐츠 생성을 병렬로 처리하면서 LLM 호출 수를 제한합니다.
-    *   Sources: [src/services/structure_analyzer.py](generate_page_content function), [src/prompts/wiki_contents_generator.yaml](template)
-*   **파일 내용 가져오기 (`_fetch_and_format_files`)**: `RepositoryFetcher`를 사용하여 지정된 파일 경로의 내용을 비동기적으로 가져옵니다.
-*   **프롬프트 템플릿 로드**: YAML 파일에서 프롬프트 템플릿을 로드하고 캐싱하여 효율성을 높입니다.
-
-### 2.4. 프롬프트 엔지니어링 (Prompt Engineering)
-
-LLM의 출력을 제어하고 고품질의 문서를 생성하기 위해 두 가지 주요 프롬프트 템플릿이 사용됩니다.
-
-#### 2.4.1. `wiki_structure_generator.yaml`
-*   **목적**: 저장소의 전체 구조(파일 트리, README)를 분석하여 위키의 논리적인 계층 구조(섹션, 페이지)를 결정합니다.
-*   **출력 형식**: `WikiStructure` Pydantic 모델에 엄격하게 부합하는 JSON 객체를 요구합니다.
-*   **주요 지시**:
-    *   포괄적인 위키를 위한 페이지 수(8-12개) 또는 간결한 위키를 위한 페이지 수(4-6개)를 지정합니다.
-    *   각 페이지에 대한 관련 파일 경로(`file_paths`)를 실제 파일 트리에서 선택하도록 지시합니다.
-    *   섹션 및 페이지 ID, 제목, 중요도, 관련 페이지 등을 상세하게 정의하도록 안내합니다.
-    *   Sources: [src/prompts/wiki_structure_generator.yaml](template)
-
-#### 2.4.2. `wiki_contents_generator.yaml`
-*   **목적**: 특정 위키 페이지의 제목과 관련 소스 파일 내용을 기반으로 해당 페이지의 Markdown 콘텐츠를 생성합니다.
-*   **출력 형식**: 순수한 Markdown 텍스트를 요구하며, JSON 객체나 코드 블록으로 감싸지 않도록 엄격하게 지시합니다.
-*   **주요 지시**:
-    *   페이지 상단에 관련 소스 파일을 나열하는 `<details>` 블록을 포함하도록 강제합니다.
-    *   소개, 상세 섹션, 결론으로 구성된 콘텐츠 구조를 따르도록 합니다.
-    *   Mermaid 다이어그램 생성 시 엄격한 문법 규칙(모든 레이블에 이중 따옴표 사용, 예약어 피하기)을 준수하도록 강조합니다.
-    *   Markdown 테이블 형식, 인용(소스 파일 URL 및 함수/라인 번호) 규칙을 명시합니다.
-    *   Sources: [src/prompts/wiki_contents_generator.yaml](template)
-
-## 3. 위키 생성 흐름 다이어그램
-
-다음 다이어그램은 Wiki As Readme의 핵심 기능들이 어떻게 상호작용하여 최종 위키 문서를 생성하는지 보여줍니다.
-
-```mermaid
-graph TD
-    A["사용자 요청 (WikiGenerationRequest)"] --> B["WikiGenerationService.generate_wiki()"];
-
-    B --> C["RepositoryFetcher.fetch_repository_structure()"];
-    C --> D["저장소 구조 (파일 트리, README)"];
-
-    D --> E["WikiStructureDeterminer.determine_wiki_structure()"];
-    E -- "프롬프트: wiki_structure_generator.yaml" --> F["LLM (구조 생성)"];
-    F --> G["WikiStructure (JSON)"];
-
-    G --> H["WikiStructureDeterminer.generate_page_content()"];
-    H -- "병렬 처리 (Semaphore)" --> I["페이지별 소스 파일 내용 가져오기"];
-    I -- "프롬프트: wiki_contents_generator.yaml" --> J["LLM (페이지 콘텐츠 생성)"];
-    J --> K["생성된 페이지 콘텐츠 (Markdown)"];
-
-    K --> L["WikiFormatter.consolidate_markdown()"];
-    L --> M["최종 위키 문서 (단일 Markdown)"];
-    M --> N["WikiGenerationService.save_to_file()"];
-    N --> O["출력 파일"];
-```
-
-## 4. 결론
-
-Wiki As Readme의 핵심 기능은 유연성, 자동화, 그리고 고품질 문서 생성에 초점을 맞추고 있습니다. 모델, 플랫폼, 배포 환경에 대한 광범위한 호환성을 제공하며, 심층적인 코드 분석과 LLM 기반의 지능적인 콘텐츠 생성을 통해 개발자가 최소한의 노력으로 포괄적이고 정확한 기술 문서를 얻을 수 있도록 지원합니다. 이러한 기능들은 프로젝트의 문서화 부담을 줄이고 개발 생산성을 향상시키는 데 기여합니다.
-
----
-
-<a name="github-액션으로-사용하기"></a>
-
-<details>
-<summary>Relevant source files</summary>
-
-The following files were used as context for generating this wiki page:
-
-- [action.yml](action.yml)
-- [.github/workflows/WIKI-AS-README-AS-ACTION.yml](.github/workflows/WIKI-AS-README-AS-ACTION.yml)
-- [src/action_entrypoint.py](src/action_entrypoint.py)
-</details>
-
-# GitHub 액션으로 사용하기
-
-## 소개
-
-`Wiki-As-Readme`는 코드베이스를 기반으로 포괄적인 `README.md` 또는 위키 문서를 LLM(대규모 언어 모델)을 사용하여 자동으로 생성하는 GitHub 액션입니다. 이 문서는 `Wiki-As-Readme` 액션을 GitHub 워크플로우에 통합하여 사용하는 방법에 대해 설명합니다. 이 액션을 사용하면 저장소의 문서화를 자동화하여 항상 최신 상태를 유지할 수 있습니다.
-
-이 액션은 Docker 컨테이너로 실행되며, 다양한 LLM 제공업체(Google, OpenAI, Anthropic 등)를 지원하고, 생성된 콘텐츠의 언어, 출력 파일명, LLM 모델 및 고급 설정 등을 유연하게 구성할 수 있습니다.
-
-## 액션 개요
-
-`Wiki-As-Readme` GitHub 액션은 `action.yml` 파일에 정의되어 있으며, 액션의 이름, 설명, 아이콘, 그리고 사용자가 설정할 수 있는 입력(inputs) 및 실행 환경을 명시합니다.
-
-### 액션 메타데이터
-
-*   **이름**: `Wiki-As-Readme`
-*   **설명**: LLM을 사용하여 코드베이스에서 포괄적인 README.md/Wiki를 생성합니다.
-*   **작성자**: catuscio
-*   **브랜딩**: `book-open` 아이콘, 파란색
-Sources: [action.yml](name, description, author, branding)
-
-### 입력 (Inputs)
-
-액션은 다양한 설정을 위한 입력을 제공합니다. 이 입력들은 워크플로우 파일에서 `with:` 키워드를 통해 전달되거나, 환경 변수로 설정될 수 있습니다.
-
-| 입력 이름 | 설명 | 필수 여부 | 기본값 |
-|---|---|---|---|
-| `language` | 생성될 콘텐츠의 언어 (예: `ko`, `en`) | `false` | `ko` |
-| `output_file` | 생성된 콘텐츠를 저장할 파일명 | `false` | `WIKI.md` |
-| `llm_provider` | LLM 제공업체 (`google`, `openai`, `anthropic`, `openrouter`, `xai`, `ollama`) | `false` | `google` |
-| `model_name` | 사용할 특정 모델 이름 | `false` | `gemini-2.5-flash` |
-| `openai_api_key` | OpenAI API 키 | `false` | |
-| `anthropic_api_key` | Anthropic API 키 | `false` | |
-| `openrouter_api_key` | OpenRouter API 키 | `false` | |
-| `xai_api_key` | xAI API 키 | `false` | |
-| `git_api_token` | 비공개 저장소 접근을 위한 GitHub/GitLab API 토큰 | `false` | |
-| `gcp_project_name` | GCP 프로젝트 이름 (Google Cloud 사용 시) | `false` | |
-| `gcp_model_location` | GCP 모델 위치 (Google Cloud 사용 시) | `false` | |
-| `google_application_credentials` | GCP 서비스 계정 JSON 키 (내용 또는 경로) | `false` | |
-| `llm_base_url` | LLM API를 위한 사용자 정의 기본 URL | `false` | |
-| `use_structured_output` | 구조화된 JSON 출력 사용 여부 | `false` | `true` |
-| `temperature` | LLM 온도 (0.0 ~ 1.0) | `false` | `0.0` |
-| `max_retries` | 최대 재시도 횟수 | `false` | `3` |
-| `max_concurrency` | 최대 병렬 LLM 호출 수 | `false` | `5` |
-| `ignored_patterns` | 무시할 glob 패턴의 JSON 배열 | `false` | `[]` |
-Sources: [action.yml](inputs section)
-
-### 실행 환경
-
-액션은 Docker 컨테이너 내에서 실행됩니다. `action.yml`은 `Dockerfile.action` 이미지를 사용하도록 구성되어 있으며, 모든 입력 값은 컨테이너 내부의 환경 변수로 매핑됩니다.
-Sources: [action.yml](runs section)
-
-## 워크플로우 설정 예시
-
-`Wiki-As-Readme` 액션을 GitHub 워크플로우에 통합하는 방법은 `.github/workflows/WIKI-AS-README-AS-ACTION.yml` 파일에 잘 설명되어 있습니다. 이 예시는 `main` 브랜치에 푸시되거나 수동으로 트리거될 때 위키 콘텐츠를 생성하고 커밋하는 방법을 보여줍니다.
-
-### 워크플로우 트리거
-
-워크플로우는 다음 조건에서 실행됩니다:
-*   `main` 브랜치에 푸시될 때, 단 `README.md`, `WIKI.md`, 또는 워크플로우 파일 자체의 변경은 무시합니다.
-*   `workflow_dispatch` 이벤트를 통해 수동으로 실행될 때.
-Sources: [.github/workflows/WIKI-AS-README-AS-ACTION.yml](on section)
-
-### `generate-and-commit` 작업
-
-이 작업은 `ubuntu-latest` 환경에서 실행되며, 저장소 콘텐츠에 대한 쓰기 권한이 필요합니다.
-
+**Workflow Example:**
 ```yaml
 name: Update Wiki README
 
@@ -453,131 +102,634 @@ jobs:
       contents: write
 
     env:
-      OUTPUT_FILE: "examples/wiki_as_README.md" # 생성될 파일 경로 설정
+      OUTPUT_FILE: "WIKI.md"
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------
-      # [선택 사항] GCP 자격 증명 설정
-      # Google Cloud (Vertex AI)를 사용하지 않는 경우 이 단계를 제거하거나 주석 처리하세요.
-      # -----------------------------------------------------------------------
-      - name: Create GCP Credentials File
-        env:
-          GCP_KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: |
-          echo "$GCP_KEY" > ./gcp-key.json
-
-      # 1. Wiki 콘텐츠 생성
       - name: Generate Wiki Content
         uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
         env:
-          # --- 기본 설정 ---
-          LANGUAGE: "ko"
+          LANGUAGE: "en"
           OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
-          
-          # --- LLM 제공업체 및 모델 설정 ---
-          LLM_PROVIDER: "google"   # 옵션: google, openai, anthropic 등
+          LLM_PROVIDER: "google"
           MODEL_NAME: "gemini-2.5-flash"
-          
-          # --- API 키 설정 ---
-          
-          # [GCP / Vertex AI]
-          # LLM_PROVIDER가 "google"인 경우에만 필요합니다.
-          # 다른 제공업체(OpenAI, Anthropic 등)를 사용하는 경우 주석 처리하세요.
           GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
           GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
           GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json
-          
-          # [다른 제공업체]
-          # 선택한 제공업체에 대한 API 키를 주석 해제하고 설정하세요.
-          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          
-          # --- GitHub 토큰 ---
           GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # -----------------------------------------------------------------------
-      # [선택 사항] GCP 자격 증명 정리
-      # Google Cloud를 사용하지 않는 경우 이 단계를 제거하거나 주석 처리하세요.
-      # -----------------------------------------------------------------------
-      - name: Remove GCP Credentials File
-        if: always()
-        run: rm -f ./gcp-key.json
-
-      # 2. 변경 사항 커밋 및 푸시
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "docs: ✨Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action"
           file_pattern: ${{ env.OUTPUT_FILE }}
 ```
-Sources: [.github/workflows/WIKI-AS-README-AS-ACTION.yml](entire file)
+Sources: [README.md](1. GitHub Action (Recommended)), [action.yml](action.yml)
 
-### 주요 단계 설명
+### 2. Docker Compose (Local)
+For local execution with minimal setup, Docker Compose provides a convenient way to run the entire application stack, including the web UI and API.
+```bash
+docker-compose up --build
+```
+Access points:
+*   **Web UI**: `http://localhost:8501`
+*   **API Docs**: `http://localhost:8000/docs`
+Sources: [README.md](2. Docker Compose (Local))
 
-1.  **코드 체크아웃 (`Checkout code`)**: 저장소 코드를 워크플로우 러너로 가져옵니다.
-2.  **GCP 자격 증명 설정 (`Create GCP Credentials File`)**: Google Cloud (Vertex AI)를 LLM 제공업체로 사용하는 경우, `GOOGLE_APPLICATION_CREDENTIALS` 비밀 값을 파일로 저장합니다. 이 파일은 액션 실행 시 사용됩니다.
-3.  **Wiki 콘텐츠 생성 (`Generate Wiki Content`)**: `wiki-as-readme-action`을 실행하는 핵심 단계입니다.
-    *   `uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest`를 사용하여 최신 Docker 이미지를 직접 참조합니다.
-    *   `env:` 섹션에서 `LANGUAGE`, `OUTPUT_FILE`, `LLM_PROVIDER`, `MODEL_NAME`, API 키(예: `GCP_PROJECT_NAME`, `GCP_MODEL_LOCATION`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `OPENAI_API_KEY`), `GIT_API_TOKEN` 등을 설정합니다.
-    *   `GIT_API_TOKEN`은 `secrets.GITHUB_TOKEN`을 사용하여 저장소에 대한 기본 권한을 부여하는 것이 일반적입니다.
-4.  **GCP 자격 증명 정리 (`Remove GCP Credentials File`)**: 보안을 위해 생성된 GCP 자격 증명 파일을 워크플로우가 완료된 후 삭제합니다.
-5.  **변경 사항 커밋 및 푸시 (`Commit and Push changes`)**: `stefanzweifel/git-auto-commit-action@v5` 액션을 사용하여 생성된 `OUTPUT_FILE`을 저장소에 자동으로 커밋하고 푸시합니다.
+### 3. Local Python Development
+Developers can run the application directly from source for modification or without Docker. This requires Python 3.12+ and `uv` for dependency management.
+```bash
+git clone https://github.com/catuscio/wiki-as-readme.git
+cd wiki-as-readme
+uv sync
+source .venv/bin/activate
+uv run uvicorn src.server:app --reload --port 8000 # Backend
+uv run streamlit run src/app.py # Frontend
+```
+Sources: [README.md](3. Local Python Development), [pyproject.toml](project.requires-python)
 
-### 전체 워크플로우 흐름
+### 4. Server & Webhooks
+The API server can be deployed as a long-running service to handle requests or webhooks, such as GitHub push events.
+*   **Endpoint**: `POST /api/v1/webhook/github`
+*   **Payload**: Standard GitHub push event payload.
+*   **Behavior**: Triggers a background task to generate and commit the wiki for the repository.
+Sources: [README.md](4. Server & Webhooks)
+
+## Configuration Reference
+
+Configuration is primarily managed through environment variables, which can be set in a `.env` file or directly in the deployment environment (e.g., GitHub Actions secrets).
+
+| Category | Variable | Description | Example | Source |
+|---|---|---|---|---|
+| **General** | `LANGUAGE` | Language for generated content | `en` | [README.md](Configuration Reference (.env)), [action.yml](inputs.language) |
+| | `OUTPUT_FILE` | Filename to save generated content | `WIKI.md` | [README.md](Configuration Reference (.env)), [action.yml](inputs.output_file) |
+| **LLM Provider** | `LLM_PROVIDER` | LLM provider to use | `google`, `openai`, `ollama` | [README.md](Configuration Reference (.env)), [action.yml](inputs.llm_provider) |
+| | `MODEL_NAME` | Specific model identifier | `gemini-2.5-flash` | [README.md](Configuration Reference (.env)), [action.yml](inputs.model_name) |
+| | `LLM_BASE_URL` | Custom base URL for LLM API | `http://localhost:11434` | [action.yml](inputs.llm_base_url) |
+| **Auth** | `OPENAI_API_KEY` | OpenAI API Key | `sk-...` | [README.md](Configuration Reference (.env)), [action.yml](inputs.openai_api_key) |
+| | `ANTHROPIC_API_KEY` | Anthropic API Key | `sk-...` | [action.yml](inputs.anthropic_api_key) |
+| | `OPENROUTER_API_KEY` | OpenRouter API Key | `sk-...` | [action.yml](inputs.openrouter_api_key) |
+| | `XAI_API_KEY` | xAI API Key | `sk-...` | [action.yml](inputs.xai_api_key) |
+| | `GIT_API_TOKEN` | GitHub/GitLab API Token for private repos | `ghp_...` | [action.yml](inputs.git_api_token) |
+| **Google Cloud** | `GCP_PROJECT_NAME` | Vertex AI Project ID | `my-genai-project` | [README.md](Configuration Reference (.env)), [action.yml](inputs.gcp_project_name) |
+| | `GCP_MODEL_LOCATION` | GCP Model Location | `us-central1` | [action.yml](inputs.gcp_model_location) |
+| | `GOOGLE_APPLICATION_CREDENTIALS` | GCP Service Account JSON Key (Content or Path) | `/path/to/key.json` | [action.yml](inputs.google_application_credentials) |
+| **Advanced LLM** | `USE_STRUCTURED_OUTPUT` | Use native JSON mode for LLM | `true` | [README.md](Configuration Reference (.env)), [action.yml](inputs.use_structured_output) |
+| | `TEMPERATURE` | LLM temperature (0.0 to 1.0) | `0.0` | [action.yml](inputs.temperature) |
+| | `MAX_RETRIES` | Max retry attempts for LLM calls | `3` | [action.yml](inputs.max_retries) |
+| | `MAX_CONCURRENCY` | Max parallel LLM calls | `5` | [action.yml](inputs.max_concurrency) |
+| **Filtering** | `IGNORED_PATTERNS` | JSON array of glob patterns to exclude | `'["*.log", "node_modules/*"]'` | [README.md](Configuration Reference (.env)), [action.yml](inputs.ignored_patterns) |
+
+## API Reference
+
+The backend API is built with FastAPI, providing interactive Swagger documentation at `/docs` when the server is running.
+
+### Wiki Generation Endpoints
+
+*   **`POST /api/v1/wiki/generate/file`**
+    *   **Description:** Initiates a background task to generate the wiki and saves the output as a Markdown file on the server.
+    *   **Request Body Example:**
+        ```json
+        {
+          "repo_url": "https://github.com/owner/repo",
+          "repo_type": "github",
+          "language": "en",
+          "is_comprehensive_view": true
+        }
+        ```
+
+*   **`POST /api/v1/wiki/generate/text`**
+    *   **Description:** Starts a background task to generate the wiki. The resulting Markdown text is stored within the task status for retrieval.
+
+*   **`GET /api/v1/wiki/status/{task_id}`**
+    *   **Description:** Retrieves the current status and the final result (if completed) of a specific wiki generation task.
+
+### Webhook Endpoints
+
+*   **`POST /api/v1/webhook/github`**
+    *   **Description:** Endpoint designed to receive GitHub Webhook push events. Upon receiving a push event to the `main` branch, it triggers an automatic wiki generation for the associated repository.
+Sources: [README.md](API Reference)
+
+## Architecture
+
+Wiki As Readme employs a modern, decoupled architecture to ensure scalability, maintainability, and flexibility.
 
 ```mermaid
 graph TD
-    A["GitHub 이벤트 트리거"] --> B{"푸시 또는 수동 실행"};
-    B -- "main 브랜치 푸시" --> C["워크플로우 시작"];
-    B -- "workflow_dispatch" --> C;
-    C --> D["코드 체크아웃"];
-    D --> E{"GCP 자격 증명 설정 (선택 사항)"};
-    E --> F["Wiki-As-Readme 액션 실행"];
-    F -- "생성된 마크다운" --> G["GCP 자격 증명 정리 (선택 사항)"];
-    G --> H["변경 사항 커밋 및 푸시"];
-    H --> I["워크플로우 종료"];
+    A["User/CI Trigger"] --> B["Wiki As Readme Application"];
+    B --> C["FastAPI Backend"];
+    B --> D["Streamlit Frontend"];
+    C --> E["LiteLLM (LLM Integration)"];
+    E --> F["Various LLMs (OpenAI, Google, Ollama, etc.)"];
+    C --> G["Git Repository (GitHub, GitLab, Local)"];
+    G --> H["Codebase"];
+    C --> I["Output (Markdown File/Text)"];
 ```
 
-## 내부 동작
+*   **Frontend:** [Streamlit](https://streamlit.io/) is used to build the interactive user interface, allowing users to configure and trigger documentation generation.
+*   **Backend:** [FastAPI](https://fastapi.tiangolo.com/) powers the REST API, handles background tasks for documentation generation, and manages webhook integrations.
+*   **LLM Integration:** [LiteLLM](https://docs.litellm.ai/) provides a unified and simplified interface for interacting with over 100 different Large Language Models, abstracting away provider-specific API calls.
+*   **Data Models:** [Pydantic](https://docs.pydantic.dev/) is utilized for data validation, settings management, and ensuring type safety, especially for structured LLM outputs.
+*   **Diagrams:** [Mermaid.js](https://mermaid.js.org/) is integrated to generate various types of diagrams (flowcharts, sequence diagrams, class diagrams) directly within the Markdown output.
+Sources: [README.md](Architecture), [pyproject.toml](project.dependencies), [pyproject.toml](project.optional-dependencies)
 
-`src/action_entrypoint.py` 파일은 GitHub 액션이 실제로 실행될 때의 진입점입니다. 이 스크립트는 환경 변수에서 입력을 읽고, `WikiGenerationService`를 사용하여 위키 콘텐츠를 생성한 다음, 지정된 출력 파일에 저장합니다.
+## GitHub Action Workflow Diagram
 
-### 실행 흐름
-
-1.  **입력 읽기**: 스크립트는 `os.getenv()`를 사용하여 `OUTPUT_FILE`, `LANGUAGE` 등 필요한 모든 설정을 환경 변수에서 읽어옵니다. 이 환경 변수들은 `action.yml`에 정의된 입력과 워크플로우 파일의 `env` 섹션에서 전달된 값들입니다.
-2.  **요청 객체 생성**: `WikiGenerationRequest` 객체를 생성합니다. 이 객체는 `repo_type="local"`로 설정되어 액션이 로컬로 체크아웃된 코드베이스에서 작동함을 나타냅니다. `local_path`는 기본적으로 현재 디렉토리(`.`)로 설정됩니다.
-3.  **서비스 초기화 및 생성**: `WikiGenerationService`를 초기화하고 `generate_wiki()` 메서드를 호출하여 실제 위키 콘텐츠 생성을 시작합니다.
-4.  **출력 처리**: 생성된 마크다운 콘텐츠가 비어있지 않은지 확인합니다. 유효한 콘텐츠가 생성되면, 지정된 `output_file` 경로에 해당 내용을 작성합니다.
-5.  **오류 처리**: 생성 과정이나 파일 쓰기 과정에서 오류가 발생하면, 로그를 기록하고 스크립트를 오류 상태로 종료합니다.
-Sources: [src/action_entrypoint.py](main function)
-
-### `action_entrypoint.py` 내부 로직 흐름
+The following sequence diagram illustrates the typical flow when using Wiki As Readme as a GitHub Action.
 
 ```mermaid
-graph TD
-    A["시작"] --> B["환경 변수에서 입력 읽기"];
-    B --> C["WikiGenerationRequest 객체 생성"];
-    C --> D["WikiGenerationService 초기화"];
-    D --> E["Wiki 생성 시작"];
-    E -- "성공" --> F{"생성된 마크다운이 비어있지 않은가?"};
-    F -- "예" --> G["출력 파일에 마크다운 쓰기"];
-    G --> H["성공적으로 완료"];
-    F -- "아니오" --> I["오류: 생성된 내용이 비어있음"];
-    E -- "실패" --> J["오류: Wiki 생성 실패"];
-    I --> K["종료 (오류)"];
-    J --> K;
+sequenceDiagram
+    participant GH["GitHub Push/Workflow Dispatch"]
+    participant GHA["GitHub Actions Runner"]
+    participant WAR["Wiki-As-Readme Action"]
+    participant LLM["LLM Provider"]
+    participant Repo["Repository"]
+
+    GH->>GHA: "Trigger workflow (push/dispatch)"
+    GHA->>GHA: "Checkout code"
+    GHA->>WAR: "Run Wiki-As-Readme Action (Docker)"
+    WAR->>Repo: "Read codebase files"
+    WAR->>LLM: "Request documentation generation"
+    LLM-->>WAR: "Return generated content"
+    WAR->>Repo: "Write generated WIKI.md"
+    GHA->>Repo: "Commit and push WIKI.md"
 ```
+Sources: [README.md](1. GitHub Action (Recommended)), [action.yml](action.yml)
 
-## 결론
+## Conclusion
 
-`Wiki-As-Readme` GitHub 액션은 저장소 문서화 프로세스를 자동화하는 강력한 도구입니다. 이 액션을 워크플로우에 통합함으로써, 코드 변경 사항에 따라 `README.md` 또는 위키 페이지를 자동으로 업데이트하여 문서의 최신성을 유지하고 개발자의 수동 작업을 줄일 수 있습니다. 유연한 설정 옵션과 다양한 LLM 제공업체 지원을 통해 프로젝트의 특정 요구사항에 맞춰 문서 생성 프로세스를 최적화할 수 있습니다.
+Wiki As Readme offers a powerful, flexible, and highly compatible solution for automating codebase documentation. By supporting a wide range of LLMs, Git platforms, and deployment methods, it aims to be the ultimate "drop-in" tool for generating comprehensive and structured wikis or `README.md` files. Its feature set, including deep context analysis, automatic diagram generation, and hybrid output, makes it an invaluable asset for maintaining up-to-date and high-quality project documentation.
 
 ---
 
-<a name="docker-compose로-로컬에서-실행"></a>
+<a name="core-features"></a>
+
+<details>
+<summary>Relevant source files</summary>
+
+The following files were used as context for generating this wiki page:
+
+- [README.md](README.md)
+- [src/services/wiki_generator.py](src/services/wiki_generator.py)
+- [src/services/structure_analyzer.py](src/services/structure_analyzer.py)
+- [src/prompts/wiki_contents_generator.yaml](src/prompts/wiki_contents_generator.yaml)
+</details>
+
+# Core Features
+
+## Introduction
+
+"Wiki As Readme" is designed to transform codebases into comprehensive documentation with minimal effort. This page outlines the core features that enable its flexibility, power, and automation. These features span universal compatibility with various models, platforms, and deployment methods, alongside intelligent content generation capabilities like deep context analysis, smart structure generation, and automatic diagramming. The underlying architecture leverages asynchronous processing for scalability and efficiency.
+
+## Universal Compatibility
+
+A foundational aspect of "Wiki As Readme" is its commitment to universal compatibility, ensuring it can integrate into virtually any development environment or workflow. This pluggable design is achieved through three key pillars:
+
+### Model Agnostic (Powered by LiteLLM)
+The system can interface with a wide array of Large Language Models (LLMs), both commercial and open-source. This flexibility is primarily enabled by [LiteLLM](https://docs.litelllm.ai/), which provides a unified API for over 100 LLMs.
+*   **Commercial APIs:** Supports Google Vertex AI (Gemini), OpenAI (GPT-4), Anthropic (Claude), xAI (Grok).
+*   **Open/Local Models:** Integrates with Ollama, OpenRouter, and HuggingFace models.
+*   **On-Premise:** Can connect to private LLM endpoints for secure, internal use.
+Sources: [README.md](Model Agnostic (Powered by LiteLLM) section)
+
+### Platform Agnostic
+"Wiki As Readme" is designed to work seamlessly across different code hosting platforms and local environments.
+*   **Cloud Repos:** Full support for GitHub, GitLab, and Bitbucket.
+*   **Local Development:** Ability to analyze code directly from the local file system, facilitating rapid iteration without needing to push changes.
+*   **Private/Enterprise:** Compatibility with private instances and self-hosted Git servers.
+Sources: [README.md](Platform Agnostic section)
+
+### Deployment Agnostic
+The tool offers multiple deployment options to fit various operational needs, from automated CI/CD pipelines to long-running services.
+*   **CI/CD:** Can be integrated into GitHub Actions workflows for automated documentation updates.
+*   **Container:** Deployable via Docker Compose for isolated and reproducible environments.
+*   **Service:** Can run as a long-running API server with webhook support for event-driven generation.
+*   **CLI:** Provides a command-line interface for local, on-demand documentation generation.
+Sources: [README.md](Deployment Agnostic section)
+
+## Core Content Generation Features
+
+The intelligence of "Wiki As Readme" lies in its ability to understand, structure, and generate high-quality technical documentation.
+
+### Deep Context Analysis
+Before generating any content, the system performs a deep analysis of the project's file structure and the relationships between files. This allows it to build a comprehensive understanding of the project's architecture, which is crucial for producing accurate and relevant documentation.
+*   **Mechanism:** The `WikiStructureDeterminer` service plays a key role here, taking the repository's file tree and README as input to inform its understanding.
+Sources: [README.md](Deep Context Analysis), [src/services/structure_analyzer.py](WikiStructureDeterminer class)
+
+### Smart Structure Generation
+The tool automatically determines a logical hierarchy for the documentation, organizing it into sections and pages. This ensures that the generated wiki is well-structured and easy to navigate.
+*   **Mechanism:** The `WikiStructureDeterminer.determine_wiki_structure` method uses an LLM to analyze the project context and output a `WikiStructure` object, defining the hierarchy and content for each page.
+Sources: [README.md](Smart Structure Generation), [src/services/structure_analyzer.py](determine_wiki_structure method)
+
+### Comprehensive Content
+"Wiki As Readme" generates detailed wiki pages covering various aspects of a project, including architecture overviews, installation guides, and API references.
+*   **Mechanism:** The `WikiStructureDeterminer.generate_page_content` method is responsible for invoking the LLM with relevant source file content and a specific page topic to produce detailed Markdown. The prompt defined in `wiki_contents_generator.yaml` guides the LLM on content structure, tone, and required elements.
+Sources: [README.md](Comprehensive Content), [src/services/structure_analyzer.py](generate_page_content method), [src/prompts/wiki_contents_generator.yaml](template)
+
+### Automatic Diagrams
+To enhance clarity and understanding, the system can generate visual representations of architecture and processes using [Mermaid.js](https://mermaid.js.org/). This includes flowcharts, sequence diagrams, and class diagrams.
+*   **Mechanism:** The `wiki_contents_generator.yaml` prompt explicitly instructs the LLM to create Mermaid diagrams where they add significant clarity, providing strict syntax rules to ensure valid and functional diagrams.
+Sources: [README.md](Automatic Diagrams), [src/prompts/wiki_contents_generator.yaml](Visuals (Mermaid Diagrams) section)
+
+### Hybrid Output
+The tool offers flexibility in its output format, generating both individual Markdown files (suitable for a wiki) and a single consolidated `README.md` file.
+*   **Mechanism:** After individual page contents are generated, the `WikiFormatter.consolidate_markdown` static method (called by `WikiGenerationService.generate_wiki`) merges the structured pages into a single, cohesive Markdown document.
+Sources: [README.md](Hybrid Output), [src/services/wiki_generator.py](generate_wiki method)
+
+### Async & Scalable
+Built with FastAPI and AsyncIO, the system is designed for non-blocking, efficient generation of documentation, even for large projects. This ensures responsiveness and the ability to handle multiple generation requests concurrently.
+*   **Mechanism:** The core services like `WikiGenerationService` and `WikiStructureDeterminer` are implemented with asynchronous methods (`async def`). Concurrency for LLM calls is managed using `asyncio.Semaphore` within `WikiStructureDeterminer` to prevent overwhelming the LLM providers.
+Sources: [README.md](Async & Scalable), [src/services/wiki_generator.py](WikiGenerationService class), [src/services/structure_analyzer.py](WikiStructureDeterminer class, semaphore attribute)
+
+## Core Wiki Generation Flow
+
+The entire process of generating a wiki is orchestrated by the `WikiGenerationService`, which coordinates several sub-services.
+
+```mermaid
+graph TD
+    A["WikiGenerationService.generate_wiki()"] --> B["RepositoryFetcher.fetch_repository_structure()"];
+    B --> C{"Repository Structure Fetched?"};
+    C -- Yes --> D["WikiStructureDeterminer.determine_wiki_structure()"];
+    D --> E{"Wiki Structure Determined?"};
+    E -- Yes --> F["WikiStructureDeterminer.generate_contents()"];
+    F --> G["LLMWikiMaker (for each page)"];
+    G --> H{"All Page Contents Generated?"};
+    H -- Yes --> I["WikiFormatter.consolidate_markdown()"];
+    I --> J["Markdown Output"];
+    J --> K["WikiGenerationService.save_to_file()"];
+    K --> L["File Saved"];
+    C -- No --> M["Error: Repo Fetch Failed"];
+    E -- No --> N["Error: Structure Determination Failed"];
+    H -- No --> O["Error: Content Generation Failed"];
+```
+Sources: [src/services/wiki_generator.py](WikiGenerationService class), [src/services/structure_analyzer.py](WikiStructureDeterminer class)
+
+## Conclusion
+
+The core features of "Wiki As Readme" collectively deliver a powerful, flexible, and intelligent documentation solution. From its universal compatibility across diverse technical stacks to its advanced AI-driven content generation, including deep context analysis, smart structuring, and automatic diagramming, the project aims to significantly reduce the burden of maintaining up-to-date and comprehensive project documentation. The asynchronous architecture further ensures that these capabilities are delivered efficiently and scalably.
+
+---
+
+<a name="universal-compatibility"></a>
+
+<details>
+<summary>Relevant source files</summary>
+
+The following files were used as context for generating this wiki page:
+
+- [README.md](README.md)
+- [src/providers/base.py](src/providers/base.py)
+- [src/providers/github.py](src/providers/github.py)
+- [src/providers/gitlab.py](src/providers/gitlab.py)
+- [src/providers/bitbucket.py](src/providers/bitbucket.py)
+- [src/providers/local.py](src/providers/local.py)
+- [src/agent/llm.py](src/agent/llm.py)
+</details>
+
+# Universal Compatibility
+
+The "Universal Compatibility" feature of **Wiki As Readme** is a core design principle that ensures the tool is highly flexible and adaptable to diverse development environments and technology stacks. It allows users to integrate the documentation generation process seamlessly, regardless of their chosen Large Language Model (LLM) provider, code hosting platform, or deployment strategy. This pluggable architecture makes Wiki As Readme a versatile "drop-in" solution for automated documentation.
+
+This page details the three main pillars of its universal compatibility: model agnosticism, platform agnosticism, and deployment agnosticism. Each pillar is designed to remove barriers to adoption and provide maximum utility across various project setups, from local development to enterprise-grade CI/CD pipelines.
+
+## Model Agnostic (Powered by LiteLLM)
+
+Wiki As Readme is designed to work with "Any Model," providing users the freedom to choose their preferred LLM. This is primarily achieved through the integration of [LiteLLM](https://docs.litellm.ai/), which offers a unified interface to over 100 different LLMs. This abstraction layer allows the application to interact with various models without requiring significant code changes for each new provider.
+
+### Supported LLM Providers
+
+The `LLMWikiMaker` class dynamically configures the LLM client based on environment variables, supporting a wide range of commercial and open-source models.
+
+*   **Commercial APIs:**
+    *   Google Vertex AI (Gemini)
+    *   OpenAI (GPT-4, etc.)
+    *   Anthropic (Claude)
+    *   xAI (Grok)
+*   **Open/Local Models:**
+    *   Ollama
+    *   OpenRouter
+    *   HuggingFace (via LiteLLM)
+*   **On-Premise:** Connects to private LLM endpoints safely, often via OpenAI-compatible APIs or specific LiteLLM configurations.
+
+Sources: [README.md](Universal Compatibility section), [src/agent/llm.py](LLMWikiMaker class)
+
+### LLM Configuration Flow
+
+The `_configure_llm` method within `LLMWikiMaker` is responsible for setting up the correct model name and API parameters based on the `LLM_PROVIDER` and `MODEL_NAME` settings.
+
+```mermaid
+graph TD
+    A["Start LLM Configuration"] --> B{"Read LLM_PROVIDER"};
+    B -- "google" --> C["Configure Vertex AI"];
+    B -- "openai" --> D["Configure OpenAI"];
+    B -- "anthropic" --> E["Configure Anthropic"];
+    B -- "openrouter" --> F["Configure OpenRouter"];
+    B -- "xai" --> G["Configure xAI"];
+    B -- "ollama" --> H["Configure Ollama/On-premise"];
+    C --> I["Set Model & Kwargs"];
+    D --> I;
+    E --> I;
+    F --> I;
+    G --> I;
+    H --> I;
+    I --> J["End Configuration"];
+```
+Sources: [src/agent/llm.py](LLMWikiMaker._configure_llm method)
+
+### Configuration Variables
+
+Users configure their LLM provider via environment variables:
+
+| Variable | Description | Example |
+|---|---|---|
+| `LLM_PROVIDER` | Specifies the LLM service to use. | `google`, `openai`, `ollama` |
+| `MODEL_NAME` | The specific model identifier for the chosen provider. | `gemini-2.5-flash`, `gpt-4o`, `llama3` |
+| `OPENAI_API_KEY` | API key for OpenAI. | `sk-...` |
+| `GCP_PROJECT_NAME` | Google Cloud Project ID for Vertex AI. | `my-genai-project` |
+| `GCP_MODEL_LOCATION` | Google Cloud region for Vertex AI. | `us-central1` |
+| `ANTHROPIC_API_KEY` | API key for Anthropic. | `sk-ant-...` |
+| `OPENROUTER_API_KEY` | API key for OpenRouter. | `sk-or-...` |
+| `XAI_API_KEY` | API key for xAI. | `sk-xai-...` |
+| `LLM_BASE_URL` | Custom base URL for OpenAI-compatible APIs (e.g., Ollama). | `http://localhost:11434/v1` |
+
+Sources: [README.md](Configuration Reference (.env) table), [src/agent/llm.py](LLMWikiMaker._configure_llm method)
+
+## Platform Agnostic
+
+The project supports "Any Repo," meaning it can integrate with various Git platforms and even local file systems. This is achieved through a modular `RepositoryProvider` system, where each platform has its own implementation for fetching repository structure and file content.
+
+### Repository Provider Architecture
+
+The `RepositoryProvider` is an abstract base class that defines the interface for interacting with different code sources. Concrete implementations handle the specifics of each platform's API or file system access.
+
+```mermaid
+classDiagram
+    direction LR
+    class RepositoryProvider {
+        <<abstract>>
+        +request: WikiGenerationRequest
+        +client: httpx.AsyncClient
+        +fetch_structure()
+        +fetch_file_content(file_path: str)
+        +close()
+    }
+
+    class GitHubProvider {
+        -_create_headers()
+        -_get_api_base()
+    }
+    class GitLabProvider {
+        -_create_headers()
+        -_get_api_base()
+        -_get_encoded_project_path()
+    }
+    class BitbucketProvider {
+        -_create_headers()
+    }
+    class LocalProvider {
+        -_scan_disk_sync(local_path: str)
+    }
+
+    RepositoryProvider <|-- GitHubProvider
+    RepositoryProvider <|-- GitLabProvider
+    RepositoryProvider <|-- BitbucketProvider
+    RepositoryProvider <|-- LocalProvider
+```
+Sources: [src/providers/base.py](RepositoryProvider class)
+
+### Supported Platforms
+
+*   **Cloud Repositories:**
+    *   **GitHub:** Utilizes the GitHub REST API to fetch repository information, file trees, and file contents. It handles authentication via `GIT_API_TOKEN` and decodes Base64-encoded content.
+        Sources: [src/providers/github.py](GitHubProvider class)
+    *   **GitLab:** Supports both `gitlab.com` and self-hosted GitLab instances by parsing the repository URL. It uses GitLab's API for tree traversal (with pagination) and raw file content retrieval.
+        Sources: [src/providers/gitlab.py](GitLabProvider class)
+    *   **Bitbucket:** Interacts with the Bitbucket Cloud API (version 2.0) to retrieve repository details, source trees, and file contents.
+        Sources: [src/providers/bitbucket.py](BitbucketProvider class)
+*   **Local Development:**
+    *   **Local File System:** The `LocalProvider` directly scans the local disk. It uses `os.walk` to build the file tree and `pathlib` for file content retrieval, offloading these synchronous operations to a separate thread using `asyncio.to_thread`.
+        Sources: [src/providers/local.py](LocalProvider class)
+
+All providers incorporate file filtering logic (`should_ignore`) based on `IGNORED_PATTERNS` to exclude irrelevant files and directories from the analysis.
+Sources: [src/providers/github.py](should_ignore usage), [src/providers/gitlab.py](should_ignore usage), [src/providers/bitbucket.py](should_ignore usage), [src/providers/local.py](should_ignore usage)
+
+## Deployment Agnostic
+
+Wiki As Readme is designed to run in "Any Environment," offering multiple usage modes to fit various deployment scenarios, from local development to automated CI/CD pipelines and long-running services.
+
+### Usage Modes
+
+*   **CI/CD (GitHub Action):** The recommended approach for automated documentation. It can be integrated into GitHub Actions workflows to generate and commit documentation (`WIKI.md`) on code pushes. This mode leverages a Docker image for consistent execution.
+    Sources: [README.md](1. GitHub Action (Recommended) section)
+*   **Container (Docker Compose):** Provides an easy way to run the full application (UI and API) locally without managing Python dependencies. It's ideal for quick local testing and evaluation.
+    Sources: [README.md](2. Docker Compose (Local) section)
+*   **CLI (Local Python Development):** For developers who want to modify the source code or run the application directly from their Python environment. This involves setting up a virtual environment and running the FastAPI backend and Streamlit frontend separately.
+    Sources: [README.md](3. Local Python Development section)
+*   **Service (Server & Webhooks):** The application can be deployed as a long-running API server. It exposes webhook endpoints (e.g., `POST /api/v1/webhook/github`) to trigger automatic wiki generation in response to events like Git pushes, making it suitable for continuous documentation updates in a server-side setup.
+    Sources: [README.md](4. Server & Webhooks section)
+
+## Conclusion
+
+The universal compatibility of Wiki As Readme is a cornerstone of its design, enabling it to be a highly flexible and powerful documentation tool. By abstracting away the specifics of LLM providers, code repositories, and deployment environments, it offers a truly pluggable solution that adapts to the user's existing infrastructure, making comprehensive documentation accessible to a wider range of projects and teams.
+
+---
+
+<a name="using-as-a-github-action"></a>
+
+<details>
+<summary>Relevant source files</summary>
+
+The following files were used as context for generating this wiki page:
+
+- [action.yml](action.yml)
+- [.github/workflows/WIKI-AS-README-AS-ACTION.yml](.github/workflows/WIKI-AS-README-AS-ACTION.yml)
+- [Dockerfile.action](Dockerfile.action)
+- [entrypoint.sh](entrypoint.sh)
+</details>
+
+# Using as a GitHub Action
+
+The `Wiki-As-Readme` project provides a GitHub Action that automates the generation of comprehensive documentation (like `README.md` or a wiki page) directly from your codebase. This action leverages Large Language Models (LLMs) to analyze your project files and produce structured, informative content. Integrating this action into your GitHub workflows allows for continuous documentation updates, ensuring your project's documentation remains current with its development.
+
+This page details how to configure and use the `Wiki-As-Readme` GitHub Action within your repository, covering its inputs, workflow integration, and underlying Docker image structure.
+
+## Action Definition (`action.yml`)
+
+The `action.yml` file defines the metadata, inputs, and execution environment for the `Wiki-As-Readme` GitHub Action. It declares the action's name, description, author, branding, and the various parameters users can configure. The action is designed to run within a Docker container, specified by `image: 'Dockerfile.action'`.
+
+Sources: [action.yml](action.yml)
+
+### Action Inputs
+
+The action exposes several inputs to control its behavior, LLM provider, model, and output. These inputs are mapped directly to environment variables within the Docker container where the action executes.
+
+| Input Name | Description | Required | Default |
+|---|---|---|---|
+| `language` | Language for the generated content (e.g., `ko`, `en`). | No | `ko` |
+| `output_file` | The filename to save the generated content. | No | `WIKI.md` |
+| `llm_provider` | LLM provider to use (e.g., `google`, `openai`, `anthropic`, `openrouter`, `xai`, `ollama`). | No | `google` |
+| `model_name` | Specific model name to use (e.g., `gemini-2.5-flash`). | No | `gemini-2.5-flash` |
+| `openai_api_key` | OpenAI API Key. | No | |
+| `anthropic_api_key` | Anthropic API Key. | No | |
+| `openrouter_api_key` | OpenRouter API Key. | No | |
+| `xai_api_key` | xAI API Key. | No | |
+| `git_api_token` | GitHub/GitLab API Token for private repositories. | No | |
+| `gcp_project_name` | GCP Project Name (for Google Cloud Vertex AI). | No | |
+| `gcp_model_location` | GCP Model Location (for Google Cloud Vertex AI). | No | |
+| `google_application_credentials` | GCP Service Account JSON Key (Content or Path). | No | |
+| `llm_base_url` | Custom base URL for LLM API. | No | |
+| `use_structured_output` | Whether to use structured JSON output from LLM. | No | `true` |
+| `temperature` | LLM temperature (0.0 to 1.0). | No | `0.0` |
+| `max_retries` | Max retry attempts for LLM calls. | No | `3` |
+| `max_concurrency` | Max parallel LLM calls. | No | `5` |
+| `ignored_patterns` | JSON array of glob patterns to ignore (e.g., `["**/*.test.js", "**/node_modules/**"]`). | No | `[]` |
+
+Sources: [action.yml](action.yml)
+
+## Integrating into a GitHub Workflow
+
+To use the `Wiki-As-Readme` action, you need to create a GitHub Actions workflow file (e.g., `.github/workflows/update-wiki.yml`) in your repository. The provided example workflow demonstrates how to generate content and commit it back to the repository.
+
+Sources: [.github/workflows/WIKI-AS-README-AS-ACTION.yml](.github/workflows/WIKI-AS-README-AS-ACTION.yml)
+
+### Workflow Configuration
+
+The example workflow `WIKI-AS-README-AS-ACTION.yml` is configured to run manually via `workflow_dispatch`, allowing you to trigger it on demand. It requires `contents: write` permissions to commit the generated file.
+
+```yaml
+name: Update Wiki README
+
+on:
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to commit changes
+    env:
+      OUTPUT_FILE: "examples/wiki_as_README.md" # Default output file for this workflow
+    steps:
+      # ... (steps defined below)
+```
+
+Sources: [.github/workflows/WIKI-AS-README-AS-ACTION.yml](.github/workflows/WIKI-AS-README-AS-ACTION.yml)
+
+### Workflow Steps
+
+The workflow typically involves the following sequence of steps:
+
+1.  **Checkout Code:** Retrieves your repository's code.
+2.  **[Optional] GCP Credentials Setup:** If using Google Cloud (Vertex AI) as your LLM provider, this step creates a temporary JSON key file from a GitHub Secret.
+3.  **Generate Wiki Content:** This is the core step where the `Wiki-As-Readme` action is invoked.
+    *   It uses the Docker image `ghcr.io/catuscio/wiki-as-readme-action:latest`.
+    *   Environment variables are passed to configure the action, including language, output file, LLM provider, model, and API keys (often sourced from GitHub Secrets).
+4.  **[Optional] GCP Credentials Cleanup:** Removes the temporary GCP key file.
+5.  **Commit and Push Changes:** Uses `stefanzweifel/git-auto-commit-action` to commit the newly generated documentation file back to the repository.
+
+```yaml
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create GCP Credentials File # Optional
+        env:
+          GCP_KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo "$GCP_KEY" > ./gcp-key.json
+
+      - name: Generate Wiki Content
+        uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+        env:
+          LANGUAGE: "en"
+          OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
+          LLM_PROVIDER: "google"
+          MODEL_NAME: "gemini-2.5-flash"
+          GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
+          GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
+          GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json # Path to the created file
+          GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For accessing private repos
+
+      - name: Remove GCP Credentials File # Optional
+        if: always()
+        run: rm -f ./gcp-key.json
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: ✨Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action"
+          file_pattern: ${{ env.OUTPUT_FILE }}
+```
+
+Sources: [.github/workflows/WIKI-AS-README-AS-ACTION.yml](.github/workflows/WIKI-AS-README-AS-ACTION.yml)
+
+### Workflow Execution Flow
+
+The following diagram illustrates the typical execution flow of the `Update Wiki README` workflow.
+
+```mermaid
+graph TD
+    A["Workflow Dispatch Trigger"] --> B["Checkout Code"];
+    B --> C{"Using GCP?"};
+    C -- "Yes" --> D["Create GCP Credentials File"];
+    D --> E["Generate Wiki Content"];
+    C -- "No" --> E;
+    E --> F{"Using GCP?"};
+    F -- "Yes" --> G["Remove GCP Credentials File"];
+    G --> H["Commit and Push Changes"];
+    F -- "No" --> H;
+    H --> I["Workflow Complete"];
+```
+
+## Action's Docker Image (`Dockerfile.action`)
+
+The `Dockerfile.action` defines how the `Wiki-As-Readme` action is packaged into a Docker image. This image contains all the necessary dependencies and the application code to execute the documentation generation process. It utilizes a multi-stage build for efficiency.
+
+Sources: [Dockerfile.action](Dockerfile.action)
+
+### Build Stages
+
+1.  **Builder Stage:**
+    *   Uses `python:3.12-slim-bookworm` as the base.
+    *   Installs `uv` (a fast Python package installer) for dependency management.
+    *   Copies `pyproject.toml` and `uv.lock` to install project dependencies efficiently, leveraging caching.
+    *   Installs dependencies into a virtual environment (`.venv`).
+
+2.  **Final Image Stage:**
+    *   Also uses `python:3.12-slim-bookworm` for a lean runtime environment.
+    *   Copies the virtual environment from the `builder` stage.
+    *   Copies the application source code (`src`) into the image.
+    *   Sets up environment variables (`PATH`, `PYTHONPATH`) to ensure the application runs correctly.
+    *   Sets the working directory to `/github/workspace`, which is the standard location for GitHub Actions to access the repository's code.
+    *   Defines the `ENTRYPOINT` as `["python", "/app/src/action_entrypoint.py"]`, meaning this Python script is executed when the Docker container starts.
+
+```mermaid
+graph TD
+    A["Dockerfile.action"] --> B["Stage 1: Builder"];
+    B --> B1["FROM python:3.12-slim-bookworm"];
+    B --> B2["Install uv"];
+    B --> B3["COPY pyproject.toml, uv.lock"];
+    B --> B4["RUN uv sync (install dependencies)"];
+
+    A --> C["Stage 2: Final Image"];
+    C --> C1["FROM python:3.12-slim-bookworm"];
+    C --> C2["COPY .venv from Builder"];
+    C --> C3["COPY src code"];
+    C --> C4["Set ENV PATH, PYTHONPATH"];
+    C --> C5["WORKDIR /github/workspace"];
+    C --> C6["ENTRYPOINT ['python', '/app/src/action_entrypoint.py']"];
+```
+
+Sources: [Dockerfile.action](Dockerfile.action)
+
+## Conclusion
+
+The `Wiki-As-Readme` GitHub Action provides a powerful and automated way to keep your project documentation up-to-date using LLMs. By integrating it into your CI/CD pipeline, you can ensure that changes in your codebase are reflected in your documentation without manual intervention, fostering better project maintainability and collaboration. The action's flexible configuration options allow it to adapt to various LLM providers and project requirements.
+
+---
+
+<a name="docker-compose-&-local-development"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -585,22 +737,45 @@ graph TD
 The following files were used as context for generating this wiki page:
 
 - [docker-compose.yml](docker-compose.yml)
+- [Dockerfile](Dockerfile)
 - [Dockerfile.server](Dockerfile.server)
-- [Dockerfile.action](Dockerfile.action)
-- [.env example](.env example)
+- [src/server.py](src/server.py)
+- [src/app.py](src/app.py)
+- [pyproject.toml](pyproject.toml)
 </details>
 
-# Docker Compose로 로컬에서 실행
+# Docker Compose & Local Development
 
-## 소개
+This document outlines the setup for local development of the `wiki-as-readme` project using Docker Compose. It details how the application's API server and Streamlit user interface are containerized and orchestrated to provide a fully functional local environment. This setup facilitates consistent development, testing, and demonstration of the application without requiring direct installation of all dependencies on the host machine.
 
-이 문서는 `wiki-as-readme` 프로젝트를 Docker Compose를 사용하여 로컬 환경에서 실행하는 방법에 대해 설명합니다. Docker Compose는 다중 컨테이너 Docker 애플리케이션을 정의하고 실행하기 위한 도구로, 단일 명령으로 전체 개발 환경을 쉽게 설정하고 관리할 수 있게 해줍니다. 이를 통해 개발자는 복잡한 설정 없이 `wiki-as-readme`의 API 서버와 잠재적인 UI(Streamlit)를 로컬에서 빠르게 구동하고 테스트할 수 있습니다.
+The project leverages Docker to create isolated environments for its components and Docker Compose to define and run multi-container Docker applications. This approach ensures that the development environment closely mirrors potential deployment environments, reducing "it works on my machine" issues.
 
-제공된 `docker-compose.yml` 파일은 `wiki-as-readme` 서비스를 정의하며, 이는 `Dockerfile.server`를 기반으로 빌드된 Docker 이미지와 `.env` 파일의 환경 변수를 활용합니다.
+## Architecture Overview
 
-## Docker Compose 구성 (`docker-compose.yml`)
+The local development environment is orchestrated by `docker-compose.yml`, which defines a single service named `wiki-as-readme`. This service builds a Docker image based on the primary `Dockerfile`, which includes both the FastAPI API server and the Streamlit UI. The container exposes ports for both services, allowing developers to interact with the application through their web browser.
 
-`docker-compose.yml` 파일은 `wiki-as-readme` 서비스를 로컬에서 실행하기 위한 모든 설정을 포함하고 있습니다.
+### Component Interaction Flow
+
+```mermaid
+graph TD
+    USER_BROWSER["User Browser"]
+    DOCKER_COMPOSE["docker-compose up"]
+    WIKI_CONTAINER["wiki-as-readme Container"]
+    FASTAPI_API["FastAPI API (src/server.py)"]
+    STREAMLIT_UI["Streamlit UI (src/app.py)"]
+
+    DOCKER_COMPOSE --> WIKI_CONTAINER
+    WIKI_CONTAINER -- "Builds from Dockerfile" --> FASTAPI_API
+    WIKI_CONTAINER -- "Builds from Dockerfile" --> STREAMLIT_UI
+
+    USER_BROWSER -- "Accesses UI (http://localhost:8501)" --> STREAMLIT_UI
+    STREAMLIT_UI -- "Calls API (http://localhost:8000/api/v1)" --> FASTAPI_API
+    USER_BROWSER -- "Accesses API (http://localhost:8000)" --> FASTAPI_API
+```
+
+## Docker Compose Configuration
+
+The `docker-compose.yml` file defines how the `wiki-as-readme` service is built and run.
 
 ```yaml
 services:
@@ -618,346 +793,123 @@ services:
 ```
 Sources: [docker-compose.yml](docker-compose.yml)
 
-### 서비스 정의
+### Service Definition
 
-*   **`wiki-as-readme`**: 이 프로젝트의 핵심 서비스입니다.
-    *   **`build: .`**: 현재 디렉토리(`docker-compose.yml`이 위치한 곳)에서 `Dockerfile`을 찾아 이미지를 빌드하도록 지시합니다. 제공된 파일 중 `Dockerfile.server`가 서버 애플리케이션을 위한 Dockerfile이므로, 로컬 실행을 위해서는 이 파일을 `Dockerfile`로 사용하거나 `dockerfile: Dockerfile.server`와 같이 명시적으로 지정해야 할 수 있습니다.
-    *   **`container_name: wiki-as-readme`**: 생성될 컨테이너의 이름을 `wiki-as-readme`로 지정하여 쉽게 식별할 수 있도록 합니다.
-    *   **`ports`**:
-        *   `"8000:8000"`: 컨테이너 내부의 8000번 포트(API 서버)를 호스트 머신의 8000번 포트에 매핑합니다.
-        *   `"8501:8501"`: 컨테이너 내부의 8501번 포트(Streamlit UI)를 호스트 머신의 8501번 포트에 매핑합니다.
-    *   **`env_file: - .env`**: `.env` 파일에 정의된 환경 변수들을 컨테이너 내부로 로드합니다. 이는 LLM 설정, API 키 등 민감하거나 환경별로 다른 설정을 관리하는 데 사용됩니다.
-    *   **`volumes: - ./output:/app/output`**: 호스트 머신의 `./output` 디렉토리를 컨테이너 내부의 `/app/output` 디렉토리에 마운트합니다. 이는 생성된 위키 문서나 기타 출력 파일을 로컬에 지속적으로 저장하는 데 사용됩니다.
-    *   **`restart: always`**: 컨테이너가 종료되거나 Docker 데몬이 재시작될 때 항상 컨테이너를 다시 시작하도록 설정합니다.
+*   **`wiki-as-readme`**: This is the primary service for the application.
+    *   **`build: .`**: Instructs Docker Compose to build the image using the `Dockerfile` located in the current directory. This `Dockerfile` is configured to include both the API and the UI components.
+    *   **`container_name: wiki-as-readme`**: Assigns a static name to the container, making it easier to reference.
+    *   **`ports`**: Maps host ports to container ports, making the services accessible from the host machine.
+        *   `8000:8000`: Exposes the FastAPI API.
+        *   `8501:8501`: Exposes the Streamlit UI.
+    *   **`env_file: - .env`**: Loads environment variables from a `.env` file in the project root into the container. This is crucial for configuring API keys, database connections, or other sensitive settings.
+    *   **`volumes: - ./output:/app/output`**: Mounts the local `output` directory into the container's `/app/output` directory. This allows generated wiki content to be persisted on the host machine even if the container is removed.
+    *   **`restart: always`**: Configures the container to automatically restart if it stops for any reason, ensuring high availability during development.
 
-## 서버 이미지 빌드 상세 (`Dockerfile.server`)
+### Port Mappings
 
-`wiki-as-readme` 서비스는 `Dockerfile.server`를 기반으로 Docker 이미지를 빌드합니다. 이 Dockerfile은 멀티 스테이지 빌드(multi-stage build)를 사용하여 최종 이미지의 크기를 최적화하고 빌드 프로세스를 효율적으로 만듭니다.
+The following table summarizes the port mappings for local development:
 
-```dockerfile
-# Stage 1: Builder
-FROM python:3.12-slim-bookworm AS builder
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
-WORKDIR /app
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_LINK_MODE=copy
-COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project --extra api
+| Service | Container Port | Host Port | Description |
+|---|---|---|---|
+| FastAPI API | `8000` | `8000` | Access the API endpoints (e.g., `http://localhost:8000/docs`). |
+| Streamlit UI | `8501` | `8501` | Access the interactive web UI (e.g., `http://localhost:8501`). |
 
-# Stage 2: Final Image
-FROM python:3.12-slim-bookworm
-LABEL maintainer="catuscio <catuscio@hotmail.com>"
-# ... (생략) ...
-RUN useradd -m -u 1000 appuser
-WORKDIR /app
-COPY --from=builder /app/.venv /app/.venv
-COPY src ./src
-RUN chown -R appuser:appuser /app
-ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH="/app"
-EXPOSE 8000
-USER appuser
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "2", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "src.server:app"]
-```
+## Docker Images
+
+The project uses two distinct Dockerfiles to cater to different deployment and development needs: `Dockerfile` for the full application (API + UI) and `Dockerfile.server` for an API-only deployment. Both utilize a multi-stage build process for efficiency and smaller final image sizes.
+
+### `Dockerfile` (Full Application: API + UI)
+
+This Dockerfile is used by `docker-compose.yml` for local development, providing both the API and the Streamlit UI.
+Sources: [Dockerfile](Dockerfile)
+
+#### Stage 1: `builder`
+*   **Base Image**: `python:3.12-slim-bookworm`.
+*   **Dependency Manager**: Copies `uv` (a fast Python package installer) into the image.
+*   **Working Directory**: Sets `/app`.
+*   **Environment Variables**: `UV_COMPILE_BYTECODE=1` and `UV_LINK_MODE=copy` optimize `uv`'s behavior.
+*   **Dependency Installation**: `uv sync --frozen --no-dev --no-install-project --extra all` installs all project dependencies, including those for both the API and UI, as defined in `pyproject.toml`.
+
+#### Stage 2: Final Image
+*   **Base Image**: `python:3.12-slim-bookworm`.
+*   **Metadata**: Includes `LABEL` instructions for maintainer, description, source, license, authors, title, and version.
+*   **User Setup**: Creates a non-root `appuser` for security best practices.
+*   **Working Directory**: Sets `/app`.
+*   **Copy Artifacts**:
+    *   Copies the virtual environment (`.venv`) from the `builder` stage.
+    *   Copies the application source code (`src`).
+    *   Copies `entrypoint.sh`, which is the script executed when the container starts.
+*   **Permissions**: Sets ownership and executable permissions for `appuser`.
+*   **Environment Variables**:
+    *   `PATH`: Adds the virtual environment's `bin` directory to the `PATH`.
+    *   `PYTHONPATH`: Adds `/app` to `PYTHONPATH` for correct module imports.
+*   **Exposed Ports**: `EXPOSE 8000` and `EXPOSE 8501` declare the ports the application listens on.
+*   **User**: Switches to `appuser`.
+*   **Command**: `CMD ["./entrypoint.sh"]` executes the entrypoint script to start the application.
+
+### `Dockerfile.server` (API Server Only)
+
+This Dockerfile is designed for deploying only the FastAPI API server, without the Streamlit UI. It's suitable for backend-only deployments.
 Sources: [Dockerfile.server](Dockerfile.server)
 
-### 빌더 스테이지 (Stage 1: Builder)
+#### Stage 1: `builder`
+*   Similar to the main `Dockerfile`'s builder stage.
+*   **Dependency Installation**: `uv sync --frozen --no-dev --no-install-project --extra api` installs only the API-specific dependencies.
 
-*   **`FROM python:3.12-slim-bookworm AS builder`**: Python 3.12 슬림 버전을 기반으로 `builder`라는 이름의 스테이지를 시작합니다.
-*   **`COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv`**: `uv` 패키지 관리 도구를 설치합니다.
-*   **`WORKDIR /app`**: 작업 디렉토리를 `/app`으로 설정합니다.
-*   **`ENV UV_COMPILE_BYTECODE=1`**, **`ENV UV_LINK_MODE=copy`**: `uv`의 성능 최적화 설정을 적용합니다.
-*   **`COPY pyproject.toml uv.lock ./`**: 프로젝트의 의존성 정의 파일들을 복사합니다.
-*   **`RUN uv sync --frozen --no-dev --no-install-project --extra api`**: `uv`를 사용하여 `api` 그룹에 필요한 의존성만 설치하고 가상 환경(`.venv`)을 구성합니다.
+#### Stage 2: Final Image
+*   Similar to the main `Dockerfile`'s final stage, but with key differences:
+    *   **Metadata**: Labels reflect it's for `wiki-as-readme-server`.
+    *   **No `entrypoint.sh`**: The `entrypoint.sh` script is not copied as it's tailored for the full application.
+    *   **Exposed Port**: Only `EXPOSE 8000` for the API.
+    *   **Command**: `CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "2", "--access-logfile", "-", "--error-logfile", "-", "src.server:app"]` directly starts the FastAPI application using Gunicorn with Uvicorn workers. This is a common production setup for Python web applications.
 
-### 최종 이미지 스테이지 (Stage 2: Final Image)
+## Application Entry Points
 
-*   **`FROM python:3.12-slim-bookworm`**: 최종 이미지는 다시 Python 3.12 슬림 버전을 기반으로 시작하여 빌더 스테이지의 불필요한 빌드 도구들을 포함하지 않도록 합니다.
-*   **`LABEL`**: 이미지에 대한 메타데이터(유지보수자, 설명, 라이선스 등)를 정의합니다.
-*   **`RUN useradd -m -u 1000 appuser`**: 보안 강화를 위해 `appuser`라는 비루트 사용자를 생성합니다.
-*   **`COPY --from=builder /app/.venv /app/.venv`**: 빌더 스테이지에서 생성된 가상 환경(`.venv`)을 최종 이미지로 복사합니다.
-*   **`COPY src ./src`**: 애플리케이션 소스 코드를 복사합니다.
-*   **`RUN chown -R appuser:appuser /app`**: `/app` 디렉토리의 소유권을 `appuser`로 변경합니다.
-*   **`ENV PATH="/app/.venv/bin:$PATH"`**, **`ENV PYTHONPATH="/app"`**: 가상 환경의 실행 파일 경로와 프로젝트 소스 코드 경로를 환경 변수에 추가합니다.
-*   **`EXPOSE 8000`**: 컨테이너가 8000번 포트를 노출함을 선언합니다.
-*   **`USER appuser`**: 이후 명령어를 `appuser` 권한으로 실행하도록 설정합니다.
-*   **`CMD [...]`**: 컨테이너가 시작될 때 실행될 기본 명령어로, `gunicorn`을 사용하여 `src.server:app`에 정의된 FastAPI 애플리케이션을 구동합니다. `uvicorn.workers.UvicornWorker`를 워커로 사용하며, 0.0.0.0:8000으로 바인딩하고 2개의 워커를 사용합니다.
+### FastAPI Server (`src/server.py`)
 
-## 환경 설정 (`.env` 파일)
+This file defines the core FastAPI application that provides the API endpoints for wiki generation and webhook integration.
+Sources: [src/server.py](src/server.py)
 
-`.env` 파일은 `wiki-as-readme` 서비스의 동작을 제어하는 다양한 환경 변수를 정의합니다. `docker-compose.yml`은 이 파일을 읽어 컨테이너에 환경 변수를 주입합니다.
+*   **Initialization**: Sets up logging and initializes a `FastAPI` application instance with title, description, and version.
+*   **Health Check**: Includes a basic `GET /` endpoint for health checks.
+*   **Routers**: Integrates API routers from `src.api.v1.endpoints.wiki` and `src.api.v1.endpoints.webhook`.
+    *   `wiki.router` is mounted at `/api/v1/wiki`.
+    *   `webhook.router` is mounted at `/api/v1/webhook`.
+*   **Local Execution**: The `if __name__ == "__main__":` block allows running the server directly using `uvicorn` for local development outside Docker, binding to `127.0.0.1:8000`. Within Docker, `gunicorn` (for `Dockerfile.server`) or `entrypoint.sh` (for `Dockerfile`) handles server startup.
 
-```ini
-# --- LLM Provider Settings ---
-LLM_PROVIDER=google
-MODEL_NAME=gemini-2.0-flash-exp
+### Streamlit UI (`src/app.py`)
 
-# --- LLM API Keys ---
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-# ... (생략) ...
+This file implements the interactive web user interface using Streamlit, allowing users to trigger wiki generation and view results.
+Sources: [src/app.py](src/app.py)
 
-# --- LLM Configuration ---
-# LLM_BASE_URL=http://localhost:11434/v1
-USE_STRUCTURED_OUTPUT=true
-temperature=0.0
-max_retries=3
-max_concurrency=5
+*   **API Base URL**: `API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")`. This environment variable allows configuring the API endpoint. By default, it points to the API server running on `localhost:8000`, which is accessible from within the Docker Compose setup.
+*   **`start_generation_task`**: An asynchronous function that sends a `WikiGenerationRequest` to the FastAPI backend to initiate a wiki generation task.
+*   **`poll_task_status`**: An asynchronous function that periodically polls the API for the status of a generation task, updating the UI with progress and eventually displaying the result or an error.
+*   **`render_sidebar`**: Renders the Streamlit sidebar for user input (repository URL/path, generation settings) and triggers the generation process.
+*   **`render_main_content`**: Displays the generated markdown content, including a download button and rendering of Mermaid diagrams.
+*   **Main Application Flow (`main` function)**: Manages the Streamlit application state, handling new generation requests, polling for task status, and rendering results.
 
-# --- File Filtering Settings ---
-# IGNORED_PATTERNS='["uv.lock", "package-lock.json", ...]'
+## Dependency Management (`pyproject.toml`)
 
-# --- Repository Access Settings ---
-GIT_API_TOKEN=
+The `pyproject.toml` file defines project metadata and manages dependencies using `uv`. It specifies optional dependency groups that are leveraged by the Dockerfiles.
+Sources: [pyproject.toml](pyproject.toml)
 
-# --- Localization Settings ---
-language=en
+*   **`[project.optional-dependencies]`**:
+    *   `ui`: Lists dependencies required for the Streamlit UI (e.g., `streamlit`, `streamlit-mermaid`).
+    *   `api`: Lists dependencies required for the FastAPI API server (e.g., `fastapi`, `uvicorn`, `gunicorn`).
+    *   `all`: A meta-group that includes both `ui` and `api` dependencies.
 
-# --- Google Cloud Platform Settings (Only for Google Vertex AI) ---
-GCP_PROJECT_NAME=
-GCP_MODEL_LOCATION=
-```
-Sources: [.env example](.env example)
+This structure allows Dockerfiles to selectively install only the necessary dependencies:
+*   `Dockerfile` uses `uv sync --extra all` to install everything for the full application.
+*   `Dockerfile.server` uses `uv sync --extra api` to install only API-related dependencies, resulting in a leaner image.
 
-주요 환경 변수들은 다음과 같습니다:
+## Conclusion
 
-| 변수명 | 설명 | 예시 |
-|---|---|---|
-| `LLM_PROVIDER` | 사용할 LLM(Large Language Model) 제공자 (예: `google`, `openai`, `anthropic`, `ollama`) | `google` |
-| `MODEL_NAME` | 사용할 특정 LLM 모델의 식별자 | `gemini-2.0-flash-exp` |
-| `OPENAI_API_KEY` | OpenAI API를 사용할 경우 필요한 API 키 | `sk-xxxxxxxxxxxxxxxxxxxx` |
-| `LLM_BASE_URL` | LLM API의 커스텀 베이스 URL (예: Ollama 또는 프록시 사용 시) | `http://localhost:11434/v1` |
-| `USE_STRUCTURED_OUTPUT` | LLM이 구조화된 JSON 출력을 사용하도록 할지 여부 | `true` |
-| `temperature` | LLM 응답의 무작위성 제어 (0.0은 결정적, 1.0은 창의적) | `0.0` |
-| `IGNORED_PATTERNS` | LLM 컨텍스트에서 제외할 파일 및 디렉토리의 glob 패턴 목록 (JSON 배열 문자열) | `["*.lock", ".git", "node_modules"]` |
-| `GIT_API_TOKEN` | 비공개 저장소 접근 또는 높은 API 요청 제한을 위한 GitHub/GitLab 개인 액세스 토큰 | `ghp_xxxxxxxxxxxxxxxxxxxx` |
-| `language` | 생성될 위키의 대상 언어 (예: `ko`, `en`, `ja`) | `en` |
-
-로컬에서 실행하기 전에 `.env` 파일을 프로젝트 루트에 생성하고 필요한 값으로 채워야 합니다.
-
-## 로컬 실행 아키텍처
-
-다음 다이어그램은 Docker Compose를 사용하여 `wiki-as-readme`를 로컬에서 실행하는 전체적인 흐름을 보여줍니다.
-
-```mermaid
-graph TD
-    A["사용자"] --> B["Docker Compose 명령어"];
-    B --> C["docker-compose.yml"];
-    C --> D["wiki-as-readme 서비스"];
-    D --> E["Dockerfile.server (이미지 빌드)"];
-    D --> F[".env (환경 변수)"];
-    D --> G["로컬 ./output 볼륨"];
-    E --> H["wiki-as-readme 컨테이너"];
-    F --> H;
-    G --> H;
-    H -- "API (8000)" --> A;
-    H -- "Streamlit UI (8501)" --> A;
-```
-
-## 로컬 실행 방법
-
-1.  **Docker 및 Docker Compose 설치**: 시스템에 Docker Desktop 또는 Docker Engine과 Docker Compose가 설치되어 있는지 확인합니다.
-2.  **`.env` 파일 생성**: 프로젝트 루트 디렉토리에 `.env` 파일을 생성하고, `.env example` 파일을 참조하여 필요한 환경 변수(특히 `LLM_PROVIDER`, `MODEL_NAME`, API 키 등)를 설정합니다.
-3.  **서비스 실행**: 터미널을 열고 프로젝트 루트 디렉토리로 이동한 후 다음 명령어를 실행합니다:
-    ```bash
-    docker compose up -d
-    ```
-    *   `-d` 옵션은 컨테이너를 백그라운드에서 실행합니다.
-    *   이 명령은 `docker-compose.yml`에 따라 `wiki-as-readme` 이미지를 빌드하고 컨테이너를 시작합니다.
-4.  **서비스 확인**: 컨테이너가 정상적으로 실행 중인지 확인합니다:
-    ```bash
-    docker compose ps
-    ```
-5.  **접근**:
-    *   API 서버는 `http://localhost:8000`에서 접근할 수 있습니다.
-    *   Streamlit UI가 활성화된 경우 `http://localhost:8501`에서 접근할 수 있습니다.
-6.  **서비스 중지**:
-    ```bash
-    docker compose down
-    ```
-
-## 결론
-
-Docker Compose를 사용하면 `wiki-as-readme` 프로젝트를 로컬 환경에서 쉽고 일관되게 설정하고 실행할 수 있습니다. `docker-compose.yml`은 서비스의 모든 구성 요소를 정의하며, `Dockerfile.server`는 애플리케이션 서버를 위한 최적화된 Docker 이미지를 생성하고, `.env` 파일은 유연한 환경 설정을 제공합니다. 이 설정은 개발 및 테스트 과정에서 효율성을 크게 향상시킵니다.
+The Docker Compose setup provides a robust and consistent environment for developing the `wiki-as-readme` application. By containerizing both the FastAPI API and the Streamlit UI, developers can quickly spin up a complete local instance, interact with both components, and ensure that their local environment closely matches production expectations. The use of multi-stage Docker builds and optional dependency groups optimizes image sizes and build times, contributing to an efficient development workflow.
 
 ---
 
-<a name="로컬-개발-환경-설정"></a>
-
-<details>
-<summary>Relevant source files</summary>
-
-The following files were used as context for generating this wiki page:
-
-- [pyproject.toml](pyproject.toml)
-- [src/server.py](src/server.py)
-- [src/app.py](src/app.py)
-- [.python-version](.python-version)
-</details>
-
-# 로컬 개발 환경 설정
-
-이 문서는 `wiki-as-readme` 프로젝트의 로컬 개발 환경을 설정하고 실행하는 방법에 대해 설명합니다. 프로젝트는 FastAPI 기반의 백엔드 API 서버와 Streamlit 기반의 프론트엔드 UI로 구성되어 있으며, Python 3.12 버전을 사용합니다.
-
-로컬 환경 설정은 Python 버전 확인, 필요한 의존성 설치, API 서버 실행, 그리고 Streamlit UI 실행 단계를 포함합니다. 또한, 코드 품질 유지를 위한 린팅 및 포매팅 도구 설정도 다룹니다.
-
-## 1. 필수 요구사항
-
-`wiki-as-readme` 프로젝트는 특정 Python 버전을 요구합니다.
-
-### Python 버전
-
-프로젝트는 Python 3.12 이상을 필요로 합니다.
-Sources: [.python-version](3.12), [pyproject.toml](project.requires-python)
-
-## 2. 의존성 설치
-
-프로젝트의 모든 의존성은 `pyproject.toml` 파일에 정의되어 있습니다. 개발 환경 설정을 위해 기본 의존성, 선택적 의존성, 그리고 개발 의존성을 설치해야 합니다.
-
-### 2.1. 기본 의존성
-
-기본 의존성은 프로젝트의 핵심 기능을 위해 필요합니다. 여기에는 `google-auth`, `httpx`, `jinja2`, `litellm`, `loguru`, `pydantic`, `python-dotenv`, `pyyaml`, `requests` 등이 포함됩니다.
-Sources: [pyproject.toml](project.dependencies)
-
-### 2.2. 선택적 의존성
-
-프로젝트는 특정 기능(UI 또는 API)을 위한 선택적 의존성을 제공합니다.
-
-| 그룹 | 설명 | 포함된 라이브러리 |
-|---|---|---|
-| `ui` | Streamlit 기반 UI 실행에 필요 | `streamlit`, `streamlit-mermaid` |
-| `api` | FastAPI 기반 API 서버 실행에 필요 | `fastapi`, `uvicorn`, `gunicorn` |
-| `all` | `ui`와 `api` 그룹의 모든 의존성 포함 | `wiki-as-readme[ui,api]` |
-
-Sources: [pyproject.toml](project.optional-dependencies)
-
-### 2.3. 개발 의존성
-
-개발 의존성은 코드 품질 유지 및 개발 편의성을 위한 도구들을 포함합니다. 현재 `ruff`가 포함되어 있습니다.
-Sources: [pyproject.toml](dependency-groups.dev)
-
-### 2.4. 설치 방법
-
-프로젝트 루트 디렉토리에서 다음 명령어를 사용하여 모든 의존성을 설치할 수 있습니다.
-
-```bash
-pip install -e ".[all,dev]"
-```
-
-이 명령어는 프로젝트를 편집 가능한 모드(`-e`)로 설치하고, `all` (UI 및 API 관련) 및 `dev` (개발 도구) 선택적 의존성을 모두 포함합니다.
-
-## 3. API 서버 설정 및 실행
-
-FastAPI 기반의 API 서버는 `src/server.py` 파일에 정의되어 있습니다. 이 서버는 `uvicorn`을 사용하여 실행됩니다.
-
-### 3.1. 서버 실행
-
-API 서버를 로컬에서 실행하려면 `src/server.py` 파일을 직접 실행합니다.
-
-```bash
-python src/server.py
-```
-
-서버는 기본적으로 `http://127.0.0.1:8000`에서 실행되며, 코드 변경 시 자동으로 재로드(`reload=True`)됩니다.
-Sources: [src/server.py](if __name__ == "__main__":)
-
-### 3.2. 서버 구성
-
-*   **호스트**: 기본적으로 `127.0.0.1` (localhost)에 바인딩됩니다. 외부에서 접근 가능하도록 하려면 `host="0.0.0.0"`으로 설정해야 합니다.
-*   **포트**: 기본 포트는 `8000`입니다.
-Sources: [src/server.py](uvicorn.run)
-
-## 4. Streamlit UI 설정 및 실행
-
-Streamlit 기반의 사용자 인터페이스는 `src/app.py` 파일에 정의되어 있습니다. 이 UI는 백엔드 API 서버와 통신하여 위키 생성 작업을 수행합니다.
-
-### 4.1. API 서버 연결 설정
-
-Streamlit UI는 `API_BASE_URL` 환경 변수를 통해 백엔드 API 서버의 주소를 설정합니다. 이 변수가 설정되지 않으면 기본값인 `http://localhost:8000/api/v1`을 사용합니다.
-
-```python
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
-```
-Sources: [src/app.py](API_BASE_URL)
-
-로컬 개발 환경에서는 API 서버가 `http://localhost:8000`에서 실행되므로, 별도의 환경 변수 설정 없이 기본값을 사용할 수 있습니다.
-
-### 4.2. UI 실행
-
-Streamlit UI를 실행하려면 다음 명령어를 사용합니다.
-
-```bash
-streamlit run src/app.py
-```
-
-이 명령어를 실행하면 웹 브라우저에서 Streamlit 애플리케이션이 열립니다.
-
-### 4.3. Streamlit UI와 API 서버 간의 상호작용
-
-Streamlit UI는 비동기 HTTP 클라이언트(`httpx`)를 사용하여 API 서버와 통신합니다. 위키 생성 요청 및 상태 폴링 과정은 다음과 같습니다.
-
-```mermaid
-sequenceDiagram
-    participant S as "Streamlit UI (src/app.py)"
-    participant A as "FastAPI 서버 (src/server.py)"
-
-    S->>A: "POST /api/v1/wiki/generate/text"
-    Note over S,A: "WikiGenerationRequest 페이로드 전송"
-    A-->>S: "task_id 응답"
-    loop "태스크 완료/실패까지 폴링"
-        S->>A: "GET /api/v1/wiki/status/{task_id}"
-        A-->>S: "태스크 상태 (진행 중/완료/실패)"
-        Note over S: "UI 업데이트 (진행률, 경과 시간)"
-    end
-    alt "태스크 완료"
-        A-->>S: "최종 결과 (마크다운 콘텐츠)"
-        Note over S: "결과 표시 및 다운로드 버튼 활성화"
-    else "태스크 실패"
-        A-->>S: "오류 메시지"
-        Note over S: "오류 메시지 표시"
-    end
-```
-Sources: [src/app.py](start_generation_task), [src/app.py](poll_task_status)
-
-## 5. 코드 품질 도구 (Ruff)
-
-프로젝트는 코드 스타일 일관성과 품질 유지를 위해 `Ruff`를 린터 및 포매터로 사용합니다. `pyproject.toml` 파일에 `Ruff` 설정이 정의되어 있습니다.
-
-### 5.1. Ruff 설정
-
-| 설정 항목 | 설명 | 값 |
-|---|---|---|
-| `line-length` | 코드 라인 최대 길이 | `88` |
-| `target-version` | 대상 Python 버전 | `py312` |
-| `select` | 활성화할 린트 규칙 | `F`, `W`, `E`, `I`, `UP`, `C4`, `FA`, `ISC`, `ICN`, `RET`, `SIM`, `TID`, `TC`, `TD`, `NPY` |
-| `ignore` | 무시할 린트 규칙 | `E501` (라인 길이 초과) |
-| `fixable` | 자동으로 수정 가능한 규칙 | `ALL` |
-| `quote-style` | 문자열 따옴표 스타일 | `double` (쌍따옴표) |
-| `indent-style` | 들여쓰기 스타일 | `space` (공백) |
-
-Sources: [pyproject.toml](tool.ruff)
-
-### 5.2. 사용 방법
-
-`Ruff`는 개발 의존성으로 설치되므로, 프로젝트 루트에서 다음 명령어를 사용하여 코드를 검사하고 포매팅할 수 있습니다.
-
-```bash
-ruff check .
-ruff format .
-```
-
-## 결론
-
-이 가이드를 통해 `wiki-as-readme` 프로젝트의 로컬 개발 환경을 성공적으로 설정하고 실행할 수 있습니다. Python 3.12 환경을 준비하고, `pyproject.toml`에 정의된 의존성을 설치한 후, FastAPI 서버와 Streamlit UI를 각각 실행하면 됩니다. `Ruff`를 활용하여 코드 품질을 유지하는 것도 중요합니다.
-
----
-
-<a name="서버-및-웹훅-배포"></a>
+<a name="deploying-as-a-server-with-webhooks"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -967,190 +919,589 @@ The following files were used as context for generating this wiki page:
 - [src/server.py](src/server.py)
 - [src/api/v1/endpoints/webhook.py](src/api/v1/endpoints/webhook.py)
 - [src/api/v1/endpoints/wiki.py](src/api/v1/endpoints/wiki.py)
+- [src/models/github_webhook_schema.py](src/models/github_webhook_schema.py)
 - [Dockerfile.server](Dockerfile.server)
 </details>
 
-# 서버 및 웹훅 배포
+# Deploying as a Server with Webhooks
 
-이 문서는 `Wiki as Readme` 프로젝트의 서버 아키텍처, 웹훅 통합 및 배포 전략에 대해 설명합니다. 이 시스템은 코드베이스를 포괄적인 위키로 변환하고, GitHub 푸시 이벤트에 반응하여 자동으로 README 파일을 업데이트하는 기능을 제공합니다. FastAPI 프레임워크를 기반으로 구축되었으며, Docker를 통해 컨테이너화되어 배포됩니다.
+This document outlines the architecture and deployment strategy for running the Wiki As Readme application as a standalone server, with a particular focus on its webhook integration capabilities. Deploying the application as a server enables automated wiki generation and updates, primarily through GitHub webhooks, facilitating continuous documentation directly within your repositories.
 
-## 1. 소개
+The server leverages FastAPI for its API endpoints, Uvicorn for local development, and Gunicorn for production deployments. Key components include the main server entry point (`src/server.py`), dedicated API routers for wiki generation (`src/api/v1/endpoints/wiki.py`) and webhook handling (`src/api/v1/endpoints/webhook.py`), and a Dockerfile for containerized deployment.
 
-`Wiki as Readme` 서버는 두 가지 주요 기능을 제공합니다: 위키 생성 API와 GitHub 웹훅 통합입니다. 위키 생성 API는 코드 저장소의 내용을 분석하여 마크다운 형식의 위키 문서를 생성하며, 웹훅 통합은 GitHub 저장소에 푸시 이벤트가 발생할 때 이 위키 생성 프로세스를 자동으로 트리거하고 생성된 위키를 저장소의 `WIKI.md` 파일로 커밋합니다. 이 문서는 이러한 기능들이 어떻게 구현되고 배포되는지 상세히 다룹니다.
+## Server Architecture
 
-## 2. 서버 아키텍처
+The application is built around a FastAPI web server, providing a robust and asynchronous API. The core server setup is defined in `src/server.py`.
 
-서버는 FastAPI를 사용하여 구축되었으며, `src/server.py` 파일이 애플리케이션의 진입점 역할을 합니다.
+### FastAPI Application Setup
 
-### 2.1. FastAPI 애플리케이션 구조
+The `src/server.py` file initializes the FastAPI application, sets up logging, and includes various API routers.
 
-`src/server.py`는 FastAPI 애플리케이션 인스턴스를 생성하고, API 라우터를 포함하며, 서버를 시작하는 역할을 합니다.
+```python
+# src/server.py
+app = FastAPI(
+    title="Wiki as Readme",
+    description="Turn your codebase into a comprehensive Wiki in minutes, delivered in a single Readme.",
+    version="1.0.0",
+)
 
-*   **애플리케이션 초기화**: `FastAPI` 인스턴스를 생성하며, 애플리케이션의 제목, 설명, 버전을 정의합니다.
-*   **헬스 체크 엔드포인트**: `/` 경로에 간단한 헬스 체크 엔드포인트(`health_check`)를 제공하여 서버의 상태를 확인할 수 있습니다.
-*   **API 라우터 포함**:
-    *   `src.api.v1.endpoints.wiki` 모듈의 라우터를 `/api/v1/wiki` 경로에 포함하여 위키 생성 관련 엔드포인트를 제공합니다.
-    *   `src.api.v1.endpoints.webhook` 모듈의 라우터를 `/api/v1/webhook` 경로에 포함하여 웹훅 통합 관련 엔드포인트를 제공합니다.
-*   **서버 실행**: `if __name__ == "__main__":` 블록 내에서 `uvicorn`을 사용하여 개발 모드 서버를 시작합니다.
+@app.get("/", tags=["Health Check"])
+def health_check():
+    return {"status": "ok"}
 
-Sources: [src/server.py](src/server.py)
+app.include_router(wiki.router, prefix="/api/v1/wiki", tags=["Wiki Generation"])
+app.include_router(webhook.router, prefix="/api/v1/webhook", tags=["Webhook Integration"])
+```
+Sources: [src/server.py](app initialization, router inclusion)
+
+This setup exposes a health check endpoint at `/` and organizes API functionalities under `/api/v1/wiki` for wiki generation and `/api/v1/webhook` for webhook integrations.
+
+### High-Level Server Flow
 
 ```mermaid
 graph TD
-    A["FastAPI Application (src.server:app)"] --> B["GET / (Health Check)"]
-    A --> C["/api/v1/wiki (Wiki Generation)"]
-    A --> D["/api/v1/webhook (Webhook Integration)"]
-    C --> C1["src.api.v1.endpoints.wiki"]
-    D --> D1["src.api.v1.endpoints.webhook"]
+    A["Client/Webhook Trigger"] --> B["FastAPI Server (src/server.py)"]
+    B --> C["Health Check (GET /)"]
+    B --> D["Wiki Generation API (src/api/v1/endpoints/wiki.py)"]
+    B --> E["Webhook API (src/api/v1/endpoints/webhook.py)"]
+    D --> F["Wiki Generation Service"]
+    E --> G["Internal Wiki API Call"]
+    E --> H["GitHub API Interaction"]
 ```
 
-## 3. 웹훅 통합
+## Webhook Integration
 
-`src/api/v1/endpoints/webhook.py` 파일은 GitHub 웹훅 이벤트를 수신하고 처리하는 로직을 담당합니다.
+The server provides a dedicated endpoint for handling webhooks, specifically designed for GitHub push events. This enables automated wiki updates whenever code changes are pushed to a configured repository. The logic resides in `src/api/v1/endpoints/webhook.py`.
 
-### 3.1. GitHub 웹훅 처리 흐름
+### GitHub Webhook Endpoint
 
-GitHub 저장소에 푸시 이벤트가 발생하면, 설정된 웹훅 URL로 페이로드가 전송됩니다. 서버는 이 이벤트를 수신하여 다음 단계를 수행합니다.
+The `/api/v1/webhook/github` endpoint is the primary entry point for GitHub push events.
 
-1.  **서명 검증**: `verify_signature` 함수를 통해 GitHub에서 전송된 요청의 유효성을 HMAC SHA256 방식으로 검증합니다. 이는 요청이 GitHub에서 온 것임을 보장하고 무단 접근을 방지합니다.
-2.  **봇 커밋 및 브랜치 필터링**: 무한 루프를 방지하기 위해 `Wiki-As-Readme-Bot`이 생성한 커밋이나 `main` 브랜치 외의 푸시 이벤트는 무시합니다.
-3.  **백그라운드 작업 시작**: `process_full_cycle` 함수를 백그라운드 태스크로 등록하여 위키 생성 및 GitHub 업데이트 작업을 비동기적으로 처리합니다.
+```python
+# src/api/v1/endpoints/webhook.py
+@router.post("/github", status_code=status.HTTP_202_ACCEPTED)
+async def github_webhook(
+    payload: GitHubPushPayload, request: Request, background_tasks: BackgroundTasks
+):
+    # ...
+```
+Sources: [src/api/v1/endpoints/webhook.py](github_webhook function)
 
-Sources: [src/api/v1/endpoints/webhook.py](src/api/v1/endpoints/webhook.py)
+Key functionalities of this endpoint include:
+
+*   **Signature Verification:** Ensures the authenticity of the webhook request using HMAC SHA256, requiring `GITHUB_WEBHOOK_SECRET`.
+    Sources: [src/api/v1/endpoints/webhook.py](verify_signature function)
+*   **Loop Prevention:** Ignores commits made by the bot itself (`Wiki-As-Readme-Bot`) or commits containing "via Wiki-As-Readme" in their message to prevent infinite update loops.
+    Sources: [src/api/v1/endpoints/webhook.py](github_webhook function, BOT_COMMITTER_NAME)
+*   **Branch Filtering:** Processes only push events to the `main` branch.
+    Sources: [src/api/v1/endpoints/webhook.py](github_webhook function)
+*   **Asynchronous Processing:** Dispatches the full wiki generation and update cycle to a background task (`process_full_cycle`) to avoid blocking the webhook response.
+    Sources: [src/api/v1/endpoints/webhook.py](github_webhook function, background_tasks.add_task)
+
+### Full Cycle Processing (`process_full_cycle`)
+
+This asynchronous function orchestrates the entire workflow from receiving a GitHub push to updating the `WIKI.md` file in the repository.
+
+```python
+# src/api/v1/endpoints/webhook.py
+async def process_full_cycle(
+    generate_url: str, request_data_json: str, repo_owner: str, repo_name: str
+):
+    # 1. Call internal Wiki generation API
+    # 2. Extract generated result (Markdown)
+    # 3. Upload to GitHub
+```
+Sources: [src/api/v1/endpoints/webhook.py](process_full_cycle function)
+
+The steps involved are:
+1.  **Call Internal Wiki Generation API:** It makes an HTTP POST request to the server's own `/api/v1/wiki/generate/file` endpoint, triggering the wiki generation process.
+2.  **Extract Generated Markdown:** It parses the response from the wiki generation API to retrieve the generated Markdown content.
+3.  **Upload to GitHub:** It then calls `update_github_readme` to commit this content back to the repository.
+
+### GitHub README/WIKI Update (`update_github_readme`)
+
+This function handles the interaction with the GitHub API to update the `WIKI.md` file.
+
+```python
+# src/api/v1/endpoints/webhook.py
+async def update_github_readme(repo_owner: str, repo_name: str, content: str):
+    # ...
+```
+Sources: [src/api/v1/endpoints/webhook.py](update_github_readme function)
+
+It performs the following actions:
+*   **Authentication:** Uses `GITHUB_ACCESS_TOKEN` (a Personal Access Token) for authorization.
+*   **Fetch Existing SHA:** Retrieves the SHA of the existing `WIKI.md` file, which is required by the GitHub API for updating files.
+*   **Base64 Encoding:** Encodes the new Markdown content to Base64, as required by the GitHub API.
+*   **Commit Data Preparation:** Constructs the commit payload, including the commit message ("docs: Update README.md via Wiki-As-Readme"), committer details, and the encoded content.
+*   **PUT Request:** Sends a PUT request to the GitHub API (`/repos/{owner}/{repo}/contents/WIKI.md`) to update the file.
+
+### GitHub Webhook Flow
+
+```mermaid
+sequenceDiagram
+    participant GH as "GitHub"
+    participant WS as "Webhook Server"
+    participant WGS as "Wiki Generation Service"
+    participant GHA as "GitHub API"
+
+    GH->>WS: "POST /api/v1/webhook/github" (Push Event Payload)
+    activate WS
+    WS->>WS: "Verify Signature (X-Hub-Signature-256)"
+    alt Signature Invalid
+        WS-->>GH: "403 Forbidden"
+    else Signature Valid
+        WS->>WS: "Check for Bot Commits / Branch"
+        alt Bot Commit or Non-Main Branch
+            WS-->>GH: "202 Accepted (Skipped)"
+        else Valid Commit
+            WS->>WS: "Start process_full_cycle in Background"
+            WS-->>GH: "202 Accepted"
+            deactivate WS
+
+            WS->>WGS: "POST /api/v1/wiki/generate/file" (WikiGenerationRequest)
+            activate WGS
+            WGS-->>WS: "Generated Markdown Content"
+            deactivate WGS
+
+            WS->>GHA: "GET /repos/{owner}/{repo}/contents/WIKI.md (Get SHA)"
+            activate GHA
+            GHA-->>WS: "SHA of WIKI.md"
+            deactivate GHA
+
+            WS->>GHA: "PUT /repos/{owner}/{repo}/contents/WIKI.md (Update WIKI.md)"
+            activate GHA
+            GHA-->>WS: "200/201 Success"
+            deactivate GHA
+    end
+```
+
+## Wiki Generation API
+
+The `src/api/v1/endpoints/wiki.py` module provides the API endpoints for triggering wiki generation. The webhook integration specifically uses the `/generate/file` endpoint.
+
+*   **`/api/v1/wiki/generate/file` (POST):** Triggers an asynchronous wiki generation task. The generated Markdown content is saved as a file on the server (in the `output/` directory, though not explicitly shown in provided code, it's implied by `save_file=True`). It returns a `task_id` for status tracking.
+    Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_file function)
+*   **`/api/v1/wiki/generate/text` (POST):** Similar to `/generate/file`, but the generated Markdown content is not saved to the server's filesystem. Instead, it's made available in the task status result.
+    Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_text function)
+*   **`/api/v1/wiki/status/{task_id}` (GET):** Retrieves the current status and result (if completed) of a wiki generation task.
+    Sources: [src/api/v1/endpoints/wiki.py](get_wiki_generation_status function)
+
+These endpoints utilize background tasks (`process_wiki_generation_task`) to perform the potentially long-running generation process without blocking the API response.
+
+## Deployment with Docker
+
+The `Dockerfile.server` provides a multi-stage build process to create a production-ready Docker image for the server.
+
+### Build Stages
+
+1.  **Builder Stage:**
+    *   Uses `python:3.12-slim-bookworm` as the base.
+    *   Copies `uv` (a fast Python package installer) into the image.
+    *   Installs project dependencies using `uv sync --frozen --no-dev --no-install-project --extra api`. This ensures only production dependencies for the `api` extra are installed into a virtual environment.
+    Sources: [Dockerfile.server](Stage 1: Builder)
+
+2.  **Final Image Stage:**
+    *   Also uses `python:3.12-slim-bookworm` for a lean runtime environment.
+    *   Adds metadata labels for image identification.
+    *   Creates a non-root `appuser` for security best practices.
+    *   Copies the virtual environment from the builder stage.
+    *   Copies the application source code (`src/`).
+    *   Sets `PATH` and `PYTHONPATH` environment variables to ensure the virtual environment and application modules are discoverable.
+    *   Exposes port `8000`.
+    *   Switches to `appuser`.
+    *   Defines the `CMD` to run the application using `gunicorn` with `uvicorn.workers.UvicornWorker`. This is suitable for production, providing worker management and robustness.
+    Sources: [Dockerfile.server](Stage 2: Final Image)
+
+### Production Command
+
+The Docker image is configured to run the FastAPI application using Gunicorn:
+
+```dockerfile
+# Dockerfile.server
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--workers", "2", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "src.server:app"]
+```
+Sources: [Dockerfile.server](CMD instruction)
+
+This command binds the server to `0.0.0.0:8000`, making it accessible from outside the container, and uses two Uvicorn workers for concurrency. For local development, `src/server.py` uses `uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)`.
+Sources: [src/server.py](if __name__ == "__main__": block)
+
+## Configuration
+
+The server's webhook functionality relies on specific environment variables.
+
+| Environment Variable | Description | Source |
+|---|---|---|
+| `GITHUB_WEBHOOK_SECRET` | Secret token used to verify the authenticity of incoming GitHub webhook payloads. | [src/api/v1/endpoints/webhook.py](GITHUB_WEBHOOK_SECRET) |
+| `GITHUB_ACCESS_TOKEN` | GitHub Personal Access Token (PAT) with `repo` scope, used by the server to write the generated `WIKI.md` back to the repository. | [src/api/v1/endpoints/webhook.py](GITHUB_ACCESS_TOKEN) |
+
+These variables must be set in the environment where the server is running (e.g., Docker environment variables, Kubernetes secrets).
+
+## Conclusion
+
+Deploying the Wiki As Readme application as a server with webhook integration provides a powerful mechanism for automating documentation. By leveraging GitHub webhooks, code changes can automatically trigger the generation and update of a comprehensive `WIKI.md` file, ensuring documentation remains synchronized with the codebase. The Dockerized deployment strategy ensures portability and ease of deployment in various environments.
+
+---
+
+<a name="configuration-reference"></a>
+
+<details>
+<summary>Relevant source files</summary>
+
+The following files were used as context for generating this wiki page:
+
+- [.env example](.env example)
+- [src/core/config.py](src/core/config.py)
+- [src/action_entrypoint.py](src/action_entrypoint.py)
+</details>
+
+# Configuration Reference
+
+This document provides a comprehensive guide to configuring the AX Wiki Generator. The system relies on a robust configuration mechanism that allows users to customize its behavior, integrate with various LLM providers, and tailor output generation. Configuration is primarily managed through environment variables, typically loaded from a `.env` file, and defined programmatically within `src/core/config.py`.
+
+Understanding these configuration options is crucial for deploying the generator effectively, whether as a standalone application or as a GitHub Action. This page details each configurable parameter, its purpose, and how it influences the application's operation.
+
+## Configuration Loading Mechanism
+
+The AX Wiki Generator uses Pydantic's `BaseSettings` to manage its configuration. This approach provides strong typing, validation, and hierarchical loading of settings.
+
+### `Settings` Class (`src/core/config.py`)
+
+The `Settings` class in `src/core/config.py` is the central definition for all configurable parameters. It specifies data types, default values, and validation rules.
+Sources: [src/core/config.py](Settings class)
+
+### Environment Variables and `.env` File
+
+Configuration values are primarily sourced from environment variables. For local development or deployment, these variables are typically loaded from a `.env` file located in the project root. The `SettingsConfigDict` in `src/core/config.py` explicitly instructs Pydantic to load variables from `.env`.
+Sources: [src/core/config.py](SettingsConfigDict), [.env example](.env example)
+
+### Configuration Flow
+
+The following diagram illustrates how configuration values are loaded and utilized within the application.
+
+```mermaid
+graph TD
+    A["User/System Environment"] --> B["'.env' File"];
+    B --> C["Pydantic 'Settings' Class"];
+    C --> D["Application Modules"];
+    D --> E["LLM Service"];
+    D --> F["File System Access"];
+    D --> G["Output Generation"];
+
+    subgraph GitHub Action Context
+        H["GitHub Action Inputs"] --> I["'action_entrypoint.py'"];
+        I --> J["WikiGenerationRequest"];
+        J --> D;
+    end
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bfb,stroke:#333,stroke-width:2px
+    style D fill:#ffb,stroke:#333,stroke-width:2px
+    style H fill:#f9f,stroke:#333,stroke-width:2px
+    style I fill:#bbf,stroke:#333,stroke-width:2px
+    style J fill:#bfb,stroke:#333,stroke-width:2px
+```
+
+## Core Configuration Parameters
+
+The following table details the primary configuration parameters available.
+
+| Parameter | Type | Default | Description | Source |
+|---|---|---|---|---|
+| `LLM_PROVIDER` | `Literal` | `google` | Specifies the Large Language Model provider to use. Supported values: `google`, `openai`, `anthropic`, `openrouter`, `xai`, `ollama`. | [.env example](LLM_PROVIDER), [src/core/config.py](LLM_PROVIDER) |
+| `MODEL_NAME` | `str` | `gemini-2.5-flash` | The specific model identifier for the chosen LLM provider (e.g., `gpt-4o`, `claude-3-5-sonnet-latest`). | [.env example](MODEL_NAME), [src/core/config.py](MODEL_NAME) |
+| `OPENAI_API_KEY` | `str` | `None` | API key for OpenAI services. | [.env example](OPENAI_API_KEY), [src/core/config.py](OPENAI_API_KEY) |
+| `ANTHROPIC_API_KEY` | `str` | `None` | API key for Anthropic services. | [.env example](ANTHROPIC_API_KEY), [src/core/config.py](ANTHROPIC_API_KEY) |
+| `OPENROUTER_API_KEY` | `str` | `None` | API key for OpenRouter services. | [.env example](OPENROUTER_API_KEY), [src/core/config.py](OPENROUTER_API_KEY) |
+| `XAI_API_KEY` | `str` | `None` | API key for xAI services. | [.env example](XAI_API_KEY), [src/core/config.py](XAI_API_KEY) |
+| `LLM_BASE_URL` | `str` | `None` | Optional custom base URL for the LLM API, useful for local models (e.g., Ollama) or proxy services. | [.env example](LLM_BASE_URL), [src/core/config.py](LLM_BASE_URL) |
+| `USE_STRUCTURED_OUTPUT` | `bool` | `True` | Whether to request structured JSON output from the LLM. Requires model support. | [.env example](USE_STRUCTURED_OUTPUT), [src/core/config.py](USE_STRUCTURED_OUTPUT) |
+| `temperature` | `float` | `0.0` | Controls the randomness of LLM output. `0.0` for deterministic, `1.0` for creative. | [.env example](temperature), [src/core/config.py](temperature) |
+| `max_retries` | `int` | `3` | Maximum number of retry attempts for failed LLM requests. | [.env example](max_retries), [src/core/config.py](max_retries) |
+| `max_concurrency` | `int` | `5` | Limits the number of parallel LLM calls to prevent rate limiting. | [.env example](max_concurrency), [src/core/config.py](max_concurrency) |
+| `IGNORED_PATTERNS` | `list[str]` | (See below) | A list of glob patterns to exclude files and directories from LLM context. Overrides default list if provided. | [.env example](IGNORED_PATTERNS), [src/core/config.py](IGNORED_PATTERNS) |
+| `GIT_API_TOKEN` | `str` | `None` | GitHub/GitLab personal access token for accessing private repositories or increasing API rate limits. | [.env example](GIT_API_TOKEN), [src/core/config.py](GIT_API_TOKEN) |
+| `language` | `Literal` | `None` | Target language for the generated wiki (e.g., `en`, `ko`, `ja`, `zh`). | [.env example](language), [src/core/config.py](language) |
+| `GCP_PROJECT_NAME` | `str` | `None` | Google Cloud Project name, required for Google Vertex AI. | [.env example](GCP_PROJECT_NAME), [src/core/config.py](GCP_PROJECT_NAME) |
+| `GCP_MODEL_LOCATION` | `str` | `None` | Google Cloud model location (e.g., `us-central1`), required for Google Vertex AI. | [.env example](GCP_MODEL_LOCATION), [src/core/config.py](GCP_MODEL_LOCATION) |
+| `GOOGLE_APPLICATION_CREDENTIALS` | `SecretStr` | `None` | Path to Google Application Credentials JSON file, if not using default authentication. | [src/core/config.py](GOOGLE_APPLICATION_CREDENTIALS) |
+| `GITHUB_WEBHOOK_SECRET` | `str` | `None` | Secret for validating GitHub webhooks (if applicable). | [src/core/config.py](GITHUB_WEBHOOK_SECRET) |
+
+## Special Configuration Handling
+
+### `IGNORED_PATTERNS` Parsing
+
+The `IGNORED_PATTERNS` setting has special parsing logic to handle different input formats.
+Sources: [src/core/config.py](parse_ignored_patterns)
+
+*   **Default Value:** If `IGNORED_PATTERNS` is not set or is empty, a predefined list of common build artifacts, lock files, and media files is used.
+    Sources: [src/core/config.py](DEFAULT_IGNORED_PATTERNS)
+*   **JSON Array String:** If provided as a single-line JSON array string (e.g., `'["*.log", "temp/"]'`), it will be parsed into a list of strings.
+*   **Comma-Separated String:** If provided as a comma-separated string (e.g., `*.log, temp/`), it will be split into a list of strings.
+*   **Override:** Defining `IGNORED_PATTERNS` in the `.env` file will completely override the default list.
+
+## GitHub Action Specific Configuration
+
+When the AX Wiki Generator runs as a GitHub Action, certain inputs are provided via environment variables prefixed with `INPUT_`. The `action_entrypoint.py` script reads these specific environment variables to configure the generation process.
+Sources: [src/action_entrypoint.py](main function)
+
+| Environment Variable / Action Input | Description | Default |
+|---|---|---|
+| `INPUT_LOCAL_PATH` | The local path to the repository to be documented. | `.` (current directory) |
+| `OUTPUT_FILE` / `INPUT_OUTPUT_FILE` | The name of the output Markdown file. | `WIKI.md` |
+| `LANGUAGE` / `INPUT_LANGUAGE` | The target language for the generated wiki. This overrides the `language` setting from `src/core/config.py` for the `WikiGenerationRequest`. | `ko` |
+
+These action-specific inputs are used to construct the `WikiGenerationRequest` object, which then guides the `WikiGenerationService`. Other LLM-related configurations (like API keys, model name, temperature) are still sourced from the global `settings` object loaded from `.env` or environment variables.
+
+## Conclusion
+
+The configuration system of the AX Wiki Generator is designed for flexibility and ease of use. By leveraging environment variables and Pydantic, it provides a clear, type-safe, and robust way to customize the application's behavior for various LLM providers, project structures, and deployment environments, including seamless integration within GitHub Actions. Proper configuration ensures optimal performance, cost efficiency, and accurate documentation generation.
+
+---
+
+<a name="api-endpoints"></a>
+
+<details>
+<summary>Relevant source files</summary>
+
+The following files were used as context for generating this wiki page:
+
+- [src/api/v1/endpoints/wiki.py](src/api/v1/endpoints/wiki.py)
+- [src/api/v1/endpoints/webhook.py](src/api/v1/endpoints/webhook.py)
+- [src/models/api_schema.py](src/models/api_schema.py)
+- [src/server.py](src/server.py)
+</details>
+
+# API Endpoints
+
+This document provides a comprehensive overview of the API endpoints implemented in the "Wiki as Readme" project. These endpoints facilitate the generation of wiki content from code repositories and integrate with external services like GitHub to automate the documentation process. The API is built using FastAPI, providing a clear, interactive interface for developers and services.
+
+The core functionalities exposed through these endpoints include:
+*   Initiating wiki generation tasks, either saving the output to the server's filesystem or returning it as text.
+*   Retrieving the status and results of ongoing or completed generation tasks.
+*   Processing GitHub webhook events to automatically trigger wiki updates upon code pushes.
+
+## API Structure and Routing
+
+The API is versioned under `/api/v1/` and organized into logical modules:
+*   **`/api/v1/wiki`**: Handles all operations related to wiki generation and task management.
+*   **`/api/v1/webhook`**: Manages integrations with external webhook providers, specifically GitHub.
+
+The main FastAPI application (`src/server.py`) integrates these routers:
+```python
+app.include_router(wiki.router, prefix="/api/v1/wiki", tags=["Wiki Generation"])
+app.include_router(
+    webhook.router, prefix="/api/v1/webhook", tags=["Webhook Integration"]
+)
+```
+Sources: [src/server.py](lines 22-26)
+
+## Wiki Generation Endpoints
+
+These endpoints, defined in `src/api/v1/endpoints/wiki.py`, allow clients to request wiki generation and monitor its progress. All generation tasks are executed asynchronously in the background.
+
+### Common Initialization Logic
+
+A helper function, `_init_wiki_generation`, encapsulates the initial steps required for any wiki generation request. This includes validating the request, creating a background task entry, and preparing the `WikiGenerationService` to determine the wiki's structure.
+
+```python
+async def _init_wiki_generation(...) -> tuple[str, Any, WikiGenerationService]:
+    # ... validation, task creation, service initialization ...
+    # ... determine initial structure ...
+```
+Sources: [src/api/v1/endpoints/wiki.py](_init_wiki_generation function)
+
+### `POST /api/v1/wiki/generate/file`
+
+This endpoint triggers the generation of a wiki and saves the resulting Markdown content as a file on the server.
+
+*   **Description**: Initiates an asynchronous task to generate wiki content based on the provided repository details. The generated content is saved to the server's `output/` directory.
+*   **Method**: `POST`
+*   **Request Body**: `WikiGenerationRequest`
+*   **Response**: `WikiGenerationResponse`
+*   **Behavior**: Returns a `task_id` immediately, allowing the client to poll for status updates. The actual generation and file saving occur in a background task.
+
+Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_file function)
+
+### `POST /api/v1/wiki/generate/text`
+
+This endpoint triggers the generation of a wiki and makes the resulting Markdown content available via the task status endpoint.
+
+*   **Description**: Initiates an asynchronous task to generate wiki content. Unlike `/generate/file`, this endpoint does not save the output to the server's filesystem. The generated Markdown text will be accessible through the `/status/{task_id}` endpoint once the task is completed.
+*   **Method**: `POST`
+*   **Request Body**: `WikiGenerationRequest`
+*   **Response**: `WikiGenerationResponse`
+*   **Behavior**: Returns a `task_id` immediately. The generated text is stored as part of the task result.
+
+Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_text function)
+
+### `GET /api/v1/wiki/status/{task_id}`
+
+This endpoint allows clients to retrieve the current status of a previously initiated wiki generation task.
+
+*   **Description**: Fetches the status, progress, and eventual result (if applicable) of a background wiki generation task identified by `task_id`.
+*   **Method**: `GET`
+*   **Path Parameter**: `task_id` (string) - The unique identifier for the task.
+*   **Response**: `TaskStatusResponse`
+*   **Error Handling**: Returns `404 Not Found` if the `task_id` does not correspond to an existing task.
+
+Sources: [src/api/v1/endpoints/wiki.py](get_wiki_generation_status function)
+
+### Wiki Generation Flow
+
+The following flowchart illustrates the general process for initiating a wiki generation task:
+
+```mermaid
+graph TD
+    A["Client Request"] --> B{"POST /generate/file or /generate/text"};
+    B --> C["_init_wiki_generation()"];
+    C --> D{"Validate Request & Create Task"};
+    D --> E["Prepare WikiGenerationService"];
+    E --> F["Determine Wiki Structure"];
+    F -- "Success" --> G["Return WikiGenerationResponse (task_id)"];
+    F -- "Failure" --> H{"HTTPException (400/500)"};
+    G --> I["Add process_wiki_generation_task to BackgroundTasks"];
+    I --> J["Background Worker Processes Task"];
+    J --> K["Update Task Status & Result"];
+```
+
+## Webhook Integration Endpoints
+
+These endpoints, defined in `src/api/v1/endpoints/webhook.py`, handle incoming webhooks from external services, primarily GitHub, to automate wiki updates.
+
+### `POST /api/v1/webhook/github`
+
+This endpoint processes GitHub push events to automatically generate and update the project's `WIKI.md` file.
+
+*   **Description**: Receives push event payloads from GitHub. Upon a valid push to the `main` branch, it triggers a background process to generate a wiki for the repository and commit it back to the repository as `WIKI.md`.
+*   **Method**: `POST`
+*   **Request Body**: `GitHubPushPayload` (parsed from GitHub's JSON payload)
+*   **Response**: `202 Accepted` with a message indicating processing has started or why it was skipped.
+
+Sources: [src/api/v1/endpoints/webhook.py](github_webhook function)
+
+#### Key Logic within `/github` Endpoint:
+
+1.  **Signature Verification (`verify_signature`)**:
+    *   Ensures the webhook request originates from GitHub and has not been tampered with.
+    *   Uses the `X-Hub-Signature-256` header and a pre-shared `GITHUB_WEBHOOK_SECRET` for HMAC SHA256 verification.
+    *   Raises `HTTPException(403)` if the signature is missing or invalid.
+    Sources: [src/api/v1/endpoints/webhook.py](verify_signature function)
+
+2.  **Bot Commit Filtering**:
+    *   Prevents infinite loops by checking if the commit was made by the `BOT_COMMITTER_NAME` ("Wiki-As-Readme-Bot") or if the commit message contains "via Wiki-As-Readme".
+    *   If detected, the request is skipped with a success message.
+    Sources: [src/api/v1/endpoints/webhook.py](github_webhook function, lines 100-104)
+
+3.  **Branch Filtering**:
+    *   Only processes push events to the `refs/heads/main` branch. Other branches are ignored.
+    Sources: [src/api/v1/endpoints/webhook.py](github_webhook function, lines 106-107)
+
+4.  **Full Cycle Processing (`process_full_cycle`)**:
+    *   If all checks pass, a background task is initiated to execute the full workflow:
+        *   Calls the internal `/api/v1/wiki/generate/file` endpoint to generate the wiki.
+        *   Extracts the generated Markdown content from the response.
+        *   Calls `update_github_readme` to commit the content back to the repository.
+    Sources: [src/api/v1/endpoints/webhook.py](process_full_cycle function)
+
+5.  **GitHub Update (`update_github_readme`)**:
+    *   This function handles the interaction with the GitHub API to update the `WIKI.md` file.
+    *   Requires `GITHUB_ACCESS_TOKEN` (Personal Access Token) for authentication.
+    *   Fetches the SHA of the existing `WIKI.md` (if any) to correctly update the file.
+    *   Base64 encodes the new content.
+    *   Performs a `PUT` request to the GitHub Contents API (`/repos/{owner}/{repo}/contents/WIKI.md`) with the new content and commit message.
+    Sources: [src/api/v1/endpoints/webhook.py](update_github_readme function)
+
+### GitHub Webhook Processing Flow
 
 ```mermaid
 sequenceDiagram
     participant G as "GitHub"
     participant W as "Webhook Endpoint"
-    participant V as "Signature Verification"
-    participant B as "Bot/Branch Check"
-    participant T as "Background Task"
+    participant B as "Background Task"
     participant I as "Internal Wiki API"
-    participant U as "GitHub Update"
+    participant GH as "GitHub API"
 
-    G->>W: "Push Event (POST /api/v1/webhook/github)"
-    W->>V: "verify_signature(request)"
-    V-->>W: "Signature Valid/Invalid"
-    alt "Signature Invalid"
+    G->>W: "POST /api/v1/webhook/github" (Push Event)
+    W->>W: "verify_signature()"
+    alt Signature Invalid
         W-->>G: "403 Forbidden"
-    else "Signature Valid"
-        W->>B: "Check Pusher/Branch"
-        alt "Bot Commit or Non-Main Branch"
-            B-->>W: "Skip Processing"
+    else Signature Valid
+        W->>W: "Check Bot Commit & Branch"
+        alt Bot Commit or Non-Main Branch
             W-->>G: "202 Accepted (Skipped)"
-        else "Valid Commit"
-            W->>T: "Add process_full_cycle task"
-            T->>I: "POST /api/v1/wiki/generate/file"
-            I-->>T: "Generated Markdown"
-            T->>U: "update_github_readme()"
-            U-->>T: "Update Status"
+        else Valid Push
+            W->>B: "Add process_full_cycle() to BackgroundTasks"
             W-->>G: "202 Accepted (Processing Started)"
+            B->>I: "POST /api/v1/wiki/generate/file"
+            I-->>B: "WikiGenerationResponse (with result)"
+            B->>GH: "GET /repos/.../contents/WIKI.md (get SHA)"
+            GH-->>B: "SHA (or 404)"
+            B->>GH: "PUT /repos/.../contents/WIKI.md (update file)"
+            GH-->>B: "200/201 Success"
         end
     end
 ```
 
-### 3.2. 주요 함수
+## API Schema Definitions
 
-*   `verify_signature(request: Request)`:
-    *   `X-Hub-Signature-256` 헤더와 `GITHUB_WEBHOOK_SECRET` 환경 변수를 사용하여 요청 본문의 HMAC 서명을 검증합니다.
-    *   Sources: [src/api/v1/endpoints/webhook.py](verify_signature function)
-*   `update_github_readme(repo_owner: str, repo_name: str, content: str)`:
-    *   생성된 마크다운 콘텐츠를 GitHub 저장소의 `WIKI.md` 파일로 커밋합니다.
-    *   `GITHUB_ACCESS_TOKEN` (개인 액세스 토큰)을 사용하여 GitHub API에 인증합니다.
-    *   기존 파일의 SHA를 가져와 파일을 덮어쓰거나, 파일이 없으면 새로 생성합니다.
-    *   Sources: [src/api/v1/endpoints/webhook.py](update_github_readme function)
-*   `process_full_cycle(generate_url: str, request_data_json: str, repo_owner: str, repo_name: str)`:
-    *   위키 생성 API를 호출하고, 그 결과를 받아 GitHub에 업데이트하는 전체 프로세스를 관리합니다.
-    *   Sources: [src/api/v1/endpoints/webhook.py](process_full_cycle function)
-*   `github_webhook(payload: GitHubPushPayload, request: Request, background_tasks: BackgroundTasks)`:
-    *   `/github` 경로의 POST 요청을 처리하는 메인 엔드포인트입니다.
-    *   서명 검증, 필터링 로직을 수행한 후 `process_full_cycle`을 백그라운드 태스크로 추가합니다.
-    *   Sources: [src/api/v1/endpoints/webhook.py](github_webhook function)
+The `src/models/api_schema.py` file defines the Pydantic models used for request and response bodies across the API.
 
-### 3.3. 환경 변수
+### `WikiGenerationRequest`
 
-웹훅 기능의 정상적인 작동을 위해 다음 환경 변수가 필요합니다.
+This model defines the input parameters required to initiate a wiki generation task.
 
-| 환경 변수 | 설명 |
-|---|---|
-| `GITHUB_WEBHOOK_SECRET` | GitHub 웹훅 설정 시 사용되는 비밀 키. 요청 서명 검증에 사용됩니다. |
-| `GITHUB_ACCESS_TOKEN` | GitHub API에 접근하여 `WIKI.md` 파일을 업데이트하는 데 사용되는 개인 액세스 토큰(PAT). |
-
-## 4. 위키 생성 API
-
-`src/api/v1/endpoints/wiki.py` 파일은 위키 생성 작업을 시작하고 그 상태를 조회하는 엔드포인트를 제공합니다.
-
-### 4.1. 위키 생성 엔드포인트
-
-| 엔드포인트 | HTTP 메서드 | 설명 |
+| Field | Type | Description |
 |---|---|---|
-| `/generate/file` | `POST` | 위키 생성을 트리거하고, 생성된 마크다운 파일을 서버의 `output/` 디렉토리에 저장합니다. 작업 ID를 반환하여 진행 상황을 추적할 수 있습니다. |
-| `/generate/text` | `POST` | 위키 생성을 트리거하지만, 파일을 저장하지 않고 생성된 마크다운 텍스트를 작업 상태 조회 시 반환합니다. 작업 ID를 반환합니다. |
-| `/status/{task_id}` | `GET` | 특정 `task_id`에 해당하는 위키 생성 작업의 현재 상태를 조회합니다. |
+| `repo_owner` | `str` \| `None` | The owner of the repository (user or organization). |
+| `repo_name` | `str` \| `None` | The name of the repository. |
+| `repo_type` | `Literal["github", "gitlab", "bitbucket", "local"]` | The type of the repository. Defaults to `github`. |
+| `repo_url` | `str` \| `None` | The URL for cloning a remote repository. |
+| `local_path` | `str` \| `None` | The local path to the repository if `repo_type` is 'local'. |
+| `language` | `str` | The language for the generated wiki content. Defaults to `ko`. |
+| `is_comprehensive_view` | `bool` | Whether to generate a comprehensive view of the repository. Defaults to `True`. |
 
-Sources: [src/api/v1/endpoints/wiki.py](src/api/v1/endpoints/wiki.py)
+**Note**: A `model_validator` automatically derives `repo_owner` and `repo_name` from `repo_url` if they are not explicitly provided and `repo_type` is `github`.
+Sources: [src/models/api_schema.py](WikiGenerationRequest class)
 
-### 4.2. 주요 함수
+### `WikiGenerationResponse`
 
-*   `_init_wiki_generation(request: WikiGenerationRequest, initial_message: str)`:
-    *   위키 생성 작업을 초기화하고, 태스크 ID와 `WikiGenerationService` 인스턴스를 준비하는 헬퍼 함수입니다.
-    *   Sources: [src/api/v1/endpoints/wiki.py](_init_wiki_generation function)
-*   `generate_wiki_file(request: WikiGenerationRequest, background_tasks: BackgroundTasks)`:
-    *   위키 생성을 시작하고 결과를 파일로 저장하는 백그라운드 태스크를 추가합니다.
-    *   Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_file function)
-*   `generate_wiki_text(request: WikiGenerationRequest, background_tasks: BackgroundTasks)`:
-    *   위키 생성을 시작하고 결과를 텍스트로 반환하는 백그라운드 태스크를 추가합니다.
-    *   Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_text function)
-*   `get_wiki_generation_status(task_id: str)`:
-    *   주어진 `task_id`에 대한 작업 상태를 반환합니다.
-    *   Sources: [src/api/v1/endpoints/wiki.py](get_wiki_generation_status function)
+This model defines the response returned immediately after a wiki generation task is successfully initiated.
 
-## 5. 배포
+| Field | Type | Description |
+|---|---|---|
+| `message` | `str` | A message indicating the status of the request. |
+| `task_id` | `str` | The ID of the background task initiated. |
+| `title` | `str` | The title of the generated wiki (determined during initial structure analysis). |
+| `description` | `str` | The description of the generated wiki (determined during initial structure analysis). |
 
-`Dockerfile.server`는 `Wiki as Readme` 서버 애플리케이션을 컨테이너화하고 배포하기 위한 지침을 제공합니다.
+Sources: [src/models/api_schema.py](WikiGenerationResponse class)
 
-### 5.1. Dockerfile 구조
+### `TaskStatusResponse`
 
-`Dockerfile.server`는 멀티 스테이지 빌드를 사용하여 최종 이미지의 크기를 최적화하고 빌드 프로세스를 효율적으로 만듭니다.
+This model defines the response returned when querying the status of a background task.
 
-*   **Stage 1: Builder**
-    *   `python:3.12-slim-bookworm` 이미지를 기반으로 합니다.
-    *   `uv` 패키지 관리자를 사용하여 의존성을 설치합니다. `uv sync --frozen --no-dev --no-install-project --extra api` 명령을 통해 `pyproject.toml` 및 `uv.lock`에 정의된 프로덕션 의존성만 설치합니다.
-    *   Sources: [Dockerfile.server](Stage 1: Builder)
-*   **Stage 2: Final Image**
-    *   `python:3.12-slim-bookworm` 이미지를 다시 사용합니다.
-    *   빌더 스테이지에서 설치된 가상 환경(`/.venv`)을 복사합니다.
-    *   애플리케이션 소스 코드(`src`)를 이미지에 복사합니다.
-    *   `appuser`라는 비루트 사용자를 생성하고 해당 사용자로 애플리케이션을 실행하여 보안을 강화합니다.
-    *   `PATH` 및 `PYTHONPATH` 환경 변수를 설정하여 가상 환경과 소스 코드를 올바르게 참조하도록 합니다.
-    *   `8000` 포트를 노출합니다.
-    *   **CMD**: `gunicorn`을 사용하여 프로덕션 환경에서 애플리케이션을 실행합니다. `uvicorn.workers.UvicornWorker`를 워커 클래스로 사용하며, `0.0.0.0:8000`에 바인딩하고 2개의 워커 프로세스를 사용하도록 설정합니다. 접근 및 에러 로그는 표준 출력/오류로 보냅니다.
-    *   Sources: [Dockerfile.server](Stage 2: Final Image)
+| Field | Type | Description |
+|---|---|---|
+| `task_id` | `str` | The ID of the task. |
+| `status` | `Literal["in_progress", "completed", "failed"]` | Current status of the task. |
+| `result` | `Any` \| `None` | Result of the task, if completed or failed. This can contain the generated Markdown text. |
 
-### 5.2. 프로덕션 실행 명령어
+Sources: [src/models/api_schema.py](TaskStatusResponse class)
 
-컨테이너가 시작될 때 실행되는 명령어는 다음과 같습니다:
+## Conclusion
 
-```bash
-gunicorn -k uvicorn.workers.UvicornWorker \
-         --bind 0.0.0.0:8000 \
-         --workers 2 \
-         --access-logfile - \
-         --error-logfile - \
-         src.server:app
-```
-
-이 명령어는 `gunicorn`을 WSGI HTTP 서버로 사용하여 `src.server:app` FastAPI 애플리케이션을 실행합니다. `uvicorn.workers.UvicornWorker`를 사용하여 비동기 워커를 활용하며, `0.0.0.0:8000`에서 요청을 수신하고 2개의 워커 프로세스로 처리합니다.
-
-Sources: [Dockerfile.server](CMD instruction)
-
-## 6. 결론
-
-`Wiki as Readme` 서버는 FastAPI를 기반으로 구축되어 위키 생성 및 GitHub 웹훅 통합 기능을 제공합니다. 모듈화된 아키텍처는 각 기능의 독립성을 보장하며, 백그라운드 태스크를 통해 비동기적인 처리를 수행합니다. Docker를 이용한 컨테이너화는 일관된 배포 환경을 제공하며, `gunicorn`을 통한 프로덕션 배포는 안정성과 성능을 확보합니다. 이 시스템은 개발자가 코드 변경 시 자동으로 문서가 업데이트되도록 하여 문서화 프로세스를 간소화하는 데 기여합니다.
+The API endpoints provide a robust and flexible interface for the "Wiki as Readme" system. They enable on-demand wiki generation, asynchronous task management, and seamless integration with GitHub for automated documentation updates. The clear separation of concerns between wiki generation and webhook processing, coupled with well-defined data schemas, ensures maintainability and extensibility of the API.
 
 ---
 
-<a name="아키텍처-개요"></a>
+<a name="system-architecture"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -1159,436 +1510,155 @@ The following files were used as context for generating this wiki page:
 
 - [src/app.py](src/app.py)
 - [src/server.py](src/server.py)
-- [src/core/config.py](src/core/config.py)
-- [src/agent/llm.py](src/agent/llm.py)
-- [src/providers/base.py](src/providers/base.py)
 </details>
 
-# 아키텍처 개요
+# System Architecture
 
-이 문서는 "Wiki As Readme" 프로젝트의 전반적인 아키텍처를 설명합니다. 이 프로젝트는 AI를 활용하여 코드 저장소의 포괄적인 문서를 생성하고, 이를 단일 README 파일 형태로 제공하는 것을 목표로 합니다. 시스템은 사용자 인터페이스, 백엔드 API, LLM(Large Language Model) 통합, 그리고 다양한 저장소 유형을 처리하는 모듈로 구성된 모듈식 접근 방식을 채택하고 있습니다.
+## Introduction
 
-주요 목표는 사용자가 저장소 URL 또는 로컬 경로를 제공하면, 시스템이 해당 저장소의 구조와 내용을 분석하고, LLM을 사용하여 상세한 위키 문서를 자동으로 생성하는 것입니다. 이 문서는 시스템의 주요 구성 요소, 이들 간의 상호작용, 그리고 핵심 데이터 흐름을 개괄적으로 설명합니다.
+The "Wiki As Readme" project is designed to generate comprehensive documentation for code repositories using AI. This document outlines the core system architecture, detailing the interaction between its primary components: a Streamlit-based user interface and a FastAPI-based backend API. The architecture follows a client-server model, enabling asynchronous processing of wiki generation requests and providing a responsive user experience.
 
-## 1. 전체 시스템 아키텍처
+## Overall Architecture
 
-"Wiki As Readme" 시스템은 크게 두 가지 주요 구성 요소로 나뉩니다: 사용자 인터페이스를 제공하는 프론트엔드 애플리케이션과 모든 핵심 로직 및 API를 처리하는 백엔드 서버입니다. 이들은 비동기적으로 통신하며, 백엔드는 LLM 및 저장소 접근 로직과 상호작용합니다.
+The system is composed of two main applications:
+1.  **Frontend Application (`src/app.py`):** A Streamlit application that provides the user interface for configuring and initiating wiki generation. It acts as the client, communicating with the backend API.
+2.  **Backend API (`src/server.py`):** A FastAPI application that exposes RESTful endpoints for handling wiki generation requests, managing tasks, and potentially integrating with webhooks. It serves as the central processing unit for all generation logic.
+
+This separation allows for independent development, scaling, and deployment of the UI and the API services.
 
 ```mermaid
 graph TD
-    User["사용자"] --> Frontend["프론트엔드 (Streamlit)"];
-    Frontend --> API_Server["백엔드 API 서버 (FastAPI)"];
-    API_Server --> LLM_Agent["LLM 에이전트 (LiteLLM)"];
-    API_Server --> Repo_Provider["저장소 제공자"];
-    LLM_Agent --> External_LLM["외부 LLM 서비스"];
-    Repo_Provider --> Git_Repo["Git 저장소 / 로컬 파일"];
-    API_Server --> Config["설정 관리"];
-    Config --> Env_Vars["환경 변수 (.env)"];
+    A["User"] --> B["Streamlit UI (src/app.py)"]
+    B -- "1. Configure & Request Generation" --> C["FastAPI Backend (src/server.py)"]
+    C -- "2. Start Background Task" --> D["AI Wiki Generation Service (Internal)"]
+    C -- "3. Return Task ID" --> B
+    B -- "4. Poll Task Status" --> C
+    C -- "5. Return Status/Result" --> B
+    B -- "6. Display Wiki" --> A
 ```
+Sources: [src/app.py](main function), [src/server.py](app initialization)
 
-## 2. 프론트엔드 애플리케이션 (`src/app.py`)
+## Frontend Application: Streamlit UI
 
-프론트엔드 애플리케이션은 Streamlit을 기반으로 구축되어 사용자에게 직관적인 인터페이스를 제공합니다. 사용자는 여기서 저장소 정보와 위키 생성 설정을 입력하고, 생성 진행 상황을 확인하며, 최종 결과를 다운로드할 수 있습니다.
+The Streamlit application (`src/app.py`) is responsible for user interaction, input collection, and displaying the results of the wiki generation process. It communicates with the backend API asynchronously.
 
-### 2.1. 주요 기능
+### Key Components and Flow
 
-*   **사용자 입력 처리**: 저장소 URL 또는 로컬 경로, 생성 언어, 포괄적 보기 설정 등을 입력받습니다.
-*   **API 요청 시작**: 사용자가 "Generate Wiki" 버튼을 클릭하면 백엔드 API에 위키 생성 요청을 보냅니다.
-*   **작업 상태 폴링**: 백엔드에서 반환된 `task_id`를 사용하여 주기적으로 작업 상태를 조회하고, 사용자에게 진행 상황을 업데이트합니다.
-*   **결과 표시**: 위키 생성이 완료되면 Markdown 콘텐츠를 화면에 미리 보여주고 다운로드 옵션을 제공합니다. Mermaid 다이어그램은 별도로 렌더링합니다.
+1.  **Configuration and Input (`render_sidebar`):**
+    *   Presents a sidebar where users can input repository details (URL or local path) and generation settings (e.g., comprehensive view, language).
+    *   Validates user input and constructs a `WikiGenerationRequest` object.
+    *   Triggers the generation process upon button click.
+    Sources: [src/app.py](render_sidebar function)
 
-### 2.2. 핵심 컴포넌트
+2.  **Initiating Generation (`start_generation_task`):**
+    *   Sends a `POST` request to the backend API's `/api/v1/wiki/generate/text` endpoint with the `WikiGenerationRequest` payload.
+    *   Uses `httpx.AsyncClient` for asynchronous HTTP communication.
+    *   Handles API errors (HTTP status errors, network errors) and displays appropriate messages.
+    *   Returns a `task_id` upon successful initiation, which is crucial for tracking the generation progress.
+    Sources: [src/app.py](start_generation_task function)
 
-*   `render_sidebar()`: 사용자 입력을 위한 사이드바 UI를 렌더링하고, `WikiGenerationRequest` 객체를 구성합니다.
-    *   Sources: [src/app.py](render_sidebar function)
-*   `start_generation_task()`: 백엔드 API에 위키 생성 작업을 시작하도록 요청하고 `task_id`를 반환합니다.
-    *   Sources: [src/app.py](start_generation_task function)
-*   `poll_task_status()`: 백엔드 API를 주기적으로 호출하여 작업 상태를 확인하고, 완료 또는 실패 시 결과를 반환합니다.
-    *   Sources: [src/app.py](poll_task_status function)
-*   `render_main_content()`: 생성된 Markdown 콘텐츠를 표시하고, 다운로드 버튼 및 Mermaid 다이어그램 렌더링을 처리합니다.
-    *   Sources: [src/app.py](render_main_content function)
+3.  **Polling Task Status (`poll_task_status`):**
+    *   Continuously queries the backend API's `/api/v1/wiki/status/{task_id}` endpoint to check the status of the generation task.
+    *   Provides real-time feedback to the user via a progress bar and status messages.
+    *   Updates the UI based on the task status: `completed`, `failed`, or `in progress`.
+    *   Retrieves the final generated markdown content or an error message once the task is complete.
+    Sources: [src/app.py](poll_task_status function)
 
-## 3. 백엔드 API 서버 (`src/server.py`)
+4.  **Displaying Results (`render_main_content`):**
+    *   Renders the generated wiki content in the main area of the Streamlit application.
+    *   Provides a download button for the consolidated Markdown file.
+    *   Intelligently parses and renders Mermaid diagrams embedded within the Markdown content using `streamlit_mermaid`.
+    Sources: [src/app.py](render_main_content function)
 
-백엔드 API 서버는 FastAPI 프레임워크를 사용하여 구축되었으며, 시스템의 핵심 로직을 담당합니다. 프론트엔드로부터의 요청을 처리하고, LLM과의 통신을 조율하며, 저장소에서 데이터를 가져오는 역할을 수행합니다.
-
-### 3.1. 주요 기능
-
-*   **API 엔드포인트 제공**: 위키 생성 시작, 작업 상태 조회 등의 RESTful API 엔드포인트를 노출합니다.
-*   **작업 오케스트레이션**: 위키 생성 요청을 받으면 비동기 작업을 시작하고, 그 진행 상황을 관리합니다.
-*   **모듈 통합**: LLM 에이전트, 저장소 제공자, 설정 관리 모듈과 통합하여 전체 워크플로우를 실행합니다.
-
-### 3.2. API 엔드포인트
-
-| 경로 | HTTP 메서드 | 설명 | 태그 |
-|---|---|---|---|
-| `/` | `GET` | 서버 상태 확인 (Health Check) | Health Check |
-| `/api/v1/wiki/generate/text` | `POST` | 위키 생성 작업을 시작합니다. | Wiki Generation |
-| `/api/v1/wiki/status/{task_id}` | `GET` | 특정 작업 ID의 상태를 조회합니다. | Wiki Generation |
-| `/api/v1/webhook` | `POST` | 웹훅 통합을 위한 엔드포인트입니다. | Webhook Integration |
-
-Sources: [src/server.py](app.include_router calls)
-
-## 4. 설정 관리 (`src/core/config.py`)
-
-시스템의 모든 설정은 `src/core/config.py` 파일에서 Pydantic Settings를 사용하여 중앙 집중식으로 관리됩니다. 이는 환경 변수(`.env` 파일 포함)로부터 설정을 로드하여 애플리케이션 전반에 걸쳐 일관된 구성을 보장합니다.
-
-### 4.1. 주요 설정 항목
-
-| 설정 항목 | 설명 | 기본값 |
-|---|---|---|
-| `LLM_PROVIDER` | 사용할 LLM 서비스 제공자 (예: `google`, `openai`) | `google` |
-| `MODEL_NAME` | 사용할 LLM 모델의 이름 | `gemini-2.5-flash` |
-| `OPENAI_API_KEY` | OpenAI API 키 | `None` |
-| `ANTHROPIC_API_KEY` | Anthropic API 키 | `None` |
-| `OPENROUTER_API_KEY` | OpenRouter API 키 | `None` |
-| `XAI_API_KEY` | xAI API 키 | `None` |
-| `LLM_BASE_URL` | 커스텀 LLM API 베이스 URL (Ollama 등) | `None` |
-| `USE_STRUCTURED_OUTPUT` | LLM의 구조화된 출력 사용 여부 | `True` |
-| `temperature` | LLM 응답의 무작위성 제어 | `0.0` |
-| `max_retries` | LLM 호출 재시도 횟수 | `3` |
-| `max_concurrency` | 동시 LLM 호출 수 | `5` |
-| `GIT_API_TOKEN` | Git API 접근 토큰 | `None` |
-| `language` | 생성될 위키의 기본 언어 | `None` |
-| `GCP_PROJECT_NAME` | Google Cloud 프로젝트 이름 | `None` |
-| `GCP_MODEL_LOCATION` | Google Cloud 모델 위치 | `None` |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Google Cloud 인증 정보 경로 | `None` |
-| `IGNORED_PATTERNS` | 파일 스캔 시 무시할 패턴 목록 | 기본 목록 참조 |
-| `GITHUB_WEBHOOK_SECRET` | GitHub 웹훅 시크릿 | `None` |
-
-Sources: [src/core/config.py](Settings class)
-
-## 5. LLM 에이전트 (`src/agent/llm.py`)
-
-LLM 에이전트는 LiteLLM 라이브러리를 활용하여 다양한 LLM 서비스 제공자와의 통합을 추상화합니다. 이를 통해 백엔드 로직은 특정 LLM 공급자에 종속되지 않고 유연하게 모델을 교체할 수 있습니다.
-
-### 5.1. `LLMWikiMaker` 클래스
-
-`LLMWikiMaker` 클래스는 LLM 호출을 위한 래퍼 역할을 합니다.
-
-*   **다중 LLM 공급자 지원**: Google, OpenAI, Anthropic, OpenRouter, xAI, Ollama 등 다양한 LLM 공급자를 지원합니다.
-*   **설정 기반 구성**: `src/core/config.py`에 정의된 설정을 기반으로 LLM 모델 및 호출 인자를 구성합니다.
-*   **구조화된 출력**: Pydantic 스키마를 사용하여 LLM으로부터 구조화된 JSON 응답을 받을 수 있도록 지원합니다.
-*   **비동기 호출**: `ainvoke` 메서드를 통해 비동기적으로 LLM을 호출합니다.
-
-```mermaid
-classDiagram
-    class LLMWikiMaker~T~ {
-        -response_schema: type[T] | None
-        -model_name: str
-        -completion_kwargs: dict
-        +__init__(response_schema: type[T] | None)
-        -_configure_llm() tuple[str, dict]
-        +ainvoke(input_data: Any) T | str
-        -_extract_json(text: str) str
-    }
-    class LiteLLM {
-        +acompletion(...)
-    }
-    class Settings {
-        +LLM_PROVIDER
-        +MODEL_NAME
-        +OPENAI_API_KEY
-        +...
-    }
-
-    LLMWikiMaker "1" -- "1" Settings : uses >
-    LLMWikiMaker "1" -- "1" LiteLLM : calls >
-```
-Sources: [src/agent/llm.py](LLMWikiMaker class)
-
-## 6. 저장소 제공자 (`src/providers/base.py`)
-
-`RepositoryProvider`는 다양한 유형의 코드 저장소(예: GitHub, GitLab, 로컬 파일 시스템)에서 파일 구조 및 콘텐츠를 가져오는 기능을 추상화하는 기본 추상 클래스입니다.
-
-### 6.1. `RepositoryProvider` 추상 클래스
-
-*   **추상 메서드**: 각 구체적인 저장소 제공자(예: `GitHubProvider`, `LocalProvider`)는 다음 추상 메서드를 구현해야 합니다.
-    *   `fetch_structure()`: 저장소의 파일 트리 및 README를 가져옵니다.
-    *   `fetch_file_content(file_path: str)`: 특정 파일의 내용을 가져옵니다.
-*   **HTTP 클라이언트**: `httpx.AsyncClient`를 내장하여 비동기 HTTP 요청을 처리합니다.
-
-```mermaid
-classDiagram
-    direction LR
-    class RepositoryProvider {
-        <<abstract>>
-        #request: WikiGenerationRequest
-        #client: httpx.AsyncClient
-        +__init__(request: WikiGenerationRequest)
-        +close()
-        +fetch_structure() RepositoryStructure
-        +fetch_file_content(file_path: str) str | None
-    }
-    class GitHubProvider {
-        +fetch_structure()
-        +fetch_file_content()
-    }
-    class LocalProvider {
-        +fetch_structure()
-        +fetch_file_content()
-    }
-
-    RepositoryProvider <|-- GitHubProvider
-    RepositoryProvider <|-- LocalProvider
-```
-Sources: [src/providers/base.py](RepositoryProvider class)
-
-## 7. 데이터 흐름: 위키 생성 요청
-
-사용자가 위키 생성을 요청할 때 시스템 내에서 데이터가 어떻게 흐르는지 보여주는 시퀀스 다이어그램입니다.
+### API Interaction Sequence
 
 ```mermaid
 sequenceDiagram
-    participant User as "사용자"
-    participant FE as "프론트엔드 (Streamlit)"
-    participant BE as "백엔드 API (FastAPI)"
-    participant RP as "저장소 제공자"
-    participant LLMA as "LLM 에이전트"
-    participant LLMS as "LLM 서비스"
+    participant User
+    participant StreamlitApp as "Streamlit UI (src/app.py)"
+    participant FastAPIApp as "FastAPI Backend (src/server.py)"
 
-    User->>FE: "저장소 정보 입력 및 '생성' 클릭"
-    FE->>BE: "POST /api/v1/wiki/generate/text (WikiGenerationRequest)"
-    activate BE
-    BE->>BE: "비동기 작업 시작 (task_id 반환)"
-    BE-->>FE: "task_id 반환"
-    deactivate BE
-
-    loop "작업 완료/실패까지 폴링"
-        FE->>BE: "GET /api/v1/wiki/status/{task_id}"
-        activate BE
-        alt "작업 진행 중"
-            BE-->>FE: "상태: 'in_progress'"
-        else "작업 완료"
-            BE-->>FE: "상태: 'completed', 결과: Markdown"
+    User->>StreamlitApp: "Enter Repo Info & Click Generate"
+    StreamlitApp->>FastAPIApp: POST /api/v1/wiki/generate/text (WikiGenerationRequest)
+    FastAPIApp-->>StreamlitApp: HTTP 202 Accepted (task_id)
+    loop Poll for Status
+        StreamlitApp->>FastAPIApp: GET /api/v1/wiki/status/{task_id}
+        alt Task In Progress
+            FastAPIApp-->>StreamlitApp: HTTP 200 OK (status: "in_progress")
+            StreamlitApp->>StreamlitApp: "Update Progress Bar"
+        else Task Completed
+            FastAPIApp-->>StreamlitApp: HTTP 200 OK (status: "completed", result: {markdown_content})
             break
-        else "작업 실패"
-            BE-->>FE: "상태: 'failed', 에러 메시지"
+        else Task Failed
+            FastAPIApp-->>StreamlitApp: HTTP 200 OK (status: "failed", result: {error_message})
             break
         end
-        deactivate BE
     end
-
-    Note over BE,LLMS: "백엔드 내부 작업 흐름 (비동기)"
-    activate BE
-    BE->>RP: "저장소 구조 및 파일 내용 가져오기"
-    activate RP
-    RP->>RP: "Git API 호출 또는 로컬 파일 읽기"
-    RP-->>BE: "저장소 구조 및 파일 내용"
-    deactivate RP
-
-    BE->>LLMA: "LLM 에이전트에 위키 생성 요청"
-    activate LLMA
-    LLMA->>LLMS: "LLM 모델 호출 (프롬프트 전송)"
-    activate LLMS
-    LLMS-->>LLMA: "생성된 위키 콘텐츠 (Markdown)"
-    deactivate LLMS
-    LLMA-->>BE: "생성된 위키 콘텐츠"
-    deactivate LLMA
-
-    BE->>BE: "결과 취합 및 저장"
-    deactivate BE
-
-    FE->>User: "생성된 위키 미리보기 및 다운로드"
+    StreamlitApp->>User: "Display Generated Wiki / Error"
 ```
+Sources: [src/app.py](start_generation_task function, poll_task_status function)
 
-## 8. 결론
+### Wiki Generation Request Model
 
-"Wiki As Readme" 프로젝트는 Streamlit 기반의 사용자 친화적인 프론트엔드, FastAPI 기반의 강력한 백엔드 API, LiteLLM을 통한 유연한 LLM 통합, 그리고 추상화된 저장소 접근 계층을 통해 모듈화되고 확장 가능한 아키텍처를 제공합니다. 이러한 설계는 다양한 LLM 서비스와 저장소 유형을 지원하며, 코드베이스 문서화 프로세스를 자동화하고 간소화하는 데 중점을 둡니다.
+The `WikiGenerationRequest` object, used for initiating the generation process, encapsulates all necessary parameters.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `repo_type` | `str` | Type of repository (e.g., "github", "gitlab", "local"). |
+| `repo_url` | `str` (Optional) | URL of the remote repository. |
+| `local_path` | `str` (Optional) | Local file system path to the repository. |
+| `language` | `str` | Target language for the wiki (e.g., "en", "ko"). |
+| `is_comprehensive_view` | `bool` | Flag to request a more detailed and structured wiki. |
+Sources: [src/app.py](render_sidebar function, WikiGenerationRequest usage)
+
+## Backend API: FastAPI Server
+
+The FastAPI application (`src/server.py`) serves as the backend for the "Wiki As Readme" system. It provides the API endpoints that the Streamlit frontend consumes.
+
+### Core Components
+
+1.  **FastAPI Application Instance:**
+    *   Initialized with a title, description, and version.
+    *   `app = FastAPI(...)`
+    Sources: [src/server.py](app initialization)
+
+2.  **Health Check Endpoint:**
+    *   A simple GET endpoint at the root (`/`) to verify the server's operational status.
+    *   Returns `{"status": "ok"}`.
+    Sources: [src/server.py](health_check function)
+
+3.  **API Routers:**
+    *   The application includes modular routers for different API concerns:
+        *   **Wiki Generation Router (`src.api.v1.endpoints.wiki`):** Mounted at `/api/v1/wiki`, this router handles requests related to starting wiki generation and checking task status.
+        *   **Webhook Integration Router (`src.api.v1.endpoints.webhook`):** Mounted at `/api/v1/webhook`, this router is intended for handling incoming webhooks (e.g., from Git providers), though its specific implementation details are not provided in the given context.
+    Sources: [src/server.py](app.include_router calls)
+
+4.  **Logging:**
+    *   Integrates `loguru` for structured and informative logging, configured via `src.core.logger_config`.
+    Sources: [src/server.py](setup_logging call, logger usage)
+
+5.  **Server Execution:**
+    *   Uses `uvicorn` to run the FastAPI application, typically on `http://127.0.0.1:8000`.
+    *   `uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)`
+    Sources: [src/server.py](uvicorn.run call)
+
+### API Endpoints (as consumed by the client)
+
+Based on the client-side interaction, the following API endpoints are exposed by the backend:
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/v1/wiki/generate/text` | `POST` | Initiates a wiki generation task for a given repository. Expects a `WikiGenerationRequest` payload. Returns a `task_id`. |
+| `/api/v1/wiki/status/{task_id}` | `GET` | Retrieves the current status and results of a specific wiki generation task. |
+Sources: [src/app.py](start_generation_task function, poll_task_status function)
+
+## Conclusion
+
+The "Wiki As Readme" system employs a robust client-server architecture, leveraging Streamlit for an interactive frontend and FastAPI for a scalable backend API. This design facilitates asynchronous task processing, clear separation of concerns, and a responsive user experience for generating comprehensive documentation from code repositories. The task-based API design allows for long-running operations like AI-driven content generation to be managed efficiently.
 
 ---
 
-<a name="llm-통합-및-설정"></a>
-
-<details>
-<summary>Relevant source files</summary>
-
-The following files were used as context for generating this wiki page:
-
-- [src/agent/llm.py](src/agent/llm.py)
-- [src/core/config.py](src/core/config.py)
-- [.env example](.env example)
-- [src/prompts/wiki_contents_generator.yaml](src/prompts/wiki_contents_generator.yaml)
-- [src/prompts/wiki_structure_generator.yaml](src/prompts/wiki_structure_generator.yaml)
-</details>
-
-# LLM 통합 및 설정
-
-## 1. 서론
-
-이 문서는 프로젝트 내에서 대규모 언어 모델(LLM)을 통합하고 설정하는 방법에 대해 설명합니다. LLM은 위키 페이지 생성과 같은 핵심 작업에 활용되며, `LiteLLM` 라이브러리를 기반으로 유연하고 확장 가능한 방식으로 구현되었습니다. 설정은 `Pydantic` 기반의 `Settings` 클래스를 통해 관리되며, 다양한 LLM 제공업체(Google, OpenAI, Anthropic 등)를 지원하고 구조화된 출력을 처리하는 기능을 포함합니다.
-
-주요 목표는 다음과 같습니다:
-*   다양한 LLM 제공업체에 대한 통합 및 설정 간소화.
-*   유형 안전성(Type Safety)을 갖춘 구조화된 LLM 응답 처리.
-*   환경 변수를 통한 유연한 LLM 구성.
-
-## 2. LLM 통합 아키텍처
-
-LLM 통합의 핵심은 `src/agent/llm.py` 파일에 정의된 `LLMWikiMaker` 클래스와 `src/core/config.py` 파일에 정의된 `Settings` 클래스입니다.
-
-### 2.1. LLM Wrapper: `LLMWikiMaker`
-
-`LLMWikiMaker` 클래스는 `LiteLLM`을 활용하여 위키 생성 작업을 수행하는 래퍼입니다. 제네릭(Generics)을 통해 유형 안전성을 갖춘 구조화된 출력을 지원합니다.
-
-**클래스 정의:**
-```python
-class LLMWikiMaker[T: BaseModel]:
-    """
-    Wrapper for LiteLLM to perform wiki generation tasks.
-    Supports Structured Output with Type Safety via Generics.
-    """
-    def __init__(self, response_schema: type[T] | None = None):
-        self.response_schema = response_schema
-        self.model_name, self.completion_kwargs = self._configure_llm()
-```
-Sources: [src/agent/llm.py](LLMWikiMaker class)
-
-**주요 메서드:**
-
-#### 2.1.1. `_configure_llm()`: LLM 설정 구성
-
-이 메서드는 `src/core/config.py`의 `settings` 객체에 정의된 `LLM_PROVIDER`에 따라 모델 이름과 호출 인수를 동적으로 구성합니다. 각 제공업체에 특화된 API 키, 기본 URL, 프로젝트 정보 등을 처리합니다.
-
-**지원되는 LLM 제공업체:**
-*   **Google Vertex AI**: `vertex_ai/` 접두사 사용, `GCP_PROJECT_NAME`, `GCP_MODEL_LOCATION` 설정.
-*   **OpenAI (GPT)**: `openai/` 접두사 사용, `OPENAI_API_KEY` 또는 `LLM_BASE_URL` 필요.
-*   **Anthropic (Claude)**: `anthropic/` 접두사 사용, `ANTHROPIC_API_KEY` 필요.
-*   **OpenRouter**: `openrouter/` 접두사 사용, `OPENROUTER_API_KEY` 필요.
-*   **xAI (Grok)**: `xai/` 접두사 사용, `XAI_API_KEY` 필요.
-*   **Ollama / On-premise**: `ollama/` 접두사 사용, `LLM_BASE_URL` 설정 가능.
-
-모든 제공업체에 공통적으로 `temperature`와 `max_retries` 설정이 적용됩니다.
-
-**LLM 구성 흐름:**
-```mermaid
-graph TD
-    A["_configure_llm() 호출"] --> B{"LLM_PROVIDER 확인"};
-    B -- "google" --> C["Google Vertex AI 설정"];
-    B -- "openai" --> D["OpenAI 설정"];
-    B -- "anthropic" --> E["Anthropic 설정"];
-    B -- "openrouter" --> F["OpenRouter 설정"];
-    B -- "xai" --> G["xAI 설정"];
-    B -- "ollama" --> H["Ollama 설정"];
-    C --> I["모델 이름 및 kwargs 반환"];
-    D --> I;
-    E --> I;
-    F --> I;
-    G --> I;
-    H --> I;
-    B -- "지원되지 않음" --> J["ValueError 발생"];
-```
-Sources: [src/agent/llm.py](LLMWikiMaker._configure_llm method)
-
-#### 2.1.2. `ainvoke()`: 비동기 LLM 호출
-
-이 비동기 메서드는 `LiteLLM`을 사용하여 LLM을 호출합니다. `response_schema`가 설정된 경우 구조화된 응답을 반환하고, 그렇지 않으면 문자열을 반환합니다.
-
-**처리 단계:**
-1.  **입력 데이터 처리**: `input_data`를 문자열 프롬프트로 변환합니다.
-2.  **LLM 호출 설정**: 모델 이름, 메시지, `completion_kwargs`를 포함한 호출 인수를 준비합니다.
-3.  **구조화된 출력 설정**: `response_schema`가 설정되어 있고 `USE_STRUCTURED_OUTPUT`이 `True`인 경우, `response_format`을 설정합니다.
-4.  **LLM 호출**: `litellm.acompletion`을 호출하여 응답을 받습니다.
-5.  **LLM 응답 파싱**:
-    *   `LiteLLM`이 이미 JSON으로 파싱한 경우(`message.parsed`), 해당 객체를 반환합니다.
-    *   응답이 JSON 문자열인 경우, `_extract_json`을 통해 마크다운 코드 블록에서 JSON을 추출하고 `response_schema.model_validate_json`을 사용하여 파싱합니다.
-
-**`ainvoke` 흐름:**
-```mermaid
-graph TD
-    A["ainvoke(input_data) 호출"] --> B["입력 데이터 문자열화"];
-    B --> C["메시지 구성"];
-    C --> D["LLM 호출 인자 준비"];
-    D --> E{"구조화된 출력 사용?"};
-    E -- "예" --> F["response_format 설정"];
-    E -- "아니오" --> G["LLM 호출 (litellm.acompletion)"];
-    F --> G;
-    G --> H["LLM 응답 수신"];
-    H --> I{"response_schema 존재?"};
-    I -- "예" --> J{"LiteLLM이 이미 파싱?"};
-    J -- "예" --> K["파싱된 객체 반환"];
-    J -- "아니오" --> L["_extract_json() 호출"];
-    L --> M["response_schema.model_validate_json()"];
-    M --> K;
-    I -- "아니오" --> N["응답 내용(str) 반환"];
-```
-Sources: [src/agent/llm.py](LLMWikiMaker.ainvoke method)
-
-#### 2.1.3. `_extract_json()`: JSON 추출 유틸리티
-
-LLM이 마크다운 코드 블록(` ```json ... ``` `) 내에 JSON을 반환하는 경우, 이 메서드는 정규 표현식을 사용하여 JSON 문자열을 추출합니다.
-Sources: [src/agent/llm.py](LLMWikiMaker._extract_json method)
-
-### 2.2. 설정 관리: `src/core/config.py`
-
-`src/core/config.py` 파일은 `Pydantic BaseSettings`를 사용하여 애플리케이션의 모든 설정을 관리합니다. LLM 관련 설정은 `.env` 파일에서 로드되거나 환경 변수에서 직접 가져옵니다.
-
-**주요 LLM 관련 설정:**
-
-| 설정명 | 타입 | 기본값 | 설명 |
-|---|---|---|---|
-| `LLM_PROVIDER` | `Literal` | `"google"` | 사용할 LLM 제공업체 (google, openai, anthropic, openrouter, xai, ollama) |
-| `MODEL_NAME` | `str` | `"gemini-2.5-flash"` | 사용할 LLM 모델의 이름 |
-| `OPENAI_API_KEY` | `str | None` | `None` | OpenAI API 키 |
-| `ANTHROPIC_API_KEY` | `str | None` | `None` | Anthropic API 키 |
-| `OPENROUTER_API_KEY` | `str | None` | `None` | OpenRouter API 키 |
-| `XAI_API_KEY` | `str | None` | `None` | xAI API 키 |
-| `LLM_BASE_URL` | `str | None` | `None` | LLM API의 커스텀 기본 URL (Ollama 또는 프록시용) |
-| `USE_STRUCTURED_OUTPUT` | `bool` | `True` | 구조화된 JSON 출력 모드 사용 여부 (모델 지원 필요) |
-| `temperature` | `float` | `0.0` | LLM 응답의 무작위성 제어 (0.0: 결정론적, 1.0: 창의적) |
-| `max_retries` | `int` | `3` | 실패한 LLM 요청에 대한 최대 재시도 횟수 |
-| `max_concurrency` | `int` | `5` | 속도 제한 방지를 위한 병렬 LLM 호출 수 제한 |
-| `GCP_PROJECT_NAME` | `str | None` | `None` | Google Cloud Platform 프로젝트 이름 (Google Vertex AI용) |
-| `GCP_MODEL_LOCATION` | `str | None` | `None` | Google Cloud Platform 모델 위치 (Google Vertex AI용) |
-
-Sources: [src/core/config.py](Settings class)
-
-`SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")` 설정을 통해 `.env` 파일에서 환경 변수를 로드합니다.
-Sources: [src/core/config.py](Settings.model_config)
-
-### 2.3. 환경 변수 설정: `.env example`
-
-`.env` 파일은 LLM 통합을 위한 환경 변수를 설정하는 데 사용됩니다. `LLM_PROVIDER`, `MODEL_NAME`, 각 제공업체의 API 키, `LLM_BASE_URL` 등 핵심 설정들이 이 파일을 통해 관리됩니다.
-
-**예시:**
-```ini
-# --- LLM Provider Settings ---
-LLM_PROVIDER=google
-MODEL_NAME=gemini-2.0-flash-exp
-
-# --- LLM API Keys ---
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-OPENROUTER_API_KEY=
-XAI_API_KEY=
-
-# --- LLM Configuration ---
-# LLM_BASE_URL=http://localhost:11434/v1
-USE_STRUCTURED_OUTPUT=true
-temperature=0.0
-max_retries=3
-max_concurrency=5
-
-# --- Google Cloud Platform Settings (Only for Google Vertex AI) ---
-GCP_PROJECT_NAME=
-GCP_MODEL_LOCATION=
-```
-Sources: [.env example](LLM Provider Settings, LLM API Keys, LLM Configuration, Google Cloud Platform Settings sections)
-
-### 2.4. 프롬프트 템플릿 활용
-
-LLM 통합은 `src/prompts/wiki_contents_generator.yaml` 및 `src/prompts/wiki_structure_generator.yaml`과 같은 Jinja2 템플릿 기반 프롬프트를 사용하여 LLM의 동작을 안내합니다. 이 프롬프트들은 `use_structured_output`과 같은 변수를 통해 `USE_STRUCTURED_OUTPUT` 설정과 연동되어 LLM이 특정 형식의 출력을 생성하도록 지시합니다.
-
-예를 들어, `wiki_contents_generator.yaml` 프롬프트는 `use_structured_output` 변수가 `False`일 때 `WikiPage` Pydantic 모델의 `content` 필드에 들어갈 마크다운 문자열만 반환하도록 LLM에 지시합니다.
-Sources: [src/prompts/wiki_contents_generator.yaml](OUTPUT SPECIFICATION section)
-
-## 3. 결론
-
-이 프로젝트의 LLM 통합 및 설정은 `LiteLLM` 래퍼와 `Pydantic` 기반의 설정 관리를 통해 강력하고 유연하게 설계되었습니다. 다양한 LLM 제공업체를 지원하고, 환경 변수를 통한 쉬운 구성, 그리고 유형 안전성을 갖춘 구조화된 출력 처리를 통해 위키 생성과 같은 복잡한 작업을 효율적으로 수행할 수 있습니다. 이러한 설계는 향후 LLM 기술 변화에 대한 적응성과 확장성을 보장합니다.
-
----
-
-<a name="주요-서비스-컴포넌트"></a>
+<a name="core-components-overview"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -1599,607 +1669,246 @@ The following files were used as context for generating this wiki page:
 - [src/services/structure_analyzer.py](src/services/structure_analyzer.py)
 - [src/services/wiki_generator.py](src/services/wiki_generator.py)
 - [src/services/wiki_formatter.py](src/services/wiki_formatter.py)
-- [src/services/wiki_worker.py](src/services/wiki_worker.py)
+- [src/agent/llm.py](src/agent/llm.py)
+- [src/providers/github.py](src/providers/github.py)
 </details>
 
-# 주요 서비스 컴포넌트
+# Core Components Overview
 
-이 문서는 위키 생성 시스템의 핵심 서비스 컴포넌트들을 설명합니다. 이 컴포넌트들은 저장소에서 정보를 가져오고, 위키 구조를 결정하며, LLM(대규모 언어 모델)을 사용하여 콘텐츠를 생성하고, 최종 마크다운 문서를 포맷팅하며, 전체 프로세스를 조율하는 역할을 합니다. 각 서비스는 특정 책임을 가지며, 서로 협력하여 자동화된 위키 생성 파이프라인을 구성합니다.
+This document provides an overview of the core components responsible for the end-to-end wiki generation process. The system is designed with a modular architecture, separating concerns such as repository interaction, LLM orchestration, content generation, and final formatting. This modularity allows for flexibility in integrating different repository providers, LLM models, and output formats.
 
-## 1. RepositoryFetcher (저장소 정보 추출기)
+The primary goal of these components is to take a software repository as input, analyze its structure and content, and produce a comprehensive, well-structured technical wiki page using Large Language Models (LLMs).
 
-`RepositoryFetcher` 서비스는 다양한 저장소 제공자(GitHub, GitLab, Bitbucket, 로컬)로부터 저장소 구조와 파일 내용을 가져오는 역할을 담당합니다. 이는 위키 생성 프로세스의 첫 단계로, LLM이 분석할 원시 데이터를 제공합니다.
+## 1. WikiGenerationService: The Orchestrator
 
-### 주요 기능 및 특징
+The `WikiGenerationService` acts as the central coordinator for the entire wiki generation pipeline. It orchestrates the interactions between various sub-services, managing the flow from initial request validation to the final markdown output.
 
-*   **다양한 저장소 지원**: `_PROVIDER_MAP`을 통해 GitHub, GitLab, Bitbucket, 로컬 저장소에 대한 플러그형 지원을 제공합니다. 요청(`WikiGenerationRequest`)에 따라 적절한 `RepositoryProvider` 인스턴스를 생성합니다.
-    *   Sources: [src/services/repo_fetcher.py](_PROVIDER_MAP)
-*   **저장소 구조 가져오기**: `fetch_repository_structure` 메서드는 저장소의 파일 트리 구조를 비동기적으로 가져옵니다.
-    *   Sources: [src/services/repo_fetcher.py](fetch_repository_structure)
-*   **파일 내용 가져오기**: `fetch_file_content` 메서드는 특정 파일의 내용을 비동기적으로 가져옵니다. 이는 `WikiStructureDeterminer`가 페이지 콘텐츠를 생성할 때 사용합니다.
-    *   Sources: [src/services/repo_fetcher.py](fetch_file_content)
-*   **비동기 컨텍스트 관리자**: `async with` 구문을 지원하여 리소스 정리(`close` 메서드 호출)를 자동으로 처리합니다.
-    *   Sources: [src/services/repo_fetcher.py](__aenter__ and __aexit__)
+### Key Responsibilities
 
-## 2. WikiStructureDeterminer (위키 구조 결정 및 콘텐츠 생성기)
+*   **Request Validation:** Ensures that the incoming `WikiGenerationRequest` contains all necessary parameters for the specified repository type.
+*   **Pipeline Management:** Manages the sequence of operations: fetching repository data, determining wiki structure, generating page content, and formatting the final output.
+*   **Resource Management:** Handles the lifecycle of sub-services, ensuring proper initialization and cleanup.
+*   **Human-in-the-Loop Support:** Provides methods (`prepare_generation`) to allow for intermediate steps where a user might review or modify the generated structure before content generation proceeds.
 
-`WikiStructureDeterminer` 서비스는 `RepositoryFetcher`로부터 가져온 정보를 바탕으로 위키의 구조를 결정하고, LLM을 활용하여 각 위키 페이지의 내용을 생성하는 핵심 로직을 포함합니다.
+### Core Methods
 
-### 주요 기능 및 특징
+| Method | Description |
+|---|---|
+| `validate_request` | Static method to check if the `WikiGenerationRequest` is valid for the given `repo_type`. |
+| `prepare_generation` | Initializes components and determines the wiki structure without generating content, returning a `WikiStructureDeterminer` instance. |
+| `generate_wiki` | Executes the full pipeline: fetches structure, generates content, and consolidates markdown. Can resume from a pre-prepared `WikiStructureDeterminer`. |
+| `_initialize_and_determine` | Internal method to fetch repository structure and then invoke the `WikiStructureDeterminer` to propose the wiki layout. |
+| `save_to_file` | Writes the final markdown content to a specified file path. |
 
-*   **LLM 통합**: `LLMWikiMaker`를 사용하여 위키 구조 및 페이지 콘텐츠 생성을 위한 LLM 호출을 관리합니다.
-    *   Sources: [src/services/structure_analyzer.py](LLMWikiMaker)
-*   **프롬프트 템플릿 로딩**: `_load_prompt_template` 메서드를 통해 YAML 파일에서 프롬프트 템플릿을 로드하고 캐싱합니다.
-    *   Sources: [src/services/structure_analyzer.py](_load_prompt_template)
-*   **파일 내용 병렬 처리**: `_fetch_and_format_files` 메서드는 `RepositoryFetcher`를 사용하여 여러 파일을 비동기적으로 병렬로 가져오고, LLM 입력에 적합한 형식으로 포맷팅합니다.
-    *   Sources: [src/services/structure_analyzer.py](_fetch_and_format_files)
-*   **위키 구조 결정**: `determine_wiki_structure` 메서드는 파일 트리와 README 내용을 기반으로 LLM을 호출하여 전체 위키 구조(`WikiStructure`)를 생성합니다.
-    *   Sources: [src/services/structure_analyzer.py](determine_wiki_structure)
-*   **페이지 콘텐츠 생성**: `generate_page_content` 메서드는 개별 위키 페이지에 대한 콘텐츠를 LLM을 통해 생성합니다. `asyncio.Semaphore`를 사용하여 동시 LLM 호출 수를 제한합니다.
-    *   Sources: [src/services/structure_analyzer.py](generate_page_content)
-*   **상태 관리**: `generated_pages`, `pages_in_progress`, `is_loading`, `error` 등의 속성을 통해 현재 생성 진행 상황 및 상태를 추적합니다.
-    *   Sources: [src/services/structure_analyzer.py](State Management in __init__)
-*   **비동기 컨텍스트 관리자**: `async with` 구문을 지원하여 리소스 정리(`close` 메서드 호출)를 자동으로 처리합니다.
-    *   Sources: [src/services/structure_analyzer.py](__aenter__ and __aexit__)
+Sources: [src/services/wiki_generator.py](WikiGenerationService class)
 
-## 3. WikiGenerationService (위키 생성 서비스)
+### Wiki Generation Flow
 
-`WikiGenerationService`는 위키 생성 파이프라인의 엔드-투-엔드 조정을 담당하는 메인 서비스입니다. `RepositoryFetcher`, `WikiStructureDeterminer`, `WikiFormatter`를 통합하여 전체 위키 생성 흐름을 관리합니다.
-
-### 주요 기능 및 특징
-
-*   **요청 유효성 검사**: `validate_request` 메서드를 통해 입력 요청(`WikiGenerationRequest`)의 유효성을 확인합니다.
-    *   Sources: [src/services/wiki_generator.py](validate_request)
-*   **생성 준비**: `prepare_generation` 메서드는 `WikiStructureDeterminer`를 초기화하고 초기 위키 구조를 결정합니다. 이는 구조 확인 후 콘텐츠 생성을 시작하는 "Human-in-the-loop" 시나리오에 유용합니다.
-    *   Sources: [src/services/wiki_generator.py](prepare_generation)
-*   **전체 위키 생성 파이프라인 실행**: `generate_wiki` 메서드는 전체 위키 생성 프로세스를 실행합니다.
-    *   새로운 `WikiStructureDeterminer`를 생성하여 처음부터 시작하거나, 이미 준비된 `WikiStructureDeterminer`를 사용하여 특정 상태에서 이어서 진행할 수 있습니다.
-    *   콘텐츠 생성이 완료될 때까지 대기하고, `WikiFormatter`를 사용하여 최종 마크다운을 통합합니다.
-    *   Sources: [src/services/wiki_generator.py](generate_wiki)
-*   **파일 저장**: `save_to_file` 메서드는 생성된 마크다운 콘텐츠를 로컬 파일 시스템에 저장합니다.
-    *   Sources: [src/services/wiki_generator.py](save_to_file)
-
-## 4. WikiFormatter (위키 포맷터)
-
-`WikiFormatter` 서비스는 `WikiStructureDeterminer`에서 생성된 위키 구조와 개별 페이지 콘텐츠를 단일 마크다운 문자열로 통합하는 역할을 합니다.
-
-### 주요 기능 및 특징
-
-*   **파일 이름 정리**: `sanitize_filename` 메서드는 파일 이름으로 사용하기에 안전한 문자열을 생성합니다.
-    *   Sources: [src/services/wiki_formatter.py](sanitize_filename)
-*   **마크다운 통합**: `consolidate_markdown` 메서드는 `WikiStructure` 객체와 생성된 페이지 콘텐츠 딕셔너리를 받아, 목차(Table of Contents)를 포함한 단일 마크다운 문서를 생성합니다. 각 페이지 제목에 대한 앵커 링크를 생성하여 문서 내 이동을 지원합니다.
-    *   Sources: [src/services/wiki_formatter.py](consolidate_markdown)
-
-## 5. Wiki Worker (백그라운드 위키 작업자)
-
-`process_wiki_generation_task` 함수는 비동기 위키 생성을 위한 백그라운드 작업 핸들러입니다. 이는 장시간 실행될 수 있는 위키 생성 프로세스를 별도의 태스크로 처리하여 메인 애플리케이션의 응답성을 유지합니다.
-
-### 주요 기능 및 특징
-
-*   **통합 백그라운드 태스크 핸들러**: `WikiGenerationService`를 사용하여 위키 생성 프로세스를 실행합니다.
-    *   Sources: [src/services/wiki_worker.py](process_wiki_generation_task)
-*   **태스크 상태 업데이트**: `update_task_status` 함수를 호출하여 태스크의 진행 상황(완료, 실패) 및 결과를 기록합니다.
-    *   Sources: [src/services/wiki_worker.py](update_task_status)
-*   **오류 처리**: 생성 과정에서 발생하는 예외를 처리하고, 태스크 상태를 "failed"로 업데이트합니다.
-    *   Sources: [src/services/wiki_worker.py](Exception handling in process_wiki_generation_task)
-*   **리소스 정리**: 외부에서 주입된 `WikiStructureDeterminer`가 있다면 작업 완료 후 `close()` 메서드를 호출하여 리소스를 정리합니다.
-    *   Sources: [src/services/wiki_worker.py](finally block in process_wiki_generation_task)
-
-## 서비스 간의 상호작용 흐름
-
-다음 다이어그램은 위키 생성 요청이 들어왔을 때 주요 서비스 컴포넌트들이 어떻게 상호작용하는지 보여줍니다.
+The following diagram illustrates the high-level flow orchestrated by the `WikiGenerationService`:
 
 ```mermaid
 graph TD
-    A["API 요청"] --> B["WikiWorker.process_wiki_generation_task()"];
-
-    B --> C["WikiGenerationService.generate_wiki()"];
-
-    subgraph WikiGenerationService
-        C --> D["_initialize_and_determine()"];
-        D --> E["RepositoryFetcher.fetch_repository_structure()"];
-        E --> F["WikiStructureDeterminer.determine_wiki_structure()"];
-        F --> G["WikiStructureDeterminer._start_content_generation_flow()"];
-        G --> H{"각 WikiPage에 대해"};
-        H --> I["WikiStructureDeterminer.generate_page_content()"];
-        I --> J["_load_prompt_template()"];
-        I --> K["_fetch_and_format_files()"];
-        K --> L["RepositoryFetcher.fetch_file_content()"];
-        I --> M["LLMWikiMaker.ainvoke() (페이지 콘텐츠 생성)"];
-        M --> H;
-        H -- 모든 페이지 완료 --> N["_wait_for_completion()"];
-        N --> O["WikiFormatter.consolidate_markdown()"];
-        O --> P["WikiGenerationService.save_to_file() (선택 사항)"];
-    end
-
-    P --> Q["TaskStore.update_task_status()"];
-    Q --> R["응답"];
+    A["WikiGenerationRequest"] --> B["WikiGenerationService.generate_wiki()"];
+    B --> C["RepositoryFetcher.fetch_repository_structure()"];
+    C --> D["WikiStructureDeterminer.determine_wiki_structure()"];
+    D --> E{"Generate Contents?"};
+    E -- Yes --> F["WikiStructureDeterminer.generate_contents()"];
+    F --> G["LLMWikiMaker.ainvoke()"];
+    G --> H["WikiFormatter.consolidate_markdown()"];
+    H --> I["Final Markdown Output"];
+    E -- No --> H;
 ```
 
-## 결론
+## 2. RepositoryFetcher: Data Source Abstraction
 
-이 시스템의 주요 서비스 컴포넌트들은 모듈화되어 각자의 명확한 책임을 가집니다. `RepositoryFetcher`는 외부 저장소와의 인터페이스를 제공하고, `WikiStructureDeterminer`는 LLM을 활용하여 지능적으로 위키 구조와 내용을 생성합니다. `WikiGenerationService`는 이 모든 과정을 조율하며, `WikiFormatter`는 최종 출력을 담당합니다. `WikiWorker`는 이 복잡한 프로세스를 백그라운드에서 안정적으로 실행할 수 있도록 지원하여, 확장 가능하고 효율적인 위키 자동 생성 시스템을 구축합니다.
+The `RepositoryFetcher` service is responsible for abstracting the details of interacting with different version control systems (VCS) or local file systems. It provides a unified interface to retrieve repository metadata (file tree, README) and individual file contents.
 
----
+### Key Responsibilities
 
-<a name="api-엔드포인트-참조"></a>
+*   **Provider Abstraction:** Maps repository types (e.g., "github", "gitlab", "local") to concrete `RepositoryProvider` implementations.
+*   **Repository Structure Retrieval:** Fetches the complete file tree and README content of a given repository.
+*   **File Content Retrieval:** Fetches the content of specific files within the repository.
+*   **Resource Management:** Manages underlying HTTP client sessions for efficient and clean resource handling, supporting asynchronous context management.
 
-<details>
-<summary>Relevant source files</summary>
+### Core Methods
 
-The following files were used as context for generating this wiki page:
+| Method | Description |
+|---|---|
+| `__init__` | Initializes the fetcher by instantiating the correct `RepositoryProvider` based on the request. |
+| `fetch_repository_structure` | Asynchronously retrieves the `RepositoryStructure` (file tree, README, default branch). |
+| `fetch_file_content` | Asynchronously fetches the content of a single file given its path. |
+| `close` | Cleans up resources held by the underlying provider. |
+| `__aenter__`, `__aexit__` | Enables asynchronous context manager usage (`async with`). |
 
-- [src/api/v1/endpoints/wiki.py](src/api/v1/endpoints/wiki.py)
-- [src/api/v1/endpoints/webhook.py](src/api/v1/endpoints/webhook.py)
-- [src/models/api_schema.py](src/models/api_schema.py)
-- [src/models/github_webhook_schema.py](src/models/github_webhook_schema.py)
-</details>
+Sources: [src/services/repo_fetcher.py](RepositoryFetcher class)
 
-# API 엔드포인트 참조
+### Repository Provider Architecture
 
-## 소개
-
-이 문서는 위키 생성 및 GitHub 통합을 위한 API 엔드포인트에 대한 포괄적인 참조를 제공합니다. 이 시스템은 사용자가 요청 시 위키 문서를 생성하거나, GitHub 푸시 이벤트를 통해 자동으로 위키를 생성하고 저장소에 업데이트할 수 있도록 설계되었습니다. 주요 기능은 비동기 작업 처리, GitHub 웹훅 보안 검증, 그리고 생성된 콘텐츠를 GitHub 저장소에 커밋하는 것을 포함합니다.
-
-제공되는 API는 크게 두 가지 범주로 나뉩니다: 위키 생성 작업을 직접 제어하는 엔드포인트와 GitHub 웹훅 이벤트를 처리하여 자동화된 위키 업데이트를 트리거하는 엔드포인트입니다. 모든 API는 Pydantic 모델을 사용하여 요청 및 응답 스키마를 정의하며, FastAPI 프레임워크를 기반으로 구축되었습니다.
-
-## 위키 생성 API 엔드포인트
-
-이 섹션에서는 위키 문서 생성 및 해당 작업 상태를 조회하는 데 사용되는 엔드포인트를 설명합니다. 모든 위키 생성 작업은 백그라운드에서 비동기적으로 처리됩니다.
-
-### 1. 위키 생성 및 파일 저장 (`POST /api/v1/wiki/generate/file`)
-
-이 엔드포인트는 위키 생성을 트리거하고, 생성된 마크다운 파일을 서버의 `output/` 디렉토리에 저장합니다. 작업의 진행 상황을 추적할 수 있는 작업 ID를 반환합니다.
-
-*   **URL:** `/api/v1/wiki/generate/file`
-*   **메서드:** `POST`
-*   **설명:** 위키 생성을 시작하고 결과를 서버 파일 시스템에 저장합니다.
-*   **요청 본문:** `WikiGenerationRequest`
-*   **응답 본문:** `WikiGenerationResponse`
-
-**요청 예시:**
-
-```json
-{
-  "repo_owner": "octocat",
-  "repo_name": "Spoon-Knife",
-  "repo_type": "github",
-  "language": "ko",
-  "is_comprehensive_view": true
-}
-```
-
-**응답 예시:**
-
-```json
-{
-  "message": "Wiki generation started in the background (File mode).",
-  "task_id": "some-unique-task-id",
-  "title": "Spoon-Knife 프로젝트 위키",
-  "description": "Spoon-Knife 저장소에 대한 포괄적인 위키 문서입니다."
-}
-```
-
-Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_file function)
-
-### 2. 위키 생성 및 텍스트 반환 (`POST /api/v1/wiki/generate/text`)
-
-이 엔드포인트는 위키 생성을 트리거하지만, 생성된 마크다운 파일을 서버에 저장하지 않습니다. 생성된 텍스트 콘텐츠는 작업 상태 조회 시 결과로 제공됩니다.
-
-*   **URL:** `/api/v1/wiki/generate/text`
-*   **메서드:** `POST`
-*   **설명:** 위키 생성을 시작하고 결과를 텍스트로 반환합니다 (서버에 저장 안 함).
-*   **요청 본문:** `WikiGenerationRequest`
-*   **응답 본문:** `WikiGenerationResponse`
-
-Sources: [src/api/v1/endpoints/wiki.py](generate_wiki_text function)
-
-### 3. 위키 생성 작업 상태 조회 (`GET /api/v1/wiki/status/{task_id}`)
-
-이 엔드포인트는 특정 위키 생성 작업의 현재 상태를 조회합니다.
-
-*   **URL:** `/api/v1/wiki/status/{task_id}`
-*   **메서드:** `GET`
-*   **설명:** `task_id`에 해당하는 위키 생성 작업의 상태를 조회합니다.
-*   **경로 파라미터:**
-    *   `task_id` (string): 조회할 작업의 고유 ID.
-*   **응답 본문:** `TaskStatusResponse`
-
-**응답 예시:**
-
-```json
-{
-  "task_id": "some-unique-task-id",
-  "status": "in_progress",
-  "result": null
-}
-```
-또는 완료 시:
-```json
-{
-  "task_id": "some-unique-task-id",
-  "status": "completed",
-  "result": "# 생성된 위키 내용\n\n이것은 마크다운 형식의 위키 내용입니다."
-}
-```
-
-Sources: [src/api/v1/endpoints/wiki.py](get_wiki_generation_status function)
-
-### 위키 생성 흐름 다이어그램
+The `RepositoryFetcher` utilizes a strategy pattern, delegating actual data fetching to specific `RepositoryProvider` implementations.
 
 ```mermaid
-graph TD
-    A["클라이언트 요청"] --> B{"POST /generate/file"};
-    A --> C{"POST /generate/text"};
-    B --> D["_init_wiki_generation()"];
-    C --> D;
-    D --> E["create_task()"];
-    D --> F["WikiGenerationService.prepare_generation()"];
-    F --> G{"Wiki 구조 결정"};
-    G -- "성공" --> H["백그라운드 작업 추가"];
-    G -- "실패" --> I["HTTP 400/500 에러"];
-    H --> J["process_wiki_generation_task()"];
-    J --> K["작업 완료/실패"];
-    B --> L["WikiGenerationResponse 반환"];
-    C --> L;
-    L --> M["클라이언트 응답"];
+classDiagram
+    class RepositoryFetcher {
+        - _PROVIDER_MAP: dict
+        + provider: RepositoryProvider
+        + __init__(request: WikiGenerationRequest)
+        + fetch_repository_structure() RepositoryStructure
+        + fetch_file_content(file_path: str) str | None
+        + close()
+    }
 
-    subgraph "작업 상태 조회"
-        N["클라이언트 요청"] --> O{"GET /status/{task_id}"};
-        O --> P["get_task()"];
-        P --> Q["TaskStatusResponse 반환"];
-        Q --> R["클라이언트 응답"];
-    end
+    class RepositoryProvider {
+        <<abstract>>
+        # request: WikiGenerationRequest
+        # client: httpx.AsyncClient
+        + __init__(request: WikiGenerationRequest)
+        + fetch_structure() RepositoryStructure
+        + fetch_file_content(file_path: str) str | None
+        + close()
+    }
+
+    class GitHubProvider {
+        + _create_headers() dict
+        + _get_api_base() str
+        + fetch_structure() RepositoryStructure
+        + fetch_file_content(file_path: str) str | None
+    }
+
+    class GitLabProvider {
+        // ... similar methods ...
+    }
+
+    class BitbucketProvider {
+        // ... similar methods ...
+    }
+
+    class LocalProvider {
+        // ... similar methods ...
+    }
+
+    RepositoryFetcher --> RepositoryProvider : "uses"
+    RepositoryProvider <|-- GitHubProvider
+    RepositoryProvider <|-- GitLabProvider
+    RepositoryProvider <|-- BitbucketProvider
+    RepositoryProvider <|-- LocalProvider
 ```
 
-## GitHub 웹훅 API 엔드포인트
+### Example: GitHubProvider
 
-이 섹션에서는 GitHub 푸시 이벤트를 수신하고 처리하여 저장소의 위키(또는 README.md)를 자동으로 업데이트하는 엔드포인트를 설명합니다.
+The `GitHubProvider` implements the `RepositoryProvider` interface specifically for GitHub repositories. It interacts with the GitHub REST API to fetch repository information.
 
-### 1. GitHub 푸시 이벤트 처리 (`POST /api/v1/webhook/github`)
+*   **Authentication:** Uses `GIT_API_TOKEN` from settings for authenticated requests.
+*   **Structure Fetching:** Retrieves the default branch, then uses the Git Trees API (`/git/trees/{sha}?recursive=1`) to get the file list, and the Readme API (`/repos/{owner}/{repo}/readme`) for the README content.
+*   **Content Fetching:** Uses the Contents API (`/repos/{owner}/{repo}/contents/{path}`) to retrieve file content, which is typically Base64 encoded and requires decoding.
 
-이 엔드포인트는 GitHub 저장소에서 푸시 이벤트가 발생했을 때 호출됩니다. 웹훅 시그니처를 검증하고, 봇 자신의 커밋을 무시하며, `main` 브랜치에 대한 푸시 이벤트에 대해서만 위키 생성 및 GitHub 업데이트 작업을 트리거합니다.
+Sources: [src/providers/github.py](GitHubProvider class)
 
-*   **URL:** `/api/v1/webhook/github`
-*   **메서드:** `POST`
-*   **설명:** GitHub 푸시 이벤트를 수신하고, 위키를 생성한 후 GitHub 저장소의 `WIKI.md` 파일을 업데이트합니다.
-*   **요청 본문:** `GitHubPushPayload` (GitHub 웹훅 페이로드)
-*   **응답 본문:** `{"message": "..."}`
+## 3. WikiStructureDeterminer: The Intelligence Core
 
-**주요 처리 로직:**
-1.  **시그니처 검증:** `X-Hub-Signature-256` 헤더를 사용하여 GitHub 웹훅의 유효성을 검증합니다. `GITHUB_WEBHOOK_SECRET` 환경 변수가 설정되어 있어야 합니다.
-2.  **봇 커밋 무시:** `BOT_COMMITTER_NAME` 또는 커밋 메시지에 "via Wiki-As-Readme"가 포함된 커밋은 무시하여 무한 루프를 방지합니다.
-3.  **브랜치 필터링:** `main` 브랜치에 대한 푸시 이벤트만 처리합니다.
-4.  **위키 생성 및 업데이트:** 백그라운드 작업 `process_full_cycle`을 시작하여 다음을 수행합니다:
-    *   내부적으로 `/api/v1/wiki/generate/file` 엔드포인트를 호출하여 위키를 생성합니다.
-    *   생성된 마크다운 콘텐츠를 `update_github_readme` 함수를 통해 GitHub 저장소의 `WIKI.md` 파일에 커밋합니다. 이 과정에는 `GITHUB_ACCESS_TOKEN` (PAT)이 필요합니다.
+The `WikiStructureDeterminer` is a critical service responsible for leveraging LLMs to analyze repository content and generate the wiki's structure (pages, titles, associated files) and their respective markdown content.
 
-Sources: [src/api/v1/endpoints/webhook.py](github_webhook function)
+### Key Responsibilities
 
-### GitHub 웹훅 처리 흐름 다이어그램
+*   **Structure Generation:** Invokes an LLM to analyze the file tree and README to propose a logical wiki structure (`WikiStructure`).
+*   **Content Generation:** For each proposed wiki page, it fetches relevant source files and uses an LLM to generate the page's markdown content.
+*   **Prompt Management:** Loads and renders Jinja2 templates for LLM prompts.
+*   **Concurrency Control:** Manages the number of concurrent LLM calls using an `asyncio.Semaphore` to prevent overwhelming the LLM provider or system resources.
+*   **State Management:** Tracks the progress of page generation, including pages in progress, completed pages, and any errors.
+
+### Core Methods
+
+| Method | Description |
+|---|---|
+| `__init__` | Initializes with a `WikiGenerationRequest`, `RepositoryFetcher`, `LLMWikiMaker`, and a concurrency `semaphore`. |
+| `_load_prompt_template` | Cached method to load LLM prompt templates from YAML files. |
+| `_fetch_and_format_files` | Fetches content for a list of file paths in parallel using `RepositoryFetcher` and formats them for LLM input. |
+| `generate_page_content` | Orchestrates the generation of a single wiki page's content using an LLM, respecting concurrency limits. |
+| `determine_wiki_structure` | Invokes an LLM to analyze the repository's file tree and README to create the initial `WikiStructure`. |
+| `_start_content_generation_flow` | Manages the asynchronous execution of all page content generation tasks. |
+
+Sources: [src/services/structure_analyzer.py](WikiStructureDeterminer class)
+
+### Structure and Content Generation Flow
 
 ```mermaid
 sequenceDiagram
-    participant G as "GitHub"
-    participant W as "웹훅 엔드포인트"
-    participant I as "내부 위키 생성 API"
-    participant GH as "GitHub API"
+    participant WSD as "WikiStructureDeterminer"
+    participant RF as "RepositoryFetcher"
+    participant LLM as "LLMWikiMaker"
 
-    G->>W: "POST /webhook/github" (푸시 이벤트)
-    activate W
-    W->>W: "verify_signature()"
-    alt 시그니처 유효하지 않음
-        W-->>G: "HTTP 403"
-    else 시그니처 유효
-        W->>W: "봇 커밋 및 브랜치 필터링"
-        alt 봇 커밋 또는 비-main 브랜치
-            W-->>G: "HTTP 202 (Skipped)"
-        else 유효한 푸시 이벤트
-            W->>W: "WikiGenerationRequest 생성"
-            W->>W: "백그라운드 작업 'process_full_cycle' 시작"
-            deactivate W
-            W->>I: "POST /wiki/generate/file" (내부 호출)
-            activate I
-            I-->>W: "생성된 마크다운 텍스트"
-            deactivate I
-            W->>GH: "GET /repos/{owner}/{repo}/contents/WIKI.md" (SHA 조회)
-            activate GH
-            GH-->>W: "기존 파일 SHA"
-            deactivate GH
-            W->>GH: "PUT /repos/{owner}/{repo}/contents/WIKI.md" (파일 업데이트)
-            activate GH
-            GH-->>W: "업데이트 성공/실패"
-            deactivate GH
-            W-->>G: "HTTP 202 (Processing started)"
-        end
+    WSD->>LLM: "determine_wiki_structure()"
+    LLM-->>WSD: "WikiStructure (pages list)"
+
+    loop For each WikiPage
+        WSD->>WSD: "generate_page_content(page)"
+        WSD->>RF: "_fetch_and_format_files(page.file_paths)"
+        RF-->>WSD: "Formatted File Contents"
+        WSD->>LLM: "ainvoke(formatted_prompt)"
+        LLM-->>WSD: "Generated Page Markdown"
+        WSD->>WSD: "Store generated_pages[page.id]"
     end
 ```
 
-## 공통 데이터 모델
+## 4. LLMWikiMaker: The AI Agent
 
-API 엔드포인트에서 사용되는 주요 Pydantic 데이터 모델은 다음과 같습니다.
+The `LLMWikiMaker` class provides a standardized interface for interacting with various Large Language Models (LLMs) through the LiteLLM library. It abstracts away provider-specific configurations and handles structured output parsing.
 
-### 1. `WikiGenerationRequest`
+### Key Responsibilities
 
-위키 생성을 요청할 때 사용되는 입력 모델입니다.
+*   **LLM Provider Configuration:** Dynamically configures LLM models based on `settings` (e.g., OpenAI, Google Vertex AI, Anthropic, Ollama), handling API keys and base URLs.
+*   **Asynchronous Invocation:** Provides an `ainvoke` method for non-blocking calls to LLMs.
+*   **Structured Output:** Supports returning Pydantic models directly from LLM responses, either through native structured output capabilities of the LLM provider or by parsing JSON from the LLM's text output.
+*   **Error Handling:** Includes basic error handling for LLM interactions and response parsing.
 
-| 필드명 | 타입 | 설명 |
-|---|---|---|
-| `repo_owner` | `str` \| `None` | 저장소 소유자 (사용자 또는 조직) |
-| `repo_name` | `str` \| `None` | 저장소 이름 |
-| `repo_type` | `Literal["github", "gitlab", "bitbucket", "local"]` | 저장소 유형 (기본값: `github`) |
-| `repo_url` | `str` \| `None` | 원격 저장소 클론 URL |
-| `local_path` | `str` \| `None` | `repo_type`이 `local`일 경우 로컬 저장소 경로 |
-| `language` | `str` | 생성될 위키 콘텐츠의 언어 (기본값: `ko`) |
-| `is_comprehensive_view` | `bool` | 저장소의 포괄적인 뷰를 생성할지 여부 (기본값: `True`) |
+### Core Methods
 
-Sources: [src/models/api_schema.py](WikiGenerationRequest class)
+| Method | Description |
+|---|---|
+| `__init__` | Initializes with an optional `response_schema` for structured output and configures the LLM. |
+| `_configure_llm` | Determines the LLM model name and specific parameters (e.g., API keys, base URLs) based on the configured provider. |
+| `ainvoke` | Asynchronously calls the configured LLM with the given input, returning either a string or a Pydantic model instance. |
+| `_extract_json` | Helper method to extract JSON content from markdown code blocks in LLM responses. |
 
-### 2. `WikiGenerationResponse`
+Sources: [src/agent/llm.py](LLMWikiMaker class)
 
-위키 생성 요청에 대한 초기 응답 모델입니다.
+### Supported LLM Providers
 
-| 필드명 | 타입 | 설명 |
-|---|---|---|
-| `message` | `str` | 요청 상태를 나타내는 메시지 |
-| `task_id` | `str` | 시작된 백그라운드 작업의 ID |
-| `title` | `str` | 생성될 위키의 제목 |
-| `description` | `str` | 생성될 위키의 설명 |
+The `LLMWikiMaker` supports a variety of LLM providers, configured via environment variables and application settings:
 
-Sources: [src/models/api_schema.py](WikiGenerationResponse class)
+*   Google Vertex AI
+*   OpenAI (GPT models)
+*   Anthropic (Claude models)
+*   OpenRouter
+*   xAI (Grok)
+*   Ollama / On-premise (OpenAI-compatible endpoints)
 
-### 3. `TaskStatusResponse`
+## 5. WikiFormatter: Output Generation
 
-백그라운드 작업의 상태를 조회할 때 사용되는 응답 모델입니다.
+The `WikiFormatter` service is responsible for taking the generated wiki structure and individual page contents and consolidating them into a single, well-formatted Markdown string.
 
-| 필드명 | 타입 | 설명 |
-|---|---|---|
-| `task_id` | `str` | 작업의 ID |
-| `status` | `Literal["in_progress", "completed", "failed"]` | 작업의 현재 상태 |
-| `result` | `Any` \| `None` | 작업이 완료되거나 실패했을 경우의 결과 |
+### Key Responsibilities
 
-Sources: [src/models/api_schema.py](TaskStatusResponse class)
+*   **Markdown Consolidation:** Merges the `WikiStructure` (title, description, page order) with the generated page content into a cohesive document.
+*   **Table of Contents (TOC) Generation:** Automatically creates a table of contents with internal links to each wiki page.
+*   **Anchor Link Management:** Generates unique anchor names for each page title to enable navigation within the markdown document.
+*   **Filename Sanitization:** Provides utility for creating safe filenames from arbitrary strings.
 
-### 4. `GitHubPushPayload`
+### Core Methods
 
-GitHub 웹훅 푸시 이벤트의 페이로드를 나타내는 모델입니다. 이 모델은 GitHub의 실제 페이로드 구조를 반영합니다.
+| Method | Description |
+|---|---|
+| `sanitize_filename` | Static method to clean a string for use as a filename, removing invalid characters. |
+| `consolidate_markdown` | Static method that takes a `WikiStructure` and a dictionary of page IDs to markdown content, returning a single markdown string. |
 
-| 필드명 | 타입 | 설명 |
-|---|---|---|
-| `ref` | `str` | 푸시된 브랜치 참조 (예: `refs/heads/main`) |
-| `repository` | `GitHubRepository` | 푸시가 발생한 저장소 정보 |
-| `pusher` | `GitHubPusher` \| `None` | 푸시를 수행한 사용자 정보 |
-| `head_commit` | `GitHubCommit` \| `None` | 최신 커밋 정보 |
+Sources: [src/services/wiki_formatter.py](WikiFormatter class)
 
-Sources: [src/models/github_webhook_schema.py](GitHubPushPayload class)
+## Conclusion
 
-## 결론
-
-이 문서에서는 위키 생성 및 GitHub 통합을 위한 API 엔드포인트에 대해 상세히 설명했습니다. 사용자는 직접 API를 호출하여 위키를 생성하고 관리할 수 있으며, GitHub 웹훅을 통해 저장소 변경 사항에 따라 위키가 자동으로 업데이트되도록 설정할 수 있습니다. 이러한 엔드포인트는 비동기 처리, 보안 검증, 그리고 유연한 데이터 모델을 통해 안정적이고 확장 가능한 위키 자동화 솔루션을 제공합니다.
+The core components of this wiki generation system form a robust and extensible pipeline. From fetching diverse repository data through `RepositoryFetcher` and its providers, intelligently determining structure and content with `WikiStructureDeterminer` and `LLMWikiMaker`, to orchestrating the entire process via `WikiGenerationService` and finally formatting the output with `WikiFormatter`, each component plays a vital role. This modular design ensures maintainability, testability, and adaptability to future changes in repository types, LLM technologies, or output requirements.
 
 ---
 
-<a name="환경-설정-가이드"></a>
-
-<details>
-<summary>Relevant source files</summary>
-
-The following files were used as context for generating this wiki page:
-
-- [.env example](.env example)
-- [src/core/config.py](src/core/config.py)
-- [README.md](README.md)
-</details>
-
-# 환경 설정 가이드
-
-## 1. 서론
-
-이 문서는 "Wiki As Readme" 프로젝트의 환경 설정을 위한 포괄적인 가이드입니다. 프로젝트는 다양한 LLM(Large Language Model) 제공업체, Git 플랫폼 및 배포 환경에서 유연하게 작동하도록 설계되었으며, 이러한 유연성은 강력하고 사용자 정의 가능한 환경 설정 시스템을 통해 가능합니다.
-
-주요 설정은 `.env` 파일을 통해 관리되며, `src/core/config.py` 파일에 정의된 Pydantic `Settings` 클래스를 통해 로드되고 검증됩니다. 이 가이드는 `.env` 파일의 각 설정 항목과 `config.py`에서 설정이 처리되는 방식에 대해 자세히 설명합니다. 올바른 환경 설정은 프로젝트의 정상적인 작동과 원하는 결과물 생성을 위해 필수적입니다.
-
-## 2. 환경 설정 개요
-
-"Wiki As Readme" 프로젝트의 설정은 주로 두 가지 소스에서 관리됩니다:
-
-1.  **`.env` 파일**: 애플리케이션 실행 시 로드되는 환경 변수를 정의합니다. 민감한 정보(API 키) 및 배포 환경별 설정을 포함합니다.
-2.  **`src/core/config.py`**: Pydantic `BaseSettings`를 사용하여 애플리케이션의 모든 설정 항목을 정의하고 기본값, 타입 검증, 유효성 검사를 처리합니다. `.env` 파일의 값은 `config.py`에 정의된 기본값을 재정의합니다.
-
-### 설정 로딩 흐름
-
-다음 다이어그램은 애플리케이션이 환경 설정을 로드하는 과정을 보여줍니다.
-
-```mermaid
-graph TD
-    A["애플리케이션 시작"] --> B["Pydantic Settings 로드"];
-    B --> C["`.env` 파일 읽기"];
-    C --> D["`src/core/config.py`의 `Settings` 클래스"];
-    D -- "환경 변수 주입 및 기본값 적용" --> E["최종 설정 객체"];
-    E --> F["애플리케이션 사용"];
-```
-Sources: [src/core/config.py](src/core/config.py), [.env example](.env example)
-
-## 3. `.env` 파일 설정 상세
-
-`.env` 파일은 프로젝트의 동작을 제어하는 핵심 환경 변수를 정의합니다. `.env example` 파일을 복사하여 `.env` 파일을 생성하고 필요에 따라 값을 설정해야 합니다.
-
-### 3.1. LLM 제공업체 설정 (LLM Provider Settings)
-
-| 변수명 | 설명 | 예시 |
-|---|---|---|
-| `LLM_PROVIDER` | 사용할 LLM 제공업체를 선택합니다. 지원되는 값: `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama`. | `google` |
-| `MODEL_NAME` | 선택한 제공업체에서 사용할 특정 모델 식별자입니다. | `gemini-2.0-flash-exp`, `gpt-4o`, `claude-3-5-sonnet-latest` |
-Sources: [.env example](.env example), [src/core/config.py](LLM_PROVIDER)
-
-### 3.2. LLM API 키 (LLM API Keys)
-
-선택한 LLM 제공업체에 따라 해당 API 키를 설정해야 합니다. 사용하지 않는 제공업체의 키는 비워두거나 주석 처리할 수 있습니다.
-
-| 변수명 | 설명 |
-|---|---|
-| `OPENAI_API_KEY` | OpenAI API 키 |
-| `ANTHROPIC_API_KEY` | Anthropic API 키 |
-| `OPENROUTER_API_KEY` | OpenRouter API 키 |
-| `XAI_API_KEY` | xAI API 키 |
-Sources: [.env example](.env example), [src/core/config.py](OPENAI_API_KEY)
-
-### 3.3. LLM 구성 (LLM Configuration)
-
-LLM 호출의 동작을 미세 조정하는 설정입니다.
-
-| 변수명 | 설명 | 예시 |
-|---|---|---|
-| `LLM_BASE_URL` | LLM API의 사용자 정의 기본 URL (예: Ollama 또는 프록시 사용 시). | `http://localhost:11434/v1` |
-| `USE_STRUCTURED_OUTPUT` | 구조화된 JSON 출력 모드 사용 여부 (모델 지원 필요). | `true` |
-| `temperature` | LLM 응답의 무작위성 제어 (0.0: 결정론적, 1.0: 창의적). | `0.0` |
-| `max_retries` | 실패한 LLM 요청에 대한 최대 재시도 횟수. | `3` |
-| `max_concurrency` | 속도 제한 방지를 위한 병렬 LLM 호출 수 제한. | `5` |
-Sources: [.env example](.env example), [src/core/config.py](LLM_BASE_URL)
-
-### 3.4. 파일 필터링 설정 (File Filtering Settings)
-
-LLM 컨텍스트에서 제외할 파일 패턴을 정의하여 토큰 사용량을 절약하고 LLM의 초점을 개선합니다.
-
-| 변수명 | 설명 | 예시 |
-|---|---|---|
-| `IGNORED_PATTERNS` | LLM 컨텍스트에서 제외할 glob 패턴 목록입니다. **중요**: 여기에 정의하면 `src/core/config.py`의 기본 목록을 재정의합니다. 값은 단일 라인 JSON 배열 문자열이어야 합니다. | `'["uv.lock", "node_modules", "*.pyc"]'` |
-Sources: [.env example](.env example), [src/core/config.py](IGNORED_PATTERNS)
-
-### 3.5. 저장소 접근 설정 (Repository Access Settings)
-
-비공개 저장소 접근 또는 높은 API 요청 제한을 위해 사용됩니다.
-
-| 변수명 | 설명 |
-|---|---|
-| `GIT_API_TOKEN` | GitHub/GitLab 개인 액세스 토큰. |
-Sources: [.env example](.env example), [src/core/config.py](GIT_API_TOKEN)
-
-### 3.6. 지역화 설정 (Localization Settings)
-
-생성될 위키의 대상 언어를 설정합니다.
-
-| 변수명 | 설명 | 예시 |
-|---|---|---|
-| `language` | 생성될 위키의 대상 언어 (예: `ko`, `en`, `ja`, `zh`). | `en` |
-Sources: [.env example](.env example), [src/core/config.py](language)
-
-### 3.7. Google Cloud Platform 설정 (Google Vertex AI 전용)
-
-`LLM_PROVIDER`가 `google`로 설정된 경우에만 필요합니다.
-
-| 변수명 | 설명 |
-|---|---|
-| `GCP_PROJECT_NAME` | Google Cloud 프로젝트 이름. |
-| `GCP_MODEL_LOCATION` | Vertex AI 모델이 배포된 지역 (예: `us-central1`). |
-| `GOOGLE_APPLICATION_CREDENTIALS` | 서비스 계정 키 파일 경로 (일반적으로 `.env`에는 직접 설정하지 않고, GitHub Actions 등에서 파일로 생성하여 사용). |
-Sources: [.env example](.env example), [src/core/config.py](GCP_PROJECT_NAME)
-
-## 4. `src/core/config.py` 상세
-
-`src/core/config.py` 파일은 Pydantic `BaseSettings`를 활용하여 애플리케이션의 모든 설정 항목을 정의하고 관리합니다.
-
-### 4.1. `DEFAULT_IGNORED_PATTERNS`
-
-이 상수는 `IGNORED_PATTERNS`가 `.env` 파일에 명시적으로 설정되지 않았을 때 사용되는 기본 제외 패턴 목록을 정의합니다. 여기에는 일반적인 잠금 파일, 빌드 아티팩트, 버전 관리 시스템 폴더, IDE 설정 폴더, 바이너리 파일 등이 포함됩니다.
-
-```python
-DEFAULT_IGNORED_PATTERNS = [
-    "uv.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
-    # ... (생략) ...
-    "__pycache__", ".git", ".venv", "node_modules", ".idea", ".vscode",
-    # ... (생략) ...
-    "*.png", "*.jpg", "*.pdf", "*.doc", "*.zip",
-]
-```
-Sources: [src/core/config.py](DEFAULT_IGNORED_PATTERNS)
-
-### 4.2. `Settings` 클래스
-
-`Settings` 클래스는 `BaseSettings`를 상속받아 모든 환경 변수를 타입 힌트와 함께 정의합니다. 각 필드는 기본값을 가질 수 있으며, 이는 `.env` 파일에 해당 변수가 없을 경우 사용됩니다.
-
-```python
-class Settings(BaseSettings):
-    LLM_PROVIDER: Literal[
-        "google", "openai", "anthropic", "openrouter", "xai", "ollama"
-    ] = "google"
-    MODEL_NAME: str = "gemini-2.5-flash"
-    # ... (다른 설정 필드들) ...
-    IGNORED_PATTERNS: Any = DEFAULT_IGNORED_PATTERNS
-    # ... (기타 필드) ...
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
-```
-Sources: [src/core/config.py](Settings class)
-
-*   **`model_config`**: `SettingsConfigDict`를 사용하여 `.env` 파일을 로드하도록 설정합니다. `env_file=".env"`는 `.env` 파일에서 환경 변수를 읽도록 지시하며, `extra="ignore"`는 `Settings` 클래스에 정의되지 않은 환경 변수를 무시하도록 합니다.
-
-### 4.3. `parse_ignored_patterns` 유효성 검사기
-
-`IGNORED_PATTERNS` 필드에 대한 `@field_validator`는 `.env` 파일에서 `IGNORED_PATTERNS` 값이 문자열로 제공될 때 이를 올바른 리스트 형식으로 파싱하는 역할을 합니다.
-
-```python
-    @field_validator("IGNORED_PATTERNS", mode="before")
-    @classmethod
-    def parse_ignored_patterns(cls, v: Any) -> list[str]:
-        if isinstance(v, str):
-            if not v.strip(): # 빈 문자열인 경우 기본값 사용
-                return DEFAULT_IGNORED_PATTERNS
-            try: # JSON 배열로 파싱 시도
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    return parsed
-            except (json.JSONDecodeError, TypeError): # JSON 파싱 실패 시 콤마로 분리
-                return [s.strip() for s in v.split(",") if s.strip()]
-        return v
-```
-Sources: [src/core/config.py](parse_ignored_patterns function)
-
-*   이 유효성 검사기는 `IGNORED_PATTERNS`가 `.env`에서 문자열로 제공될 때, JSON 배열 문자열(`'["a", "b"]'`)이거나 콤마로 구분된 문자열(`'a, b, c'`)일 수 있음을 처리합니다.
-*   만약 값이 비어있으면 `DEFAULT_IGNORED_PATTERNS`를 반환합니다.
-*   JSON 파싱에 실패하면 콤마로 분리하여 리스트를 생성합니다.
-
-## 5. GitHub Actions에서의 설정
-
-GitHub Actions 워크플로우에서는 `.env` 파일을 직접 사용하기보다는 `env` 블록을 통해 환경 변수를 설정하거나 GitHub Secrets를 활용하여 민감한 정보를 안전하게 전달합니다.
-
-예시 워크플로우에서 환경 변수를 설정하는 방법은 다음과 같습니다:
-
-```yaml
-      - name: Generate Wiki Content
-        uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
-        env:
-          # --- Basic Settings ---
-          LANGUAGE: "en"
-          OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
-          
-          # --- LLM Provider and Model Settings ---
-          LLM_PROVIDER: "google"
-          MODEL_NAME: "gemini-2.5-flash"
-          
-          # --- API Key Settings ---
-          GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
-          GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
-          GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json # 파일 경로
-          
-          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          
-          # --- GitHub Token ---
-          GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
-Sources: [README.md](GitHub Action section)
-
-*   `secrets.GCP_PROJECT_NAME`과 같이 `secrets` 컨텍스트를 사용하여 GitHub 저장소에 저장된 비밀 값을 안전하게 주입할 수 있습니다.
-*   `GOOGLE_APPLICATION_CREDENTIALS`와 같은 파일 경로는 워크플로우 내에서 파일을 생성한 후 해당 경로를 지정하는 방식으로 처리됩니다.
-
-## 6. 결론
-
-"Wiki As Readme" 프로젝트의 환경 설정은 `.env` 파일과 `src/core/config.py` 파일의 조합을 통해 이루어집니다. `.env` 파일은 배포 환경에 특화된 값과 민감한 정보를 제공하며, `config.py`는 모든 설정 항목의 정의, 기본값, 타입 검증 및 유효성 검사를 담당합니다. 이 가이드를 통해 프로젝트의 다양한 측면을 효과적으로 구성하고 제어하여 원하는 문서화 결과를 얻을 수 있습니다.
-
----
-
-<a name="기여-가이드"></a>
+<a name="contributing-to-wiki-as-readme"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -2208,114 +1917,150 @@ The following files were used as context for generating this wiki page:
 
 - [README.md](README.md)
 - [LICENSE](LICENSE)
-- [.github/workflows/version-sync.yml](.github/workflows/version-sync.yml)
 </details>
 
-# 기여 가이드
+# Contributing to Wiki As Readme
 
-## 1. 소개
+## Introduction
 
-Wiki As Readme 프로젝트에 관심을 가져주셔서 감사합니다! 이 문서는 프로젝트에 기여하고자 하는 개발자들을 위한 가이드라인을 제공합니다. 여러분의 기여는 이 프로젝트를 더욱 강력하고 유용하게 만드는 데 큰 도움이 됩니다. 버그 수정, 새로운 기능 제안, 문서 개선 등 어떤 형태의 기여든 환영합니다.
+**Wiki As Readme** is a flexible AI documentation tool designed to transform codebases into comprehensive wikis. It supports various LLM providers (commercial APIs, local models), integrates with any Git platform or local folders, and offers multiple deployment options. This document outlines how to contribute to the project, providing essential context for developers looking to get involved. The project actively welcomes contributions and Pull Requests to enhance its features and integrations.
 
-## 2. 기여 시작하기
+Sources: [README.md](Introduction), [README.md](Note on Contributions)
 
-### 2.1. 기여 절차
+## Project Overview for Contributors
 
-프로젝트에 기여하는 일반적인 절차는 다음과 같습니다. 이는 표준 GitHub 워크플로우를 따릅니다.
+Understanding the core principles and architecture of Wiki As Readme is crucial for effective contributions.
 
-1.  **프로젝트 포크 (Fork the project):** GitHub에서 `catuscio/wiki-as-readme` 저장소를 본인의 계정으로 포크합니다.
-2.  **기능 브랜치 생성 (Create your feature branch):** 새로운 기능이나 버그 수정을 위한 브랜치를 생성합니다.
-    ```bash
-    git checkout -b feature/AmazingFeature
-    ```
-3.  **변경 사항 커밋 (Commit your changes):** 의미 있는 커밋 메시지와 함께 변경 사항을 커밋합니다.
-    ```bash
-    git commit -m 'Add some AmazingFeature'
-    ```
-4.  **브랜치 푸시 (Push to the branch):** 변경 사항을 본인의 포크된 저장소의 해당 브랜치로 푸시합니다.
-    ```bash
-    git push origin feature/AmazingFeature
-    ```
-5.  **Pull Request 열기 (Open a Pull Request):** 원본 저장소(`catuscio/wiki-as-readme`)의 `main` 브랜치로 Pull Request를 생성합니다.
+### Universal Compatibility
 
-**기여 워크플로우:**
+The project is built with a strong emphasis on pluggability and compatibility across different environments:
+
+*   **Model Agnostic:** Powered by LiteLLM, it supports a wide range of LLMs including commercial APIs (Google Vertex AI, OpenAI, Anthropic, xAI) and open/local models (Ollama, OpenRouter, HuggingFace), as well as on-premise LLM endpoints.
+*   **Platform Agnostic:** It works seamlessly with cloud repositories like GitHub, GitLab, Bitbucket, and can analyze code directly from local file systems. It also supports private instances and self-hosted Git servers.
+*   **Deployment Agnostic:** The tool can be integrated into CI/CD pipelines (e.g., GitHub Actions), run via Docker Compose, deployed as a long-running API service with Webhooks, or executed as a CLI tool.
+
+Sources: [README.md](Universal Compatibility)
+
+### Core Features
+
+Key functionalities that contributors might extend or improve include:
+
+*   **Deep Context Analysis:** Understanding project architecture through file structure and relationships.
+*   **Smart Structure Generation:** Automatically creating logical documentation hierarchies (Sections > Pages).
+*   **Comprehensive Content:** Generating detailed pages covering architecture, installation, and API references.
+*   **Automatic Diagrams:** Producing Mermaid.js diagrams (Flowcharts, Sequence, Class) for visualization.
+*   **Hybrid Output:** Generating both individual Markdown files for a wiki and a single consolidated `README.md`.
+*   **Async & Scalable:** Built with FastAPI and AsyncIO for efficient handling of large documentation tasks.
+
+Sources: [README.md](Core Features)
+
+### Architecture
+
+The project's architecture is composed of several modern technologies:
+
 ```mermaid
 graph TD
-    A["프로젝트 포크"] --> B["새 기능 브랜치 생성"];
-    B --> C["변경 사항 커밋"];
-    C --> D["브랜치 푸시"];
-    D --> E["Pull Request 열기"];
+    A["User Interface (Streamlit)"] --> B["Backend API (FastAPI)"]
+    B --> C["LLM Integration (LiteLLM)"]
+    C --> D["Various LLMs (OpenAI, Google, Ollama, etc.)"]
+    B --> E["Data Models (Pydantic)"]
+    B --> F["Mermaid.js Diagram Generation"]
+    B --> G["Git Repository / Local Files Access"]
 ```
-Sources: [README.md](https://github.com/catuscio/wiki-as-readme/blob/main/README.md#contributing)
 
-### 2.2. 개발 환경 설정
+*   **Frontend:** [Streamlit](https://streamlit.io/) for the interactive user interface.
+*   **Backend:** [FastAPI](https://fastapi.tiangolo.com/) for the REST API and managing background tasks.
+*   **LLM Integration:** [LiteLLM](https://docs.litelllm.ai/) provides a unified interface to over 100 LLMs.
+*   **Data Models:** [Pydantic](https://docs.pydantic.dev/) ensures type safety and structured output validation.
+*   **Diagrams:** [Mermaid.js](https://mermaid.js.org/) is used for generating visual representations of architecture.
 
-로컬에서 프로젝트를 개발하고 테스트하기 위한 환경 설정 방법입니다.
+Sources: [README.md](Architecture)
 
-**전제 조건:** Python 3.12+, [uv](https://github.com/astral-sh/uv)
+## Getting Started with Development
 
-1.  **저장소 클론 및 의존성 설치:**
+For developers looking to contribute, setting up a local Python development environment is the recommended approach.
+
+### Prerequisites
+
+*   Python 3.12+
+*   [uv](https://github.com/astral-sh/uv) (a fast Python package installer and resolver)
+
+### Setup Steps
+
+1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/catuscio/wiki-as-readme.git
     cd wiki-as-readme
+    ```
+2.  **Install Dependencies:**
+    ```bash
     uv sync
+    ```
+3.  **Activate Virtual Environment:**
+    ```bash
     source .venv/bin/activate
     ```
-2.  **.env 파일 설정:**
-    `.env example` 파일을 `.env`로 복사하고 필요한 환경 변수(예: `LLM_PROVIDER`, `OPENAI_API_KEY` 등)를 설정합니다.
-3.  **백엔드 실행:**
+4.  **Configure Environment Variables:**
+    Copy the example environment file and populate it with your LLM API keys and other settings.
+    ```bash
+    cp .env.example .env
+    # Edit .env with your preferred text editor
+    ```
+5.  **Run Backend Server:**
     ```bash
     uv run uvicorn src.server:app --reload --port 8000
     ```
-4.  **프론트엔드 실행:**
+6.  **Run Frontend UI:**
     ```bash
     uv run streamlit run src/app.py
     ```
-Sources: [README.md](https://github.com/catuscio/wiki-as-readme/blob/main/README.md#3-local-python-development)
 
-## 3. 프로젝트 관리 및 자동화
+Sources: [README.md](Local Python Development)
 
-### 3.1. 버전 동기화 워크플로우
+### Configuration Reference
 
-프로젝트는 `pyproject.toml` 파일에 정의된 버전을 여러 파일에 자동으로 동기화하는 GitHub Actions 워크플로우를 사용합니다. 기여자들은 이 워크플로우가 어떻게 작동하는지 이해하는 것이 좋습니다.
+When developing or deploying, the application's behavior is controlled via environment variables, typically set in a `.env` file.
 
-**워크플로우 파일:** `.github/workflows/version-sync.yml`
+| Category | Variable | Description | Example |
+|---|---|---|---|
+| **LLM Provider** | `LLM_PROVIDER` | Specifies the LLM service to use. Options include `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama`. | `google` |
+| | `MODEL_NAME` | The specific identifier for the chosen LLM model. | `gemini-2.0-flash-exp` |
+| **Auth** | `OPENAI_API_KEY` | API key for OpenAI services. | `sk-...` |
+| | `GCP_PROJECT_NAME` | Project ID for Google Cloud Vertex AI. | `my-genai-project` |
+| **Advanced** | `USE_STRUCTURED_OUTPUT` | Boolean flag to enable native JSON mode for LLM interactions. | `true` |
+| **Filtering** | `IGNORED_PATTERNS` | A JSON array of glob patterns to exclude files or directories from analysis. | `'["*.log", "node_modules/*"]'` |
 
-**작동 방식:**
-*   `main` 브랜치에 푸시되거나 수동으로 트리거될 때 실행됩니다.
-*   `pyproject.toml` 파일의 변경 사항이 감지되면 워크플로우가 시작됩니다.
-*   Python 스크립트 (`.github/scripts/sync_version.py`)를 실행하여 `pyproject.toml`의 `version` 값을 `src/server.py`, `Dockerfile`, `Dockerfile.action`, `Dockerfile.server` 파일에 동기화합니다.
-*   변경 사항이 있을 경우, `github-actions[bot]` 사용자로 커밋하고 `main` 브랜치에 푸시합니다.
+Sources: [README.md](Configuration Reference (.env))
 
-**버전 동기화 워크플로우:**
-```mermaid
-graph TD
-    A["main 브랜치에 푸시 또는 수동 실행"] --> B{"pyproject.toml 변경 감지?"};
-    B -- "예" --> C["코드 체크아웃"];
-    C --> D["Python 환경 설정"];
-    D --> E["버전 동기화 스크립트 실행"];
-    E --> F{"파일 변경 사항 감지?"};
-    F -- "예" --> G["Git 사용자 설정"];
-    G --> H["변경 파일 추가 및 커밋"];
-    H --> I["변경 사항 푸시"];
-    B -- "아니오" --> J["워크플로우 종료"];
-    F -- "아니오" --> J;
-```
-Sources: [.github/workflows/version-sync.yml](https://github.com/catuscio/wiki-as-readme/blob/main/.github/workflows/version-sync.yml)
+## Contribution Guidelines
 
-## 4. 기타 중요 사항
+Contributions are highly encouraged. Please follow these steps to contribute:
 
-### 4.1. 라이선스
+1.  **Fork the Project:** Create a fork of the `wiki-as-readme` repository on GitHub.
+2.  **Create a Feature Branch:**
+    ```bash
+    git checkout -b feature/YourAmazingFeature
+    ```
+3.  **Commit Your Changes:** Make your changes and commit them with a descriptive message.
+    ```bash
+    git commit -m 'feat: Add Your Amazing Feature'
+    ```
+4.  **Push to the Branch:** Push your local branch to your forked repository.
+    ```bash
+    git push origin feature/YourAmazingFeature
+    ```
+5.  **Open a Pull Request:** Submit a Pull Request from your feature branch to the `main` branch of the original repository.
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 모든 기여는 이 라이선스 조건에 따라 이루어져야 합니다. Pull Request를 제출함으로써, 귀하의 기여가 MIT 라이선스에 따라 라이선스될 것에 동의하는 것으로 간주됩니다.
-Sources: [LICENSE](https://github.com/catuscio/wiki-as-readme/blob/main/LICENSE)
+Sources: [README.md](Contributing)
 
-### 4.2. 코드 스타일
+## License
 
-명시적인 코드 스타일 가이드라인은 없지만, 기존 코드베이스의 스타일과 컨벤션을 따르는 것을 권장합니다. 일관된 코드 스타일은 코드 가독성과 유지보수성을 높이는 데 중요합니다.
+This project is licensed under the MIT License. By contributing, you agree that your contributions will be licensed under the same terms.
 
-## 5. 결론
+Sources: [README.md](License), [LICENSE](file start)
 
-Wiki As Readme 프로젝트에 기여해 주셔서 다시 한번 감사드립니다. 여러분의 참여는 이 프로젝트의 성장과 발전에 필수적입니다. 질문이 있거나 도움이 필요하면 언제든지 Pull Request나 이슈를 통해 문의해 주세요.
+## Conclusion
+
+Contributing to Wiki As Readme offers an opportunity to enhance a versatile AI documentation tool. By following the development setup and contribution guidelines, developers can help improve its universal compatibility, core features, and overall robustness. The project's modular architecture and clear contribution path aim to make the process straightforward and rewarding.
 
 ---
