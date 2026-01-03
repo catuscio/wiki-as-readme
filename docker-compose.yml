@@ -9,4 +9,6 @@ services:
       - .env
     volumes:
       - ./output:/app/output
+      - ./credentials.json:/app/credentials.json # Google Cloud Credentials
+      - ./:/app/target_repo # Mount current directory for local analysis
     restart: always
