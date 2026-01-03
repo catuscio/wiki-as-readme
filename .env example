@@ -1,0 +1,45 @@
+# --- LLM Provider Settings ---
+# Choose your LLM provider: google, openai, anthropic, xai, openrouter, ollama
+LLM_PROVIDER=google
+# Specific model identifier
+# (e.g., gemini-2.0-flash-exp, gpt-4o, claude-3-5-sonnet-latest, nvidia/nemotron-3-nano-30b-a3b:free)
+MODEL_NAME=gemini-2.0-flash-exp
+
+# --- LLM API Keys ---
+# Provide the API key for your chosen provider
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+OPENROUTER_API_KEY=
+XAI_API_KEY=
+
+# --- LLM Configuration ---
+# Optional: Set a custom base URL for the LLM API (e.g., for Ollama or proxy)
+# LLM_BASE_URL=http://localhost:11434/v1
+# Whether to use structured JSON output mode (requires model support)
+USE_STRUCTURED_OUTPUT=true
+# Controls randomness: 0.0 for deterministic, 1.0 for creative
+temperature=0.0
+# Maximum number of retry attempts for failed LLM requests
+max_retries=3
+# Limit the number of parallel LLM calls to prevent rate limits
+max_concurrency=5
+
+# --- File Filtering Settings ---
+# List of glob patterns to exclude from LLM context to save tokens and improve focus.
+# IMPORTANT: Defining this here will OVERRIDE the default list in src/core/config.py.
+# The value must be a single-line JSON array string.
+# Examples:
+# IGNORED_PATTERNS='["uv.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "poetry.lock", "Gemfile.lock", "composer.lock", "*.pyc", "*.pyo", "*.pyd", "__pycache__", ".git", ".venv", "node_modules", ".idea", ".vscode", ".DS_Store", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.ico", "*.woff", "*.woff2", "*.ttf", "*.eot", "*.mp4", "*.webm", "*.mp3", "*.wav", "*.zip", "*.tar", "*.gz", "*.rar", "*.7z", "*.pdf", "*.doc", "*.docx", "*.xls", "*.xlsx", "*.ppt", "*.pptx"]'
+# IGNORED_PATTERNS=
+
+# --- Repository Access Settings ---
+# GitHub/GitLab personal access token for private repos or higher rate limits
+GIT_API_TOKEN=
+
+# --- Localization Settings ---
+# Target language for the generated wiki (e.g., ko, en, ja, zh)
+language=en
+
+# --- Google Cloud Platform Settings (Only for Google Vertex AI) ---
+GCP_PROJECT_NAME=
+GCP_MODEL_LOCATION=

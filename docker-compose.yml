@@ -1,0 +1,12 @@
+services:
+  wiki-as-readme:
+    build: .
+    container_name: wiki-as-readme
+    ports:
+      - "8000:8000" # API
+      - "8501:8501" # Streamlit UI
+    env_file:
+      - .env
+    volumes:
+      - ./output:/app/output
+    restart: always

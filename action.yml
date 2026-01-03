@@ -1,0 +1,100 @@
+name: 'Wiki-As-Readme'
+description: 'Generate a comprehensive README.md/Wiki from your codebase using LLM'
+author: 'catuscio'
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  language:
+    description: 'Language for the generated content (e.g., ko, en)'
+    required: false
+    default: 'ko'
+  output_file:
+    description: 'The filename to save the generated content'
+    required: false
+    default: 'WIKI.md'
+  llm_provider:
+    description: 'LLM provider (google, openai, anthropic, openrouter, xai, ollama)'
+    required: false
+    default: 'google'
+  model_name:
+    description: 'Specific model name to use'
+    required: false
+    default: 'gemini-2.5-flash'
+  
+  # --- LLM API Keys ---
+  openai_api_key:
+    description: 'OpenAI API Key'
+    required: false
+  anthropic_api_key:
+    description: 'Anthropic API Key'
+    required: false
+  openrouter_api_key:
+    description: 'OpenRouter API Key'
+    required: false
+  xai_api_key:
+    description: 'xAI API Key'
+    required: false
+  git_api_token:
+    description: 'GitHub/GitLab API Token for private repos'
+    required: false
+
+  # --- Google Cloud ---
+  gcp_project_name:
+    description: 'GCP Project Name'
+    required: false
+  gcp_model_location:
+    description: 'GCP Model Location'
+    required: false
+  google_application_credentials:
+    description: 'GCP Service Account JSON Key (Content or Path)'
+    required: false
+
+  # --- Advanced LLM Config ---
+  llm_base_url:
+    description: 'Custom base URL for LLM API'
+    required: false
+  use_structured_output:
+    description: 'Whether to use structured JSON output'
+    required: false
+    default: 'true'
+  temperature:
+    description: 'LLM temperature (0.0 to 1.0)'
+    required: false
+    default: '0.0'
+  max_retries:
+    description: 'Max retry attempts'
+    required: false
+    default: '3'
+  max_concurrency:
+    description: 'Max parallel LLM calls'
+    required: false
+    default: '5'
+  ignored_patterns:
+    description: 'JSON array of glob patterns to ignore'
+    required: false
+    default: '[]'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile.action'
+  env:
+    LANGUAGE: ${{ inputs.language }}
+    OUTPUT_FILE: ${{ inputs.output_file }}
+    LLM_PROVIDER: ${{ inputs.llm_provider }}
+    MODEL_NAME: ${{ inputs.model_name }}
+    OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+    ANTHROPIC_API_KEY: ${{ inputs.anthropic_api_key }}
+    OPENROUTER_API_KEY: ${{ inputs.openrouter_api_key }}
+    XAI_API_KEY: ${{ inputs.xai_api_key }}
+    GIT_API_TOKEN: ${{ inputs.git_api_token }}
+    GCP_PROJECT_NAME: ${{ inputs.gcp_project_name }}
+    GCP_MODEL_LOCATION: ${{ inputs.gcp_model_location }}
+    LLM_BASE_URL: ${{ inputs.llm_base_url }}
+    USE_STRUCTURED_OUTPUT: ${{ inputs.use_structured_output }}
+    TEMPERATURE: ${{ inputs.temperature }}
+    MAX_RETRIES: ${{ inputs.max_retries }}
+    MAX_CONCURRENCY: ${{ inputs.max_concurrency }}
+    IGNORED_PATTERNS: ${{ inputs.ignored_patterns }}
+    GOOGLE_APPLICATION_CREDENTIALS: ${{ inputs.google_application_credentials }}

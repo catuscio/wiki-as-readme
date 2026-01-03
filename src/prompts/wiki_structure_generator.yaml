@@ -1,0 +1,96 @@
+_type: prompt
+template_format: jinja2
+input_variables:
+  - owner
+  - repo
+  - fileTree
+  - readme
+  - language
+  - isComprehensiveView
+  - use_structured_output
+template: |
+  You are an expert technical writer and software architect.
+  Analyze the provided GitHub repository {{ owner }}/{{ repo }} and generate a comprehensive wiki structure for it.
+  
+  1. The complete file tree of the project:
+  <file_tree>
+  {{ fileTree }}
+  </file_tree>
+  
+  2. The README file of the project:
+  <readme>
+  {{ readme }}
+  </readme>
+  
+  I want to create a wiki for this repository. Your task is to determine the most logical and detailed structure for a wiki based on the repository's content.
+  
+  IMPORTANT: The wiki content will be generated in {% if language == 'en' %}English{% elif language == 'ja' %}Japanese (日本語){% elif language == 'zh' %}Mandarin Chinese (中文){% elif language == 'zh-tw' %}Traditional Chinese (繁體中文){% elif language == 'es' %}Spanish (Español){% elif language == 'ko' %}Korean (한국어){% elif language == 'vi' %}Vietnamese (Tiếng Việt){% elif language == 'pt-br' %}Brazilian Portuguese (Português Brasileiro){% elif language == 'fr' %}Français (French){% elif language == 'ru' %}Русский (Russian){% else %}English{% endif %} language.
+  
+  {% if not use_structured_output %}
+  Your output MUST be a JSON object that strictly conforms to the `WikiStructure` Pydantic model. Here is the schema for your reference:
+  
+  ```json
+  from pydantic import BaseModel, Field
+  from typing import Optional, Literal, List
+  from typing_extensions import Annotated
+  
+  
+  class WikiSection(BaseModel):
+      id: Annotated[str, Field(description='Unique identifier for the section (e.g., "section-overview")')]
+      title: Annotated[str, Field(description='Title of the section (e.g., "Overview")')]
+      pages: Annotated[List[str], Field(description='List of WikiPage IDs that belong directly to this section')]
+      subsections: Annotated[Optional[List[str]], Field(description='List of WikiSection IDs that are children of this section')] = None
+  
+  
+  class WikiPage(BaseModel):
+      id: Annotated[str, Field(description='Unique identifier for the page (e.g., "page-getting-started")')]
+      title: Annotated[str, Field(description='Title of the page (e.g., "Getting Started")')]
+      content: Annotated[str, Field(description='Leave this field empty. It will be generated later.')]
+      file_paths: Annotated[List[str], Field(description='List of relevant file paths from the repository for this page. Must contain at least 1 relevant file path.')]
+      importance: Annotated[Literal['high', 'medium', 'low'], Field(description='Importance of the page')]
+      related_pages: Annotated[List[str], Field(description='List of WikiPage IDs that are related to this page')]
+      parent_id: Annotated[Optional[str], Field(description="ID of the parent section this page belongs to. Can be null if it's a top-level page not directly under a section.")] = None
+  
+  
+  class WikiStructure(BaseModel):
+      id: Annotated[str, Field(description='Overall unique identifier for the wiki (e.g., "repository-wiki")')]
+      title: Annotated[str, Field(description='Overall title for the wiki (e.g., "My Project Wiki")')]
+      description: Annotated[str, Field(description='Brief description of the entire wiki/repository')]
+      pages: Annotated[List[WikiPage], Field(description='List of all WikiPage objects in the wiki')]
+      sections: Annotated[List[WikiSection], Field(description='List of all WikiSection objects in the wiki. Must be provided, even as an empty list if no sections.')]
+      root_sections: Annotated[List[str], Field(description='List of WikiSection IDs that are top-level sections (not subsections of others). Must be provided, even as an empty list if no root sections.')]
+  ```
+  
+  **EXAMPLE OF A MINIMAL VALID JSON OUTPUT:**
+  ```json
+  {
+    "id": "project-wiki",
+    "title": "My Project Wiki",
+    "description": "A brief overview of My Project.",
+    "pages": [],
+    "sections": [],
+    "root_sections": []
+  }
+  ```
+  
+  Guidelines for generating the JSON:
+  - You MUST include values for ALL top-level fields of `WikiStructure`: `id`, `title`, `description`, `pages`, `sections`, and `root_sections`.
+  - For `WikiPage` objects within the `pages` list, you MUST include values for ALL its fields: `id`, `title`, `content`, `file_paths`, `importance`, `related_pages`, and `parent_id`.
+  - For `WikiSection` objects within the `sections` list, you MUST include values for ALL its fields: `id`, `title`, `pages`, and `subsections`.
+  - If a list is empty, provide an empty array `[]`. If an optional string/object is not applicable, provide `null`.
+  - DO NOT truncate the JSON output. Generate the complete, valid JSON object.
+  {% endif %}
+  
+  Guidelines for the wiki content:
+  - Create {% if isComprehensiveView %}8-12{% else %}4-6{% endif %} pages that would make a {% if isComprehensiveView %}comprehensive{% else %}concise{% endif %} wiki for this repository.
+  - Each page (`WikiPage`) should focus on a specific aspect of the codebase (e.g., architecture, key features, setup).
+  - For `WikiPage.file_paths`, select actual file paths from the provided `fileTree` that you MUST use to generate that page's content. Ensure there is at least one file path.
+  - For `WikiPage.parent_id`, provide the `id` of the `WikiSection` it belongs to, or `null` if it's a top-level page.
+  - Populate `WikiStructure.sections` with a logical hierarchy, and `WikiStructure.root_sections` with top-level section IDs. If no sections are deemed necessary, provide empty lists `[]` for both.
+  - Ensure all `pages` are included in at least one `section.pages` list, or are top-level pages.
+  - Provide realistic and descriptive `id` and `title` for both pages and sections.
+  
+  Return ONLY the JSON object. DO NOT wrap the JSON in markdown code blocks or add any explanation text before or after the JSON.
+  Ensure the JSON is properly formatted and valid.
+  
+  **CRITICAL FINAL INSTRUCTION: YOU MUST ENSURE THE ENTIRE JSON OBJECT IS COMPLETE AND VALID. DO NOT STOP GENERATING UNTIL THE FINAL CLOSING BRACE `}` IS OUTPUTTED. VERIFY ALL NESTED OBJECTS AND LISTS ARE FULLY FORMED.**

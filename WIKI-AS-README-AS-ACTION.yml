@@ -1,0 +1,71 @@
+# This file alone works independently in any repository.
+# Save this file as .github/workflows/WIKI-AS-README-AS-ACTION.yml.
+name: Update Wiki README
+
+on:
+  push:
+    branches:
+      - main    # or master, devlop, etc
+    paths-ignore:
+      - 'README.md'
+      - 'WIKI.md'
+      - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
+  workflow_dispatch:
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      OUTPUT_FILE: "WIKI.md"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Generate Wiki Content (Run Docker image directly)
+      - name: Generate Wiki Content
+        uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+        env:
+          # --- Basic Settings ---
+          LANGUAGE: "ko"
+          OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
+          
+          # --- LLM Provider and Model Settings ---
+          LLM_PROVIDER: "google"   # google, openai, anthropic, openrouter, xai, ollama
+          MODEL_NAME: "gemini-2.5-flash"
+          
+          # --- API Key Settings (Uncomment and set only for the services you use) ---
+          # Google Cloud (Vertex AI)
+          GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
+          GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          
+          # OpenAI / Anthropic / Others
+          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          
+          # --- GitHub Token (for analyzing private repos and pushing) ---
+          GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # --- Advanced LLM Settings (Uncomment if needed) ---
+          # LLM_BASE_URL: "https://your-proxy-url.com"
+          # USE_STRUCTURED_OUTPUT: "true"
+          # TEMPERATURE: "0.0"
+          # MAX_RETRIES: "3"
+          # MAX_CONCURRENCY: "5"
+          
+          # Exclude specific files/folders (JSON array format)
+          # IGNORED_PATTERNS: '["*.log", "dist/**", "build/**", "examples", "uv.lock", "public"]'
+
+      # 2. Commit and Push Changes
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          # Must match OUTPUT_FILE set above.
+          commit_message: "docs: ✨Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action"
+          file_pattern: ${{ env.OUTPUT_FILE }}
