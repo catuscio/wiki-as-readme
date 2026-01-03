@@ -35,8 +35,6 @@ all = [
 
 [dependency-groups]
 dev = [
-    { include-group = "ui" },
-    { include-group = "api" },
     "ruff>=0.14.10",
 ]
 

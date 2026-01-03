@@ -14,133 +14,159 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 [![LiteLLM](https://img.shields.io/badge/LiteLLM-orange?style=flat)](https://docs.litellm.ai/)
 
-> **Turn your codebase into a comprehensive Wiki in minutes, delivered in a single Readme.**
+> **Turn your codebase into a comprehensive Wiki in minutes.**
+>
+> **Any Model. Any Repo. Any Environment.**
 
-**Wiki As Readme** is an AI-powered tool that analyzes your Git repository (GitHub, GitLab, Bitbucket, or Local) and automatically generates a structured, detailed Wiki. It leverages modern LLMs (via **LiteLLM**) to understand your code structure, read your source files, and write professional-grade documentation, complete with Mermaid diagrams.
+**Wiki As Readme** is the most flexible AI documentation tool available. Whether you're running a local Llama 3 model via Ollama, using Google's Gemini Pro, or hitting OpenAI's API, this tool adapts to your stack. It seamlessly integrates with any Git platform (GitHub, GitLab, Bitbucket) or local folders, making it the ultimate "drop-in" documentation solution.
 
-## ✨ Features
+> [!NOTE]
+> Some features and integrations are currently under development. **Wiki-As-Readme** warmly welcomes your contributions and Pull Requests!
 
-*   **🤖 Multi-LLM Support:**
-    *   Powered by **LiteLLM**, supporting **Google Vertex AI (Gemini)**, **OpenAI (GPT-4)**, **Anthropic (Claude)**, **xAI (Grok)**, **Ollama**, and **OpenRouter**.
-*   **🧠 Deep Context Analysis:**
-    *   Analyzes file structure and relationships to understand the project's architecture before writing.
-*   **📦 Smart Structure Generation:**
-    *   Automatically determines a logical hierarchy (Sections > Pages) for your documentation.
-*   **🔍 Comprehensive Content:**
-    *   Writes detailed pages including architecture overviews, installation guides, and API references.
-*   **📊 Automatic Diagrams:**
-    *   Generates **Mermaid.js** diagrams (Flowcharts, Sequence diagrams, Class diagrams) to visualize architecture.
-*   **🚉 Universal Repo Support:**
-    *   Works with **GitHub**, **GitLab**, **Bitbucket**, and **Local File Systems**.
-*   **🚗 Hybrid Output:**
-    *   Generates both individual Markdown files for a Wiki and a single consolidated `README.md`.
-*   **⚡ Async & Scalable:**
-    *   Built with **FastAPI** and **AsyncIO** for non-blocking, efficient generation of large documentations.
+## ✨ Universal Compatibility
 
-## 🚀 Getting Started
+This project is built to be **truly pluggable**. You choose how to run it, where to run it, and what powers it.
 
-### Prerequisites
+### 🧠 1. Model Agnostic (Powered by LiteLLM)
+*   **Commercial APIs:** Google Vertex AI (Gemini), OpenAI (GPT-4), Anthropic (Claude), xAI (Grok).
+*   **Open/Local Models:** **Ollama**, OpenRouter, HuggingFace.
+*   **On-Premise:** Connect to your own private LLM endpoints safely.
 
-*   **Python 3.12** or higher.
-*   **[uv](https://github.com/astral-sh/uv)** (Recommended for dependency management).
-*   **API Keys** for your chosen LLM Provider (e.g., Google Cloud Project, OpenAI API Key).
+### 🚉 2. Platform Agnostic
+*   **Cloud Repos:** Works seamlessly with **GitHub**, **GitLab**, and **Bitbucket**.
+*   **Local Development:** Analyze code directly from your local file system without pushing.
+*   **Private/Enterprise:** Full support for private instances and self-hosted Git servers.
 
-### Installation
+### 🛠️ 3. Deployment Agnostic
+*   **CI/CD:** Drop it into GitHub Actions.
+*   **Container:** Run it via Docker Compose.
+*   **Service:** Deploy as a long-running API server with Webhooks.
+*   **CLI:** Run it locally while you code.
 
-1.  **Clone the repository**
+## ⚡ Core Features
+*   **🧠 Deep Context Analysis:** Analyzes file structure and relationships to understand the project's architecture before writing.
+*   **📦 Smart Structure Generation:** Automatically determines a logical hierarchy (Sections > Pages) for your documentation.
+*   **🔍 Comprehensive Content:** Writes detailed pages including architecture overviews, installation guides, and API references.
+*   **📊 Automatic Diagrams:** Generates **Mermaid.js** diagrams (Flowcharts, Sequence diagrams, Class diagrams) to visualize architecture.
+*   **🚗 Hybrid Output:** Generates both individual Markdown files for a Wiki and a single consolidated `README.md`.
+*   **⚡ Async & Scalable:** Built with **FastAPI** and **AsyncIO** for non-blocking, efficient generation of large documentations.
 
+## 🚀 Usage Modes
+
+This project is designed to be **pluggable** and can be used in multiple ways depending on your needs:
+
+1.  **[GitHub Action](#1-github-action-recommended)**: Automate documentation updates in your CI/CD pipeline.
+2.  **[Docker Compose (Local)](#2-docker-compose-local)**: Run the full UI/API locally without installing Python dependencies.
+3.  **[Local Python Development](#3-local-python-development)**: For developers who want to modify the source code.
+4.  **[Server & Webhooks](#4-server--webhooks)**: Deploy as a long-running service with Webhook support.
+
+---
+
+### 1. GitHub Action (Recommended)
+
+Add this workflow to your repository to automatically update a `WIKI.md` file whenever you push changes.
+
+1.  Create `.github/workflows/update-wiki.yml`:
+
+    ```yaml
+    name: Update Wiki README
+    on:
+      push:
+        branches: [ main ]
+        paths-ignore: ['WIKI.md', '.github/workflows/**']
+      workflow_dispatch:
+
+    permissions:
+      contents: write
+
+    jobs:
+      generate-and-commit:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          
+          - name: Generate Wiki
+            uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+            env:
+              OUTPUT_FILE: "WIKI.md"
+              LANGUAGE: "en" # or ko, ja
+              LLM_PROVIDER: "google" # or openai, anthropic, etc.
+              MODEL_NAME: "gemini-2.0-flash-exp"
+              # Add your API keys as secrets to your repository
+              GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
+              GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
+              GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+              # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+          - uses: stefanzweifel/git-auto-commit-action@v5
+            with:
+              commit_message: "docs: Update WIKI.md via Wiki-As-Readme"
+              file_pattern: "WIKI.md"
+    ```
+
+### 2. Docker Compose (Local)
+
+Run the application locally with a single command. This is the easiest way to try out the UI.
+
+1.  **Configure `.env`**: 
+    Copy `.env example` to `.env` and set your API keys (e.g., `LLM_PROVIDER`, `OPENAI_API_KEY` or `GCP_...`).
+
+2.  **Run**:
+    ```bash
+    docker-compose up --build
+    ```
+3.  **Access**:
+    *   **Web UI**: `http://localhost:8501`
+    *   **API Docs**: `http://localhost:8000/docs`
+
+### 3. Local Python Development
+
+For developers who want to modify the source code or run without Docker.
+
+**Prerequisites:** Python 3.12+, [uv](https://github.com/astral-sh/uv).
+
+1.  **Clone & Install**:
     ```bash
     git clone https://github.com/catuscio/wiki-as-readme.git
     cd wiki-as-readme
-    ```
-
-2.  **Install dependencies using `uv`**
-
-    ```bash
-    # Install uv if you haven't already
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    # Sync dependencies
     uv sync
-    ```
-
-3.  **Activate Virtual Environment**
-
-    ```bash
     source .venv/bin/activate
     ```
 
-### Configuration (`.env`)
+2.  **Configure `.env`**:
+    Copy `.env example` to `.env` and set your variables.
 
-This project uses a `.env` file for configuration, including LLM settings and API keys.
-
-1.  **Copy the example file:**
-
+3.  **Run Backend**:
     ```bash
-    cp ".env example" .env
+    uv run uvicorn src.server:app --reload --port 8000
     ```
 
-2.  **Edit `.env` and set the required variables:**
+4.  **Run Frontend**:
+    ```bash
+    uv run streamlit run src/app.py
+    ```
 
-    | Category | Variable | Description | Example |
-    | :--- | :--- | :--- | :--- |
-    | **LLM Provider** | `LLM_PROVIDER` | Choose provider: `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama` | `google` |
-    | | `MODEL_NAME` | Specific model identifier | `gemini-2.0-flash-exp` or `gpt-4o` |
-    | **Auth (Choose 1)** | `OPENAI_API_KEY` | For OpenAI provider | `sk-...` |
-    | | `ANTHROPIC_API_KEY`| For Anthropic provider | `sk-ant-...` |
-    | | `GCP_PROJECT_NAME` | **(Google Only)** Vertex AI Project ID | `my-genai-project` |
-    | | `GCP_MODEL_LOCATION`| **(Google Only)** Region | `us-central1` |
-    | **Advanced LLM** | `USE_STRUCTURED_OUTPUT`| Use native JSON mode (Requires model support) | `true` |
-    | **Filtering** | `IGNORED_PATTERNS` | **JSON array** of glob patterns to exclude from analysis | `'["*.log", "node_modules/*"]'` |
-    | **Git Access** | `GIT_API_TOKEN` | **Critical for private repos** and to avoid rate limits | `ghp_...` |
-    | **App Config** | `API_BASE_URL` | URL for the backend API | `http://localhost:8000/api/v1` |
-    | | `language` | Target language for the Wiki | `en`, `ko`, `ja` |
+### 4. Server & Webhooks
 
-#### Detailed Settings
+You can deploy the API server to handle requests or webhooks (e.g., from GitHub).
 
-*   **`USE_STRUCTURED_OUTPUT`**:
-    *   When set to `true`, the tool uses the LLM's native structured output capability (e.g., Gemini's JSON mode or OpenAI's Structured Outputs).
-    *   This significantly improves the reliability of generated wiki structures and ensures consistent metadata.
-    *   **Recommendation:** Keep `true` for modern models like Gemini 1.5 Pro/Flash, GPT-4o, or Claude 3.5 Sonnet.
-*   **`IGNORED_PATTERNS`**:
-    *   Allows you to exclude specific files or directories from being analyzed by the AI.
-    *   **Crucial for token optimization**: Excluding large dependency folders (`node_modules`), build artifacts (`dist`, `build`), or lock files (`uv.lock`, `package-lock.json`) saves money and prevents the LLM from getting distracted.
-    *   **Format**: Must be a single-line JSON array string (e.g., `'["*.png", "docs/*"]'`).
+*   **Endpoint**: `POST /api/v1/webhook/github`
+*   **Payload**: Standard GitHub push event payload.
+*   **Behavior**: Triggers a background task to generate the wiki for the repository and commit it back (requires `GIT_API_TOKEN`).
 
-    > **Note for Google Vertex AI Users:**
-    > You must authenticate your local environment using gcloud:
-    > ```bash
-    > gcloud auth application-default login
-    > ```
+### Configuration Reference (`.env`)
 
-## 💻 Usage
+Whether running locally or in Docker, you configure the app via environment variables:
 
-The application consists of two parts: the **FastAPI Backend** and the **Streamlit Frontend**. You need to run both.
+| Category | Variable | Description | Example |
+| :--- | :--- | :--- | :--- |
+| **LLM Provider** | `LLM_PROVIDER` | `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama` | `google` |
+| | `MODEL_NAME` | Specific model identifier | `gemini-2.0-flash-exp` |
+| **Auth** | `OPENAI_API_KEY` | OpenAI API Key | `sk-...` |
+| | `GCP_PROJECT_NAME` | Vertex AI Project ID | `my-genai-project` |
+| **Advanced** | `USE_STRUCTURED_OUTPUT`| Use native JSON mode | `true` |
+| **Filtering** | `IGNORED_PATTERNS` | **JSON array** of glob patterns to exclude | `'["*.log", "node_modules/*"]'` |
 
-### 1. Start the Backend API
-
-Open a terminal and run:
-
-```bash
-uv run uvicorn src.server:app --reload --port 8000
-```
-
-### 2. Start the Streamlit UI
-
-Open a **new** terminal window and run:
-
-```bash
-uv run streamlit run src/app.py
-```
-
-### 3. Generate Wiki
-
-1.  Open your browser to the URL provided by Streamlit (usually `http://localhost:8501`).
-2.  **Repo Information:** Enter your Repository URL (e.g., `https://github.com/owner/repo`) or Local Path.
-3.  **Settings:** Toggle "Comprehensive View" or change language if needed.
-4.  Click **✨ Generate Wiki**.
-5.  Wait for the process to complete (it runs in the background).
-6.  **Download:** Once finished, you can preview the content and download the consolidated `README.md`.
 
 ## 🔌 API Reference
 
@@ -180,14 +206,6 @@ Curious about the results? Check out our sample outputs to see the quality of do
 *   **[LangGraph Wiki Example (Korean)](examples/langgraph_readme_ko.md)**: The same LangGraph wiki, but generated in Korean.
 *   **[Wiki As Readme's Own Wiki](examples/wiki_as_README.md)**: Documentation for this project, generated by itself!
 
-## 🐳 Docker Support
-
-You can also run the API server using Docker Compose.
-
-```bash
-docker-compose up --build
-```
-*Note: This currently only starts the API server on port 8000. You will still need to run the Streamlit app locally or adapt the compose file.*
 
 ## 🛠️ Architecture
 

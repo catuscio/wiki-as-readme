@@ -2105,12 +2105,10 @@ wheels = [
 
 [[package]]
 name = "wiki-as-readme"
-version = "0.1.0"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "fastapi" },
     { name = "google-auth" },
-    { name = "gunicorn" },
     { name = "httpx" },
     { name = "jinja2" },
     { name = "litellm" },
@@ -2120,17 +2118,36 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "requests" },
-    { name = "ruff" },
+]
+
+[package.optional-dependencies]
+all = [
+    { name = "fastapi" },
+    { name = "gunicorn" },
     { name = "streamlit" },
     { name = "streamlit-mermaid" },
     { name = "uvicorn" },
 ]
+api = [
+    { name = "fastapi" },
+    { name = "gunicorn" },
+    { name = "uvicorn" },
+]
+ui = [
+    { name = "streamlit" },
+    { name = "streamlit-mermaid" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "ruff" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.128.0" },
+    { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.128.0" },
     { name = "google-auth", specifier = ">=2.45.0" },
-    { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "gunicorn", marker = "extra == 'api'", specifier = ">=23.0.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "litellm", specifier = ">=1.80.11" },
@@ -2140,11 +2157,15 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.32.5" },
-    { name = "ruff", specifier = ">=0.14.10" },
-    { name = "streamlit", specifier = ">=1.51.0" },
-    { name = "streamlit-mermaid" },
-    { name = "uvicorn", specifier = ">=0.40.0" },
+    { name = "streamlit", marker = "extra == 'ui'", specifier = ">=1.51.0" },
+    { name = "streamlit-mermaid", marker = "extra == 'ui'" },
+    { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.40.0" },
+    { name = "wiki-as-readme", extras = ["ui", "api"], marker = "extra == 'all'" },
 ]
+provides-extras = ["ui", "api", "all"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ruff", specifier = ">=0.14.10" }]
 
 [[package]]
 name = "win32-setctime"
