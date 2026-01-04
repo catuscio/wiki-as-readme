@@ -278,6 +278,6 @@ GitHub 웹훅(Push 이벤트) 엔드포인트입니다. `main` 브랜치 푸시 
 
 ### 감사의 말
 
-*   이 프로젝트는 [deepwiki-open](https://github.com/AsyncFuncAI/deepwiki-open) 프로젝트의 핵심 로직을 활용하고 많은 영향을 받았습니다.
+*   이 프로젝트는 AsyncFuncAI의 [deepwiki-open](https://github.com/AsyncFuncAI/deepwiki-open) 프로젝트의 핵심 로직을 활용하고 많은 영향을 받았습니다.
 *   오픈 소스 라이브러리의 힘으로 만들어졌습니다.
 *   더 나은 자동화된 문서화에 대한 필요성에서 영감을 받았습니다.

@@ -80,20 +80,20 @@ Add this workflow to your repository to automatically update a `WIKI.md` file wh
           - 'WIKI.md'
           - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
       workflow_dispatch:
-    
+
     jobs:
       generate-and-commit:
         runs-on: ubuntu-latest
         permissions:
           contents: write
-    
+
         env:
           OUTPUT_FILE: "WIKI.md"
-    
+
         steps:
           - name: Checkout code
             uses: actions/checkout@v4
-    
+
           # -----------------------------------------------------------------------
           # [OPTIONAL] GCP Credentials Setup
           # Remove or comment out this step if you are NOT using Google Cloud (Vertex AI).
@@ -103,7 +103,7 @@ Add this workflow to your repository to automatically update a `WIKI.md` file wh
               GCP_KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
             run: |
               echo "$GCP_KEY" > ./gcp-key.json
-    
+
           # 1. Generate Wiki Content
           - name: Generate Wiki Content
             uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
@@ -111,28 +111,28 @@ Add this workflow to your repository to automatically update a `WIKI.md` file wh
               # --- Basic Settings ---
               LANGUAGE: "en"
               OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
-              
+
               # --- LLM Provider and Model Settings ---
               LLM_PROVIDER: "google"   # Options: google, openai, anthropic, etc.
               MODEL_NAME: "gemini-2.5-flash"
-              
+
               # --- API Key Settings ---
-              
+
               # [GCP / Vertex AI]
               # These settings are only required if LLM_PROVIDER is "google".
               # Comment them out if using other providers (OpenAI, Anthropic, etc.).
               GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
               GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
               GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json
-              
+
               # [Other Providers]
               # Uncomment and set the API key for your chosen provider.
               # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
               # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-              
+
               # --- GitHub Token ---
               GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+
           # -----------------------------------------------------------------------
           # [OPTIONAL] GCP Credentials Cleanup
           # Remove or comment out this step if you are NOT using Google Cloud.
@@ -140,7 +140,7 @@ Add this workflow to your repository to automatically update a `WIKI.md` file wh
           - name: Remove GCP Credentials File
             if: always()
             run: rm -f ./gcp-key.json
-    
+
           # 2. Commit and Push Changes
           - name: Commit and Push changes
             uses: stefanzweifel/git-auto-commit-action@v5
@@ -278,6 +278,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Acknowledgments
 
-*   This project is heavily influenced by and utilizes core logic from [deepwiki-open](https://github.com/AsyncFuncAI/deepwiki-open).
+*   This project is heavily influenced by and utilizes core logic from [deepwiki-open](https://github.com/AsyncFuncAI/deepwiki-open) by AsyncFuncAI.
 *   Built with the power of open-source libraries.
 *   Inspired by the need for better automated documentation.
