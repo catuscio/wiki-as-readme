@@ -3,7 +3,7 @@ name: Version Sync
 on:
   push:
     branches:
-      - main
+      - develop
     paths:
       - "pyproject.toml"
   workflow_dispatch:
