@@ -3,6 +3,7 @@ Streamlit demo application for AI Wiki Generator.
 """
 
 import asyncio
+import glob
 import os
 import re
 import sys
@@ -25,14 +26,16 @@ from src.models.api_schema import WikiGenerationRequest
 # --- Configuration ---
 # Default to localhost:8000 but allow override via environment variable
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+OUTPUT_DIR = "output"  # Directory where wiki files are saved
 
 
 # --- API Interaction ---
 async def start_generation_task(request_data: WikiGenerationRequest) -> str | None:
     """
     Starts the wiki generation task and returns the task ID.
+    Uses /wiki/generate/file endpoint to save the result on the server.
     """
-    start_url = f"{API_BASE_URL}/wiki/generate/text"
+    start_url = f"{API_BASE_URL}/wiki/generate/file"
     payload = request_data.model_dump(exclude_none=True, mode="json")
 
     try:
@@ -56,17 +59,13 @@ async def start_generation_task(request_data: WikiGenerationRequest) -> str | No
 async def poll_task_status(task_id: str) -> dict[str, Any] | None:
     """
     Polls the status of the task.
-    Returns the result dict if completed, None if failed (handled internally),
-    or loops forever updating UI until done/interrupted.
+    Returns the result dict if completed, None if failed.
     """
     status_url = f"{API_BASE_URL}/wiki/status/{task_id}"
 
     status_placeholder = st.empty()
     progress_bar = st.progress(0, text="Resuming task...")
 
-    # We don't have the original start time across reruns easily without persisting it,
-    # but a relative elapsed time for this polling session is okay.
-    # Optionally, we could save start_time in session_state too.
     if "task_start_time" not in st.session_state:
         st.session_state.task_start_time = time.time()
 
@@ -82,7 +81,6 @@ async def poll_task_status(task_id: str) -> dict[str, Any] | None:
                     status_response.raise_for_status()
                     status_data = status_response.json()
                 except httpx.RequestError:
-                    # Transient network error, wait and retry
                     await asyncio.sleep(2.0)
                     continue
 
@@ -105,7 +103,6 @@ async def poll_task_status(task_id: str) -> dict[str, Any] | None:
                     st.error(f"Task failed: {error_msg}")
                     status_placeholder.empty()
                     progress_bar.empty()
-                    # Return a special flag or just None to indicate failure/stop
                     return {"error": error_msg}
 
                 # In progress
@@ -122,23 +119,46 @@ async def poll_task_status(task_id: str) -> dict[str, Any] | None:
         return None
 
 
-# --- UI Components ---
-def render_sidebar() -> WikiGenerationRequest | None:
-    """
-    Renders the sidebar and returns the configuration if the 'Generate' button is clicked.
-    """
-    with st.sidebar:
-        st.header("Repo Information")
+# --- Helper Functions ---
+def get_generated_files() -> list[str]:
+    """Returns a list of generated markdown files in the output directory."""
+    if not os.path.exists(OUTPUT_DIR):
+        return []
+    # Sort by modification time (newest first)
+    files = glob.glob(os.path.join(OUTPUT_DIR, "*.md"))
+    files.sort(key=os.path.getmtime, reverse=True)
+    return files
 
+
+def render_markdown_with_mermaid(markdown_content: str):
+    """Renders markdown content, handling Mermaid diagrams separately."""
+    parts = re.split(r"(```mermaid\s+.*?\s+```)", markdown_content, flags=re.DOTALL)
+
+    for part in parts:
+        if part.startswith("```mermaid"):
+            mermaid_code = re.search(r"```mermaid\s+(.*?)\s+```", part, re.DOTALL)
+            if mermaid_code:
+                st_mermaid(mermaid_code.group(1).strip())
+        else:
+            st.markdown(part, unsafe_allow_html=True)
+
+
+# --- Pages ---
+def render_generator_page():
+    """Renders the main Generator page."""
+    st.header("Repo Information")
+
+    # Sidebar Inputs
+    with st.sidebar:
+        st.header("Configuration")
+        
         # Initialize session state for persistent inputs
         if "saved_repo_input" not in st.session_state:
             st.session_state.saved_repo_input = ""
 
-        # Callbacks to sync widget state to persistent state
         def save_repo_input():
             st.session_state.saved_repo_input = st.session_state.widget_repo_input
 
-        # Unified Input Field
         repo_input = st.text_input(
             "Repository URL or Local Path",
             value=st.session_state.saved_repo_input,
@@ -147,10 +167,7 @@ def render_sidebar() -> WikiGenerationRequest | None:
             on_change=save_repo_input,
             help="Enter a GitHub/GitLab URL or a local folder path.",
         )
-        # Ensure persistence
         st.session_state.saved_repo_input = repo_input
-
-        st.header("Generation Settings")
 
         is_comprehensive = st.toggle(
             "Comprehensive View",
@@ -167,121 +184,47 @@ def render_sidebar() -> WikiGenerationRequest | None:
         )
 
         st.divider()
-
-        # Configuration Notes
         st.info("💡 **Note:** Setup `.env` first")
         st.info(
             "🐳 **Docker Tip:** For local analysis, use paths starting with `/app/target_repo` "
             "(e.g., `/app/target_repo/your-project`)"
         )
 
-        submitted = st.button(
-            "✨ Generate Wiki",
-            type="primary",
-            use_container_width=True,
-        )
+        submitted = st.button("✨ Generate Wiki", type="primary", use_container_width=True)
 
-        if submitted:
-            # Automatic Detection Logic
+    # Logic for Generation Request
+    request_data = None
+    if submitted:
+        repo_type_value = "local"
+        repo_url = None
+        local_path = None
+        clean_input = repo_input.strip()
+
+        if clean_input.startswith(("http://", "https://", "git@")):
+            repo_url = clean_input
+            if "gitlab" in clean_input:
+                repo_type_value = "gitlab"
+            elif "bitbucket" in clean_input:
+                repo_type_value = "bitbucket"
+            else:
+                repo_type_value = "github"
+        else:
             repo_type_value = "local"
-            repo_url = None
-            local_path = None
+            local_path = clean_input
 
-            clean_input = repo_input.strip()
+        try:
+            request_data = WikiGenerationRequest(
+                repo_type=repo_type_value,
+                repo_url=repo_url,
+                local_path=local_path,
+                language=language,
+                is_comprehensive_view=is_comprehensive,
+            )
+        except ValidationError as e:
+            for error in e.errors():
+                st.error(f"Invalid {error['loc'][0]}: {error['msg']}")
 
-            if clean_input.startswith(("http://", "https://", "git@")):
-                repo_url = clean_input
-                if "gitlab" in clean_input:
-                    repo_type_value = "gitlab"
-                elif "bitbucket" in clean_input:
-                    repo_type_value = "bitbucket"
-                else:
-                    repo_type_value = "github"
-            else:
-                repo_type_value = "local"
-                local_path = clean_input
-
-            try:
-                # Create and validate request object
-                return WikiGenerationRequest(
-                    repo_type=repo_type_value,
-                    repo_url=repo_url,
-                    local_path=local_path,
-                    language=language,
-                    is_comprehensive_view=is_comprehensive,
-                )
-            except ValidationError as e:
-                # Display friendly validation errors
-                for error in e.errors():
-                    field = error["loc"][0]
-                    msg = error["msg"]
-                    st.error(f"Invalid {field}: {msg}")
-                return None
-
-    return None
-
-
-def render_main_content(result: dict[str, Any] | None):
-    """
-    Renders the main content area with the generation results.
-    """
-    if result and "markdown_content" in result:
-        st.success("Wiki generation complete!")
-
-        markdown_content = result["markdown_content"]
-
-        st.download_button(
-            label="📥 Download Consolidated Wiki (README.md)",
-            data=markdown_content,
-            file_name="README.md",
-            mime="text/markdown",
-            use_container_width=True,
-        )
-
-        st.markdown("### Preview")
-
-        # Split markdown by mermaid blocks and render them
-        # Regex to find ```mermaid ... ``` blocks
-        parts = re.split(r"(```mermaid\s+.*?\s+```)", markdown_content, flags=re.DOTALL)
-
-        for part in parts:
-            if part.startswith("```mermaid"):
-                # Extract the code between the fences
-                mermaid_code = re.search(r"```mermaid\s+(.*?)\s+```", part, re.DOTALL)
-                if mermaid_code:
-                    st_mermaid(mermaid_code.group(1).strip())
-            else:
-                # Regular markdown text
-                st.markdown(part, unsafe_allow_html=True)
-
-    elif result and "error" in result:
-        # Error handled in poll, but if passed here:
-        st.error(f"Generation failed: {result['error']}")
-    elif result:
-        st.error(f"Unexpected API response format: {result}")
-
-
-# --- Main Application ---
-def main():
-    st.set_page_config(page_title="Wiki As Readme", page_icon="📕", layout="wide")
-
-    st.title("Wiki As Readme")
-    st.caption(
-        "Generate comprehensive documentation for your code repositories using AI."
-    )
-
-    # Initialize State
-    if "is_generating" not in st.session_state:
-        st.session_state.is_generating = False
-    if "task_id" not in st.session_state:
-        st.session_state.task_id = None
-    if "generation_result" not in st.session_state:
-        st.session_state.generation_result = None
-
-    # Render sidebar and get request object if submitted
-    request_data = render_sidebar()
-
-    # Case 1: Start new generation
+    # Start Task
     if request_data:
         task_id = asyncio.run(start_generation_task(request_data))
         if task_id:
@@ -291,27 +234,135 @@ def main():
             st.session_state.task_start_time = time.time()
             st.rerun()
 
-    # Case 2: Continue generation (Polling)
+    # Poll Status
     if st.session_state.is_generating and st.session_state.task_id:
         result = asyncio.run(poll_task_status(st.session_state.task_id))
-
-        # If we got a result (success or failure dict), stop generating
         if result:
             st.session_state.is_generating = False
             st.session_state.generation_result = result
             st.rerun()
-        # If result is None, it means polling was interrupted (e.g. tab switch)
-        # or still waiting. On next rerun, we re-enter this block.
 
-    # Case 3: Display Result
+    # Display Result
     if st.session_state.generation_result:
-        render_main_content(st.session_state.generation_result)
+        result = st.session_state.generation_result
+        if "markdown_content" in result:
+            st.success("Wiki generation complete!")
+            
+            # Use file_path from result if available, otherwise default name
+            file_name = "README.md"
+            if "file_path" in result:
+                file_name = os.path.basename(result["file_path"])
 
-    # Initial state hint
+            st.download_button(
+                label=f"📥 Download {file_name}",
+                data=result["markdown_content"],
+                file_name=file_name,
+                mime="text/markdown",
+                use_container_width=True,
+            )
+            
+            st.markdown("### Preview")
+            render_markdown_with_mermaid(result["markdown_content"])
+            
+        elif "error" in result:
+            st.error(f"Generation failed: {result['error']}")
+
+    # Initial Hint
     if not st.session_state.is_generating and not st.session_state.generation_result:
-        st.info(
-            "👈 Enter repository details in the sidebar and click 'Generate Wiki' to start."
+        st.info("👈 Enter repository details in the sidebar and click 'Generate Wiki' to start.")
+
+
+def render_history_page():
+    """Renders the History page listing generated files in a grid layout."""
+    import datetime
+
+    st.header("📚 Generated Wikis (History)")
+    st.caption(f"Files located in: `{os.path.abspath(OUTPUT_DIR)}`")
+
+    files = get_generated_files()
+
+    if not files:
+        st.warning("No generated wiki files found yet.")
+        return
+
+    # Initialize selection state
+    if "history_selected_file" not in st.session_state:
+        st.session_state.history_selected_file = None
+
+    # Grid Layout
+    cols = st.columns(3)
+    for idx, file_path in enumerate(files):
+        file_name = os.path.basename(file_path)
+        stats = os.stat(file_path)
+        # Format date: YYYY-MM-DD HH:MM
+        mod_time = datetime.datetime.fromtimestamp(stats.st_mtime).strftime(
+            "%Y-%m-%d %H:%M"
         )
+        file_size_kb = stats.st_size / 1024
+
+        with cols[idx % 3]:
+            with st.container(border=True):
+                st.markdown(f"**📄 {file_name}**")
+                st.caption(f"📅 {mod_time} | 💾 {file_size_kb:.1f} KB")
+
+                # Action Buttons
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button(
+                        "👁️ View",
+                        key=f"view_{file_name}",
+                        use_container_width=True,
+                    ):
+                        st.session_state.history_selected_file = file_path
+                        st.rerun()
+                with c2:
+                    with open(file_path, "rb") as f:
+                        st.download_button(
+                            label="📥 Save",
+                            data=f,
+                            file_name=file_name,
+                            mime="text/markdown",
+                            key=f"dl_{file_name}",
+                            use_container_width=True,
+                        )
+
+    st.divider()
+
+    # Preview Section
+    if st.session_state.history_selected_file:
+        selected_path = st.session_state.history_selected_file
+        if os.path.exists(selected_path):
+            st.subheader(f"📖 Preview: {os.path.basename(selected_path)}")
+            try:
+                with open(selected_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                render_markdown_with_mermaid(content)
+            except Exception as e:
+                st.error(f"Error reading file: {e}")
+        else:
+            st.error("File not found. It might have been deleted.")
+
+
+# --- Main Application ---
+def main():
+    st.set_page_config(page_title="Wiki As Readme", page_icon="📕", layout="wide")
+    st.title("Wiki As Readme")
+
+    # Initialize State
+    if "is_generating" not in st.session_state:
+        st.session_state.is_generating = False
+    if "task_id" not in st.session_state:
+        st.session_state.task_id = None
+    if "generation_result" not in st.session_state:
+        st.session_state.generation_result = None
+
+    # Navigation
+    page = st.sidebar.radio("Navigation", ["Generator", "History"], index=0)
+    
+    if page == "Generator":
+        render_generator_page()
+    elif page == "History":
+        render_history_page()
 
 
 if __name__ == "__main__":
