@@ -43,3 +43,12 @@ language=en
 # --- Google Cloud Platform Settings (Only for Google Vertex AI) ---
 GCP_PROJECT_NAME=
 GCP_MODEL_LOCATION=
+
+# --- Docker & Local Path Settings ---
+# [Host Path] The absolute path to the local repository you want to analyze.
+# Default is the current directory (./) in docker-compose.
+# LOCAL_REPO_PATH=/Users/username/your-project
+
+# [Host Path] The absolute path to your Google Cloud Service Account JSON key.
+# Default is ./credentials.json in docker-compose.
+# GOOGLE_CREDENTIALS_PATH=/Users/username/downloads/vertex-ai-key.json
