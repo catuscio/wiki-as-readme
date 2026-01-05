@@ -49,6 +49,10 @@ GCP_MODEL_LOCATION=
 # Default is the current directory (./) in docker-compose.
 # LOCAL_REPO_PATH=/Users/username/your-project
 
+# [Host Path] The absolute path where generated wiki files will be saved.
+# Default is ./output in docker-compose.
+# WIKI_OUTPUT_PATH=/Users/username/wiki-output
+
 # [Host Path] The absolute path to your Google Cloud Service Account JSON key.
 # Comment out the line below if NOT using Google Cloud (Vertex AI)
 # Default is ./credentials.json in docker-compose.
