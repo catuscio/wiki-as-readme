@@ -8,9 +8,11 @@ services:
     env_file:
       - .env
     environment:
+      # Comment out the line below if NOT using Google Cloud (Vertex AI)
       - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
     volumes:
       - ./output:/app/output
+      # Comment out the line below if NOT using Google Cloud (Vertex AI)
       - ${GOOGLE_CREDENTIALS_PATH:-./credentials.json}:/app/credentials.json # Google Cloud Credentials
       - ${LOCAL_REPO_PATH:-./}:/app/target_repo # Mount local directory (Default: current dir)
     restart: always

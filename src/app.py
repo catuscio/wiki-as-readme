@@ -168,8 +168,12 @@ def render_sidebar() -> WikiGenerationRequest | None:
 
         st.divider()
 
-        # Google Cloud Note
-        st.info("**Note:** Setup `.env` first")
+        # Configuration Notes
+        st.info("💡 **Note:** Setup `.env` first")
+        st.info(
+            "🐳 **Docker Tip:** For local analysis, use paths starting with `/app/target_repo` "
+            "(e.g., `/app/target_repo/your-project`)"
+        )
 
         submitted = st.button(
             "✨ Generate Wiki",
