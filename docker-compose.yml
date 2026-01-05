@@ -7,8 +7,12 @@ services:
       - "8501:8501" # Streamlit UI
     env_file:
       - .env
+    environment:
+      # Comment out the line below if NOT using Google Cloud (Vertex AI)
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
     volumes:
-      - ./output:/app/output
-      - ./credentials.json:/app/credentials.json # Google Cloud Credentials
-      - ./:/app/target_repo # Mount current directory for local analysis
+      - ${WIKI_OUTPUT_PATH:-./output}:/app/output # Save generated files to host
+      # Comment out the line below if NOT using Google Cloud (Vertex AI)
+      - ${GOOGLE_CREDENTIALS_PATH:-./credentials.json}:/app/credentials.json # Google Cloud Credentials
+      - ${LOCAL_REPO_PATH:-./}:/app/target_repo # Mount local directory (Default: current dir)
     restart: always
