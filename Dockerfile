@@ -23,7 +23,7 @@ LABEL org.opencontainers.image.description="Turn your codebase into a comprehens
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.authors="catuscio <catuscio@hotmail.com>"
 LABEL org.opencontainers.image.title="wiki-as-readme"
-LABEL org.opencontainers.image.version="1.2.1"
+LABEL org.opencontainers.image.version="1.2.2"
 
 RUN useradd -m -u 1000 appuser
 
