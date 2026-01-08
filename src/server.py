@@ -15,7 +15,7 @@ from src.api.v1.endpoints import webhook, wiki
 app = FastAPI(
     title="Wiki as Readme",
     description="Turn your codebase into a comprehensive Wiki in minutes, delivered in a single Readme.",
-    version="1.1.0",
+    version="1.2.2",
 )
 
 
