@@ -1,7 +1,7 @@
-name: Update Wiki README & Notion Sync
+name: Wiki-As-Readme As Action
 
 on:
-  # # 1. When pushing to main branch (runs automatically with defaults)
+  # 1. When pushing to main branch (runs automatically with defaults)
   # push:
   #   branches:
   #     - main
@@ -11,12 +11,9 @@ on:
   #     - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
   
   # 2. Manual trigger (allows custom input settings)
+  # "Use workflow from" menu in GitHub UI handles branch selection automatically.
   workflow_dispatch:
     inputs:
-      target_branch:
-        description: 'Target Branch to checkout'
-        required: false
-        default: 'main'
       language:
         description: 'Language code (e.g., ko, en, ja, etc.)'
         required: false
@@ -45,11 +42,10 @@ jobs:
       OUTPUT_FILE: "WIKI.md"
 
     steps:
-      # 1. Checkout code (uses input branch for manual trigger, otherwise current ref)
+      # 1. Checkout code
+      # No 'ref' needed; it automatically checks out the branch selected in the "Run workflow" UI.
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.target_branch || github.ref }}
 
       # -----------------------------------------------------------------------
       # [OPTIONAL] GCP Credentials Setup
