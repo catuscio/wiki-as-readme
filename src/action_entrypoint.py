@@ -95,8 +95,13 @@ async def main():
             try:
                 from src.services.notion_sync import sync_wiki_to_notion
 
-                # Use folder name as repo name
-                repo_name = Path(local_path).resolve().name
+                # Use GITHUB_REPOSITORY env var if available, otherwise folder name
+                github_repo = os.environ.get("GITHUB_REPOSITORY")
+                if github_repo:
+                    # GITHUB_REPOSITORY format: "owner/repo-name"
+                    repo_name = github_repo.split("/")[-1]
+                else:
+                    repo_name = Path(local_path).resolve().name
 
                 logger.info(f"Starting Notion sync for {repo_name}...")
                 result_urls = sync_wiki_to_notion(
