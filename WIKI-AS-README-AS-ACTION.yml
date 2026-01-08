@@ -40,10 +40,11 @@ on:
         default: 'push'
 
 jobs:
-  generate-commit-sync:
+  wiki-time:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     env:
       WIKI_OUTPUT_PATH: "WIKI.md"
