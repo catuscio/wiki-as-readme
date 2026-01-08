@@ -2,13 +2,13 @@ name: Wiki-As-Readme As Action
 
 on:
   # 1. When pushing to main branch (runs automatically with defaults)
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'README.md'
-      - 'WIKI.md'
-      - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - 'README.md'
+  #     - 'WIKI.md'
+  #     - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
   
   # 2. Manual trigger (allows custom input settings)
   # "Use workflow from" menu in GitHub UI handles branch selection automatically.
@@ -37,7 +37,7 @@ on:
         options:
           - push
           - pull-request
-        default: 'push'
+        default: 'pull-request'
 
 jobs:
   wiki-time:
