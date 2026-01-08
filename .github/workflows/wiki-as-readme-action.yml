@@ -39,7 +39,7 @@ jobs:
       contents: write
 
     env:
-      WIKI_OUTPUT_PATH: "WIKI.md"
+      WIKI_OUTPUT_PATH: "examples/wiki_as_README.md"
 
     steps:
       # 1. Checkout code
