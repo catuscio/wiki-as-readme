@@ -3,7 +3,7 @@ Service for synchronizing wiki content to Notion database and pages.
 """
 
 import re
-from typing import Any, cast  # [수정] cast 추가
+from typing import Any, cast
 
 from loguru import logger
 
@@ -170,7 +170,6 @@ class NotionSyncService:
             )
             resp.raise_for_status()
             
-            # [수정] httpx 응답을 명시적으로 dict로 캐스팅하여 'get' 메소드 오류 방지
             data = cast(dict[str, Any], resp.json())
             properties = data.get("properties", {})
 
@@ -200,7 +199,6 @@ class NotionSyncService:
             )
             resp.raise_for_status()
             
-            # [수정] httpx 응답 캐스팅
             data = cast(dict[str, Any], resp.json())
             results = data.get("results", [])
 
@@ -212,7 +210,6 @@ class NotionSyncService:
             logger.warning(f"Query failed: {e}")
 
         # Create new item
-        # [수정] notion_client 응답을 명시적으로 dict로 캐스팅하여 subscript 오류 방지
         response = cast(dict[str, Any], self.client.pages.create(
             parent={"database_id": self.database_id},
             properties={title_prop: {"title": [{"text": {"content": repo_name}}]}},
@@ -227,7 +224,6 @@ class NotionSyncService:
             start_cursor = None
 
             while has_more:
-                # [수정] notion_client 응답 캐스팅
                 response = cast(dict[str, Any], self.client.blocks.children.list(
                     block_id=page_id, start_cursor=start_cursor
                 ))
@@ -300,7 +296,6 @@ class NotionSyncService:
 
     def _create_page(self, parent_id: str, title: str) -> str:
         """Create a new Notion page."""
-        # [수정] notion_client 응답 캐스팅
         response = cast(dict[str, Any], self.client.pages.create(
             parent={"page_id": parent_id},
             properties={"title": {"title": [{"text": {"content": title[:2000]}}]}},
@@ -322,13 +317,11 @@ class NotionSyncService:
                 i += batch_size
             except (APIResponseError, HTTPResponseError) as e:
                 error_str = str(e)
-                # 413 에러나 Payload Too Large 메시지가 있으면 배치 사이즈를 줄임
                 if "413" in error_str or "Payload Too Large" in error_str:
                     if batch_size > 1:
                         # Reduce batch size and retry
                         batch_size = max(1, batch_size // 2)
                         logger.warning(f"Reducing batch size to {batch_size}")
-                        # i를 증가시키지 않고 continue하여 줄어든 배치 사이즈로 재시도
                         continue
                     # Single block too large - skip it
                     logger.error(f"Block too large, skipping: {e}")
