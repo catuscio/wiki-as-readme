@@ -5,12 +5,14 @@ LLM_PROVIDER=google
 # (e.g., gemini-2.5-flash, gpt-4o, claude-3-5-sonnet-latest, nvidia/nemotron-3-nano-30b-a3b:free)
 MODEL_NAME=gemini-2.5-flash
 
+
 # --- LLM API Keys ---
 # Provide the API key for your chosen provider
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 OPENROUTER_API_KEY=
 XAI_API_KEY=
+
 
 # --- LLM Configuration ---
 # Optional: Set a custom base URL for the LLM API (e.g., for Ollama or proxy)
@@ -24,7 +26,8 @@ max_retries=3
 # Limit the number of parallel LLM calls to prevent rate limits
 max_concurrency=5
 
-# --- File Filtering Settings ---
+
+# --- File Filtering Settings -s--
 # List of glob patterns to exclude from LLM context to save tokens and improve focus.
 # IMPORTANT: Defining this here will OVERRIDE the default list in src/core/config.py.
 # The value must be a single-line JSON array string.
@@ -32,17 +35,21 @@ max_concurrency=5
 # IGNORED_PATTERNS='["uv.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "poetry.lock", "Gemfile.lock", "composer.lock", "*.pyc", "*.pyo", "*.pyd", "__pycache__", ".git", ".venv", "node_modules", ".idea", ".vscode", ".DS_Store", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.ico", "*.woff", "*.woff2", "*.ttf", "*.eot", "*.mp4", "*.webm", "*.mp3", "*.wav", "*.zip", "*.tar", "*.gz", "*.rar", "*.7z", "*.pdf", "*.doc", "*.docx", "*.xls", "*.xlsx", "*.ppt", "*.pptx"]'
 # IGNORED_PATTERNS=
 
+
 # --- Repository Access Settings ---
 # GitHub/GitLab personal access token for private repos or higher rate limits
 GIT_API_TOKEN=
+
 
 # --- Localization Settings ---
 # Target language for the generated wiki (e.g., ko, en, ja, zh)
 language=en
 
+
 # --- Google Cloud Platform Settings (Only for Google Vertex AI) ---
 GCP_PROJECT_NAME=
 GCP_MODEL_LOCATION=
+
 
 # --- Docker & Local Path Settings ---
 # [Host Path] The absolute path to the local repository you want to analyze.
@@ -57,3 +64,16 @@ GCP_MODEL_LOCATION=
 # Comment out the line below if NOT using Google Cloud (Vertex AI)
 # Default is ./credentials.json in docker-compose.
 # GOOGLE_CREDENTIALS_PATH=/Users/username/downloads/vertex-ai-key.json
+
+
+# --- Notion Sync Settings (Optional) ---
+# Enable automatic sync to Notion after wiki generation.
+# NOTION_SYNC_ENABLED=true
+
+# Notion Integration Token (get from https://www.notion.so/my-integrations)
+# NOTION_API_KEY=secret_xxx...
+
+# The Notion Database ID where each repository will be added as an item.
+# Each repo becomes a DB item, with wiki sections as sub-pages inside.
+# Get from DB URL: https://notion.so/workspace/{32-char-ID}?v=...
+# NOTION_DATABASE_ID=abc123...

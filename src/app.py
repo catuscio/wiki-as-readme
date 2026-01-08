@@ -151,7 +151,7 @@ def render_generator_page():
     # Sidebar Inputs
     with st.sidebar:
         st.header("Configuration")
-        
+
         # Initialize session state for persistent inputs
         if "saved_repo_input" not in st.session_state:
             st.session_state.saved_repo_input = ""
@@ -190,7 +190,9 @@ def render_generator_page():
             "(e.g., `/app/target_repo/your-project`)"
         )
 
-        submitted = st.button("✨ Generate Wiki", type="primary", use_container_width=True)
+        submitted = st.button(
+            "✨ Generate Wiki", type="primary", use_container_width=True
+        )
 
     # Logic for Generation Request
     request_data = None
@@ -247,7 +249,7 @@ def render_generator_page():
         result = st.session_state.generation_result
         if "markdown_content" in result:
             st.success("Wiki generation complete!")
-            
+
             # Use file_path from result if available, otherwise default name
             file_name = "README.md"
             if "file_path" in result:
@@ -260,16 +262,18 @@ def render_generator_page():
                 mime="text/markdown",
                 use_container_width=True,
             )
-            
+
             st.markdown("### Preview")
             render_markdown_with_mermaid(result["markdown_content"])
-            
+
         elif "error" in result:
             st.error(f"Generation failed: {result['error']}")
 
     # Initial Hint
     if not st.session_state.is_generating and not st.session_state.generation_result:
-        st.info("👈 Enter repository details in the sidebar and click 'Generate Wiki' to start.")
+        st.info(
+            "👈 Enter repository details in the sidebar and click 'Generate Wiki' to start."
+        )
 
 
 def render_history_page():
@@ -300,31 +304,29 @@ def render_history_page():
         )
         file_size_kb = stats.st_size / 1024
 
-        with cols[idx % 3]:
-            with st.container(border=True):
-                st.markdown(f"**📄 {file_name}**")
-                st.caption(f"📅 {mod_time} | 💾 {file_size_kb:.1f} KB")
+        with cols[idx % 3], st.container(border=True):
+            st.markdown(f"**📄 {file_name}**")
+            st.caption(f"📅 {mod_time} | 💾 {file_size_kb:.1f} KB")
 
-                # Action Buttons
-                c1, c2 = st.columns(2)
-                with c1:
-                    if st.button(
-                        "👁️ View",
-                        key=f"view_{file_name}",
-                        use_container_width=True,
-                    ):
-                        st.session_state.history_selected_file = file_path
-                        st.rerun()
-                with c2:
-                    with open(file_path, "rb") as f:
-                        st.download_button(
-                            label="📥 Save",
-                            data=f,
-                            file_name=file_name,
-                            mime="text/markdown",
-                            key=f"dl_{file_name}",
-                            use_container_width=True,
-                        )
+            # Action Buttons
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button(
+                    "👁️ View",
+                    key=f"view_{file_name}",
+                    use_container_width=True,
+                ):
+                    st.session_state.history_selected_file = file_path
+                    st.rerun()
+            with c2, open(file_path, "rb") as f:
+                st.download_button(
+                    label="📥 Save",
+                    data=f,
+                    file_name=file_name,
+                    mime="text/markdown",
+                    key=f"dl_{file_name}",
+                    use_container_width=True,
+                )
 
     st.divider()
 
@@ -334,7 +336,7 @@ def render_history_page():
         if os.path.exists(selected_path):
             st.subheader(f"📖 Preview: {os.path.basename(selected_path)}")
             try:
-                with open(selected_path, "r", encoding="utf-8") as f:
+                with open(selected_path, encoding="utf-8") as f:
                     content = f.read()
                 render_markdown_with_mermaid(content)
             except Exception as e:
@@ -358,7 +360,7 @@ def main():
 
     # Navigation
     page = st.sidebar.radio("Navigation", ["Generator", "History"], index=0)
-    
+
     if page == "Generator":
         render_generator_page()
     elif page == "History":

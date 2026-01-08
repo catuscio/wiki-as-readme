@@ -7,7 +7,9 @@ import os
 
 from loguru import logger
 
+from src.core.config import settings
 from src.models.api_schema import WikiGenerationRequest
+from src.models.wiki_schema import WikiStructure
 from src.services.repo_fetcher import RepositoryFetcher
 from src.services.structure_analyzer import WikiStructureDeterminer
 from src.services.wiki_formatter import WikiFormatter
@@ -53,13 +55,29 @@ class WikiGenerationService:
         Runs the full wiki generation pipeline.
         If a determiner is provided, it continues from that state (Human-in-the-loop).
         """
+        result = await self.generate_wiki_with_structure(determiner)
+        return result["markdown"]
+
+    async def generate_wiki_with_structure(
+        self, determiner: WikiStructureDeterminer | None = None
+    ) -> dict:
+        """
+        Runs the full wiki generation pipeline and returns structure info.
+
+        Returns:
+            dict with keys:
+                - markdown: The consolidated markdown string
+                - structure: WikiStructure object (sections/pages hierarchy)
+                - pages: Dict mapping page_id to markdown content
+        """
+
         # 1. Start from scratch if no determiner is provided (Auto-pilot)
         should_close_determiner = False
         if determiner is None:
             determiner = await self._initialize_and_determine()
             should_close_determiner = True
 
-        # If the structure is determined, start content generation (unless it's already in progress or completed)
+        # If the structure is determined, start content generation
         if (
             not (determiner.is_loading or determiner.pages_in_progress)
             and not determiner.generated_pages
@@ -70,16 +88,20 @@ class WikiGenerationService:
             # 2. Wait for content generation
             await self._wait_for_completion(determiner)
 
-            # 3. Verify structure (defensive code)
+            # 3. Verify structure
             if not determiner.wiki_structure:
                 raise ValueError("Wiki structure is missing.")
 
-            # 4. Merge results
-            return WikiFormatter.consolidate_markdown(
-                determiner.wiki_structure, determiner.generated_pages
-            )
+            # 4. Build result
+            structure: WikiStructure = determiner.wiki_structure
+            pages: dict[str, str] = determiner.generated_pages
+
+            return {
+                "markdown": WikiFormatter.consolidate_markdown(structure, pages),
+                "structure": structure,
+                "pages": pages,
+            }
         finally:
-            # Clean up resources if it's a newly created determiner
             if should_close_determiner:
                 await determiner.close()
 
@@ -109,7 +131,7 @@ class WikiGenerationService:
 
     async def save_to_file(self, markdown_content: str) -> str:
         """Saves the markdown content to a file."""
-        output_dir = "output"
+        output_dir = settings.WIKI_OUTPUT_PATH or "output"
         os.makedirs(output_dir, exist_ok=True)
 
         repo_name = self.request.repo_name or "repository"

@@ -13,6 +13,7 @@ sys.path.append(os.getcwd())
 
 from loguru import logger
 
+from src.core.config import settings
 from src.models.api_schema import WikiGenerationRequest
 from src.services.wiki_generator import WikiGenerationService
 
@@ -22,17 +23,26 @@ async def main():
     Entrypoint for GitHub Action to generate Wiki/README.
     """
     # 1. Inputs from Environment Variables
-    local_path = os.getenv("INPUT_LOCAL_PATH", ".")
+    local_path = os.getenv("INPUT_LOCAL_PATH") or settings.LOCAL_REPO_PATH or "."
     output_file = (
         os.getenv("OUTPUT_FILE") or os.getenv("INPUT_OUTPUT_FILE") or "WIKI.md"
     )
     language = os.getenv("LANGUAGE") or os.getenv("INPUT_LANGUAGE") or "ko"
 
+    # Notion sync settings
+    notion_sync_enabled = (
+        os.getenv("NOTION_SYNC_ENABLED", "").lower() in ("true", "1", "yes")
+        or settings.NOTION_SYNC_ENABLED
+    )
+    notion_api_key = os.getenv("NOTION_API_KEY") or settings.NOTION_API_KEY
+    notion_database_id = os.getenv("NOTION_DATABASE_ID") or settings.NOTION_DATABASE_ID
+
     # Optional: Log the configuration (be careful not to log secrets)
     logger.info("Action triggered with:")
-    logger.info(f"  Local Path: {local_path}")
+    logger.info(f"  Local Path (Source): {local_path}")
     logger.info(f"  Output File: {output_file}")
     logger.info(f"  Language: {language}")
+    logger.info(f"  Notion Sync: {notion_sync_enabled}")
 
     # 2. Construct Request
     # We use repo_type="local" because the Action checks out the code locally.
@@ -47,9 +57,16 @@ async def main():
 
     # 3. Initialize Service and Generate
     service = WikiGenerationService(request)
+    wiki_structure = None
+    generated_pages = None
+
     try:
         logger.info("Starting Wiki Generation...")
-        markdown = await service.generate_wiki()
+        result = await service.generate_wiki_with_structure()
+
+        markdown = result["markdown"]
+        wiki_structure = result["structure"]
+        generated_pages = result["pages"]
 
         if not markdown:
             logger.error("Generated content is empty.")
@@ -57,14 +74,15 @@ async def main():
 
     except Exception as e:
         logger.error(f"Generation failed: {e}")
-        # Print full traceback for debugging in Actions logs
         import traceback
 
         traceback.print_exc()
         sys.exit(1)
 
     # 4. Write Output
-    output_path = Path(local_path) / output_file
+    output_base_dir = settings.WIKI_OUTPUT_PATH or local_path
+    os.makedirs(output_base_dir, exist_ok=True)
+    output_path = Path(output_base_dir) / output_file
     try:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(markdown)
@@ -72,6 +90,43 @@ async def main():
     except Exception as e:
         logger.error(f"Failed to write output file: {e}")
         sys.exit(1)
+
+    # 5. Notion Sync (optional)
+    if notion_sync_enabled and wiki_structure and generated_pages:
+        if not notion_api_key or not notion_database_id:
+            logger.warning(
+                "Notion sync enabled but NOTION_API_KEY or "
+                "NOTION_DATABASE_ID not set. Skipping."
+            )
+        else:
+            try:
+                from src.services.notion_sync import sync_wiki_to_notion
+
+                # Use folder name as repo name
+                repo_name = Path(local_path).resolve().name
+
+                logger.info(f"Starting Notion sync for {repo_name}...")
+                result_urls = sync_wiki_to_notion(
+                    repo_name=repo_name,
+                    structure=wiki_structure,
+                    pages_content=generated_pages,
+                    api_key=notion_api_key,
+                    database_id=notion_database_id,
+                )
+                logger.info(f"Notion sync completed. Synced {len(result_urls)} pages.")
+                for page_id, url in result_urls.items():
+                    logger.info(f"  {page_id}: {url}")
+            except ImportError:
+                logger.warning(
+                    "notion-client not installed. "
+                    "Install with: pip install wiki-as-readme[notion]"
+                )
+            except Exception as e:
+                logger.error(f"Notion sync failed: {e}")
+                import traceback
+
+                traceback.print_exc()
+                # Don't exit - wiki file was already written successfully
 
 
 if __name__ == "__main__":
