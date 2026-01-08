@@ -39,7 +39,7 @@ jobs:
       contents: write
 
     env:
-      OUTPUT_FILE: "WIKI.md"
+      WIKI_OUTPUT_PATH: "WIKI.md"
 
     steps:
       # 1. Checkout code
@@ -69,7 +69,7 @@ jobs:
           # --- Basic Settings ---
           # Use input if available, otherwise default to 'en' (e.g., for push events)
           LANGUAGE: ${{ inputs.language || 'en' }}
-          OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
+          WIKI_OUTPUT_PATH: ${{ env.WIKI_OUTPUT_PATH }}
           
           # --- LLM Provider and Model Settings ---
           LLM_PROVIDER: ${{ inputs.llm_provider || 'google' }}
@@ -106,5 +106,5 @@ jobs:
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "docs: ✨📚 Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action (${{ inputs.language || 'en' }})"
-          file_pattern: ${{ env.OUTPUT_FILE }}
+          commit_message: "docs: ✨📚 Update ${{ env.WIKI_OUTPUT_PATH }} via Wiki-As-Readme Action (${{ inputs.language || 'en' }})"
+          file_pattern: ${{ env.WIKI_OUTPUT_PATH }}

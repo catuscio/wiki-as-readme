@@ -9,9 +9,9 @@ inputs:
   language:
     description: 'Language for the generated content (e.g., ko, en)'
     required: false
-    default: 'ko'
-  output_file:
-    description: 'The filename to save the generated content'
+    default: 'en'
+  wiki_output_path:
+    description: 'The file path to save the generated wiki content'
     required: false
     default: 'WIKI.md'
   llm_provider:
@@ -81,7 +81,7 @@ runs:
   image: 'Dockerfile.action'
   env:
     LANGUAGE: ${{ inputs.language }}
-    OUTPUT_FILE: ${{ inputs.output_file }}
+    WIKI_OUTPUT_PATH: ${{ inputs.wiki_output_path }}
     LLM_PROVIDER: ${{ inputs.llm_provider }}
     MODEL_NAME: ${{ inputs.model_name }}
     OPENAI_API_KEY: ${{ inputs.openai_api_key }}
