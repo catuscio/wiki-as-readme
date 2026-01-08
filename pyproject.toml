@@ -1,6 +1,6 @@
 [project]
 name = "wiki-as-readme"
-version = "1.1.0"
+version = "1.2.0"
 description = "Turn your codebase into a comprehensive Wiki in minutes, delivered in a single Readme."
 readme = "README.md"
 authors = [{ name = "catuscio", email = "catuscio@hotmail.com" }]
@@ -29,8 +29,11 @@ api = [
     "uvicorn>=0.40.0",
     "gunicorn>=23.0.0",
 ]
+notion = [
+    "notion-client>=2.7.0",
+]
 all = [
-    "wiki-as-readme[ui,api]",
+    "wiki-as-readme[ui,api,notion]",
 ]
 
 [dependency-groups]
