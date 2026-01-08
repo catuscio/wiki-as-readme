@@ -22,25 +22,20 @@ async def main():
     """
     Entrypoint for GitHub Action to generate Wiki/README.
     """
-    # 1. Inputs from Environment Variables
-    local_path = os.getenv("INPUT_LOCAL_PATH") or settings.LOCAL_REPO_PATH or "."
-    output_file = (
-        os.getenv("OUTPUT_FILE") or os.getenv("INPUT_OUTPUT_FILE") or "WIKI.md"
-    )
-    language = os.getenv("LANGUAGE") or os.getenv("INPUT_LANGUAGE") or "ko"
+    # 1. Inputs from Settings (pydantic-settings reads environment variables automatically)
+    local_path = settings.LOCAL_REPO_PATH
+    output_path = Path(settings.WIKI_OUTPUT_PATH)
+    language = settings.language
 
     # Notion sync settings
-    notion_sync_enabled = (
-        os.getenv("NOTION_SYNC_ENABLED", "").lower() in ("true", "1", "yes")
-        or settings.NOTION_SYNC_ENABLED
-    )
-    notion_api_key = os.getenv("NOTION_API_KEY") or settings.NOTION_API_KEY
-    notion_database_id = os.getenv("NOTION_DATABASE_ID") or settings.NOTION_DATABASE_ID
+    notion_sync_enabled = settings.NOTION_SYNC_ENABLED
+    notion_api_key = settings.NOTION_API_KEY
+    notion_database_id = settings.NOTION_DATABASE_ID
 
     # Optional: Log the configuration (be careful not to log secrets)
     logger.info("Action triggered with:")
     logger.info(f"  Local Path (Source): {local_path}")
-    logger.info(f"  Output File: {output_file}")
+    logger.info(f"  Output Path: {output_path}")
     logger.info(f"  Language: {language}")
     logger.info(f"  Notion Sync: {notion_sync_enabled}")
 
@@ -80,9 +75,7 @@ async def main():
         sys.exit(1)
 
     # 4. Write Output
-    output_base_dir = settings.WIKI_OUTPUT_PATH or local_path
-    os.makedirs(output_base_dir, exist_ok=True)
-    output_path = Path(output_base_dir) / output_file
+    os.makedirs(output_path.parent, exist_ok=True)
     try:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(markdown)

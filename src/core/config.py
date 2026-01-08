@@ -74,9 +74,9 @@ class Settings(BaseSettings):
 
     GIT_API_TOKEN: str | None = None
 
-    language: (
-        Literal["ko", "en", "ja", "zh", "zh-tw", "es", "vi", "pt-br", "fr", "ru"] | None
-    ) = None
+    language: Literal[
+        "ko", "en", "ja", "zh", "zh-tw", "es", "vi", "pt-br", "fr", "ru"
+    ] = "en"
 
     # GCP
     GCP_PROJECT_NAME: str | None = None
@@ -103,7 +103,7 @@ class Settings(BaseSettings):
 
     # Path Settings
     LOCAL_REPO_PATH: str = "."
-    WIKI_OUTPUT_PATH: str = "./output"
+    WIKI_OUTPUT_PATH: str = "./WIKI.md"
 
     # Notion Integration
     NOTION_API_KEY: str | None = None
