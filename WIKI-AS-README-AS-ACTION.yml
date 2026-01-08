@@ -1,8 +1,7 @@
-# This file alone works independently in any repository.
-# Save this file as .github/workflows/WIKI-AS-README-AS-ACTION.yml.
-name: Update Wiki README
+name: Update Wiki README & Notion Sync
 
 on:
+  # 1. When pushing to main branch (runs automatically with defaults)
   push:
     branches:
       - main
@@ -10,10 +9,34 @@ on:
       - 'README.md'
       - 'WIKI.md'
       - '.github/workflows/WIKI-AS-README-AS-ACTION.yml'
+  
+  # 2. Manual trigger (allows custom input settings)
   workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Target Branch to checkout'
+        required: false
+        default: 'main'
+      language:
+        description: 'Language code (e.g., ko, en, ja, etc.)'
+        required: false
+        default: 'en'
+      llm_provider:
+        description: 'LLM Provider (google, openai, anthropic, etc.)'
+        required: false
+        default: 'google'
+      model_name:
+        description: 'Model Name'
+        required: false
+        default: 'gemini-2.5-flash'
+      sync_to_notion:
+        description: 'Sync to Notion? (true/false)'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
-  generate-and-commit:
+  generate-commit-sync:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -22,59 +45,70 @@ jobs:
       OUTPUT_FILE: "WIKI.md"
 
     steps:
+      # 1. Checkout code (uses input branch for manual trigger, otherwise current ref)
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_branch || github.ref }}
 
       # -----------------------------------------------------------------------
       # [OPTIONAL] GCP Credentials Setup
-      # Remove or comment out this step if you are NOT using Google Cloud (Vertex AI).
+      # Create GCP key only if using Google Provider (defaults to 'google' if undefined)
       # -----------------------------------------------------------------------
       - name: Create GCP Credentials File
+        if: ${{ (inputs.llm_provider == 'google') || (inputs.llm_provider == '') || (github.event_name == 'push') }}
         env:
           GCP_KEY: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
-          echo "$GCP_KEY" > ./gcp-key.json
+          if [ -n "$GCP_KEY" ]; then
+            echo "$GCP_KEY" > ./gcp-key.json
+          else
+            echo "::warning::GOOGLE_APPLICATION_CREDENTIALS secret is missing, but provider is set to google."
+          fi
 
-      # 1. Generate Wiki Content
-      - name: Generate Wiki Content
+      # 2. Generate Wiki Content & Sync
+      - name: Generate Content (and Sync to Notion if enabled)
         uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
         env:
           # --- Basic Settings ---
-          LANGUAGE: "en"
+          # Use input if available, otherwise default to 'en' (e.g., for push events)
+          LANGUAGE: ${{ inputs.language || 'en' }}
           OUTPUT_FILE: ${{ env.OUTPUT_FILE }}
           
           # --- LLM Provider and Model Settings ---
-          LLM_PROVIDER: "google"   # Options: google, openai, anthropic, etc.
-          MODEL_NAME: "gemini-2.5-flash"
+          LLM_PROVIDER: ${{ inputs.llm_provider || 'google' }}
+          MODEL_NAME: ${{ inputs.model_name || 'gemini-2.5-flash' }}
           
           # --- API Key Settings ---
           
           # [GCP / Vertex AI]
-          # These settings are only required if LLM_PROVIDER is "google".
-          # Comment them out if using other providers (OpenAI, Anthropic, etc.).
           GCP_PROJECT_NAME: ${{ secrets.GCP_PROJECT_NAME }}
           GCP_MODEL_LOCATION: ${{ secrets.GCP_MODEL_LOCATION }}
           GOOGLE_APPLICATION_CREDENTIALS: /github/workspace/gcp-key.json
           
           # [Other Providers]
-          # Uncomment and set the API key for your chosen provider.
-          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           
           # --- GitHub Token ---
           GIT_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+          # --- Notion Sync Settings ---
+          # Pass "true" only if inputs.sync_to_notion is true; otherwise "false" (including push events)
+          NOTION_SYNC_ENABLED: ${{ inputs.sync_to_notion || 'false' }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+
       # -----------------------------------------------------------------------
       # [OPTIONAL] GCP Credentials Cleanup
-      # Remove or comment out this step if you are NOT using Google Cloud.
       # -----------------------------------------------------------------------
       - name: Remove GCP Credentials File
         if: always()
         run: rm -f ./gcp-key.json
 
-      # 2. Commit and Push Changes
+      # 3. Commit and Push Changes (Update file in GitHub Repo)
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "docs: ✨Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action"
+          commit_message: "docs: ✨📚 Update ${{ env.OUTPUT_FILE }} via Wiki-As-Readme Action (${{ inputs.language || 'en' }})"
           file_pattern: ${{ env.OUTPUT_FILE }}
