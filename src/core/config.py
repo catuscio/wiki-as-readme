@@ -100,6 +100,16 @@ class Settings(BaseSettings):
         return v
 
     GITHUB_WEBHOOK_SECRET: str | None = None
+
+    # Path Settings
+    LOCAL_REPO_PATH: str = "."
+    WIKI_OUTPUT_PATH: str = "./output"
+
+    # Notion Integration
+    NOTION_API_KEY: str | None = None
+    NOTION_DATABASE_ID: str | None = None
+    NOTION_SYNC_ENABLED: bool = False
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )

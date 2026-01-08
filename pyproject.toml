@@ -29,8 +29,11 @@ api = [
     "uvicorn>=0.40.0",
     "gunicorn>=23.0.0",
 ]
+notion = [
+    "notion-client>=2.7.0",
+]
 all = [
-    "wiki-as-readme[ui,api]",
+    "wiki-as-readme[ui,api,notion]",
 ]
 
 [dependency-groups]
