@@ -169,8 +169,8 @@ class NotionSyncService:
                 headers=self._get_notion_headers(),
             )
             resp.raise_for_status()
-            
-            data = cast(dict[str, Any], resp.json())
+
+            data = cast("dict[str, Any]", resp.json())
             properties = data.get("properties", {})
 
             for name, prop in properties.items():
@@ -198,8 +198,8 @@ class NotionSyncService:
                 },
             )
             resp.raise_for_status()
-            
-            data = cast(dict[str, Any], resp.json())
+
+            data = cast("dict[str, Any]", resp.json())
             results = data.get("results", [])
 
             if results:
@@ -210,7 +210,7 @@ class NotionSyncService:
             logger.warning(f"Query failed: {e}")
 
         # Create new item
-        response = cast(dict[str, Any], self.client.pages.create(
+        response = cast("dict[str, Any]", self.client.pages.create(
             parent={"database_id": self.database_id},
             properties={title_prop: {"title": [{"text": {"content": repo_name}}]}},
         ))
@@ -224,7 +224,7 @@ class NotionSyncService:
             start_cursor = None
 
             while has_more:
-                response = cast(dict[str, Any], self.client.blocks.children.list(
+                response = cast("dict[str, Any]", self.client.blocks.children.list(
                     block_id=page_id, start_cursor=start_cursor
                 ))
 
@@ -296,7 +296,7 @@ class NotionSyncService:
 
     def _create_page(self, parent_id: str, title: str) -> str:
         """Create a new Notion page."""
-        response = cast(dict[str, Any], self.client.pages.create(
+        response = cast("dict[str, Any]", self.client.pages.create(
             parent={"page_id": parent_id},
             properties={"title": {"title": [{"text": {"content": title[:2000]}}]}},
         ))
