@@ -71,6 +71,7 @@ class Settings(BaseSettings):
     temperature: float = 0.0
     max_retries: int = 3
     max_concurrency: int = 5
+    llm_timeout: int = 300
 
     GIT_API_TOKEN: str | None = None
 
