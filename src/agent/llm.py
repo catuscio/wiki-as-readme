@@ -44,6 +44,7 @@ class LLMWikiMaker[T: BaseModel]:
         kwargs = {
             "temperature": settings.temperature,
             "max_retries": settings.max_retries,
+            "timeout": settings.llm_timeout,
         }
 
         # 1. Google Vertex AI

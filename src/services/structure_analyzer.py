@@ -152,9 +152,29 @@ class WikiStructureDeterminer:
 
             except Exception as e:
                 logger.error(f"Error generating page {page.title}: {e}")
-                self.generated_pages[page.id] = f"Error: {e}"
+                self.generated_pages[page.id] = self._build_error_placeholder(
+                    page.title, str(e), language
+                )
             finally:
                 self.pages_in_progress.discard(page.id)
+
+    @staticmethod
+    def _build_error_placeholder(page_title: str, error_msg: str, language: str) -> str:
+        if language == "ko":
+            return (
+                f"> **이 섹션의 콘텐츠 생성에 실패했습니다.**\n"
+                f">\n"
+                f"> 원인: {error_msg}\n"
+                f">\n"
+                f"> 워크플로우를 다시 실행하면 이 섹션이 정상적으로 생성될 수 있습니다.\n"
+            )
+        return (
+            f"> **Content generation failed for this section.**\n"
+            f">\n"
+            f"> Cause: {error_msg}\n"
+            f">\n"
+            f"> Re-running the workflow may resolve this issue.\n"
+        )
 
     async def determine_wiki_structure(
         self,
