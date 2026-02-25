@@ -186,7 +186,7 @@ def render_generator_page():
         st.divider()
         st.info("💡 **Note:** Setup `.env` first")
         st.info(
-            "🐳 **Docker Tip:** For local analysis, use paths starting with `/app/target_repo` "
+            "🐳 **Docker Tip:**\nFor local analysis, use paths starting with `/app/target_repo` "
             "(e.g., `/app/target_repo/your-project`)"
         )
 
@@ -231,6 +231,14 @@ def render_generator_page():
         task_id = asyncio.run(start_generation_task(request_data))
         if task_id:
             st.session_state.task_id = task_id
+
+            # Extract project name from repo_input (works for both local paths and URLs)
+            clean_input = repo_input.strip().rstrip("/\\")
+            project_name = os.path.basename(clean_input)
+            if project_name.endswith(".git"):
+                project_name = project_name[:-4]
+            st.session_state.current_project_name = project_name
+
             st.session_state.is_generating = True
             st.session_state.generation_result = None
             st.session_state.task_start_time = time.time()
@@ -250,9 +258,11 @@ def render_generator_page():
         if "markdown_content" in result:
             st.success("Wiki generation complete!")
 
-            # Use file_path from result if available, otherwise default name
+            # Use extracted project name as filename, fallback to result or default
             file_name = "README.md"
-            if "file_path" in result:
+            if "current_project_name" in st.session_state and st.session_state.current_project_name:
+                file_name = f"{st.session_state.current_project_name}.md"
+            elif "file_path" in result:
                 file_name = os.path.basename(result["file_path"])
 
             st.download_button(

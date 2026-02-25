@@ -31,13 +31,18 @@ class WikiGenerationRequest(BaseModel):
 
     @model_validator(mode="after")
     def derive_repo_details(self) -> "WikiGenerationRequest":
-        # 1. Skip if information is already complete or if it's a local repository
-        if (self.repo_owner and self.repo_name) or self.repo_type == "local":
-            return self
-
-        # 2. Parse GitHub URL
+        # 1. Parse GitHub URL
         if self.repo_type == "github" and self.repo_url:
             self._parse_github_url()
+        
+        # 2. Derive name from local path if needed
+        if self.repo_type == "local" and self.local_path and not self.repo_name:
+            import os
+            clean_path = self.local_path.strip().rstrip("/\\")
+            basename = os.path.basename(clean_path)
+            if basename.endswith(".git"):
+                basename = basename[:-4]
+            self.repo_name = basename
 
         return self
 
