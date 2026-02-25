@@ -39,6 +39,10 @@ on:
           - pull-request
         default: 'push'
 
+concurrency:
+  group: wiki-update-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   wiki-time:
     runs-on: ubuntu-latest
