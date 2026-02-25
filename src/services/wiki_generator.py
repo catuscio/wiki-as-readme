@@ -7,7 +7,6 @@ import os
 
 from loguru import logger
 
-from src.core.config import settings
 from src.models.api_schema import WikiGenerationRequest
 from src.models.wiki_schema import WikiStructure
 from src.services.repo_fetcher import RepositoryFetcher
@@ -97,7 +96,9 @@ class WikiGenerationService:
             pages: dict[str, str] = determiner.generated_pages
 
             return {
-                "markdown": WikiFormatter.consolidate_markdown(structure, pages),
+                "markdown": WikiFormatter.consolidate_markdown(
+                    structure, pages
+                ),
                 "structure": structure,
                 "pages": pages,
             }
