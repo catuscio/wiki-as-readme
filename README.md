@@ -103,9 +103,6 @@ You can manually run the workflow from the "Actions" tab and customize settings 
 **📒 Notion Sync:**\
 Optionally sync the generated content to a Notion Database.
 
-**📤 Pull Requests:**\
-Choose to open a Pull Request for review instead of pushing directly to the branch.
-
 1.  Create `.github/workflows/update-wiki.yml`:
 
     ```yaml
@@ -253,12 +250,61 @@ Choose to open a Pull Request for review instead of pushing directly to the bran
               add-paths: ${{ env.WIKI_OUTPUT_PATH }}
     ```
 
+#### How it triggers
+
+The workflow runs in two ways:
+
+| Trigger | When | Commit Method | Settings |
+| :--- | :--- | :--- | :--- |
+| **`push`** | Code is pushed to `main` | Always **Direct Push** | Uses defaults (language: `en`, model: `gemini-2.5-flash`) |
+| **`workflow_dispatch`** | Manually from the "Actions" tab | Choose **Push** or **Pull Request** | Customizable per run |
+
+> Changes to `README.md`, `WIKI.md`, and the workflow file itself are excluded from push triggers via `paths-ignore` to prevent infinite loops.
+
+#### Commit Method: Direct Push (default)
+
+When `commit_method` is `push` (or on automatic `push` events):
+
+1. The generated `WIKI.md` is committed directly to the current branch.
+2. Uses [`stefanzweifel/git-auto-commit-action`](https://github.com/stefanzweifel/git-auto-commit-action) to detect changes, stage `WIKI.md`, and push.
+3. If the content hasn't changed, no commit is created.
+4. The commit message follows the format: `✨📚 Update WIKI.md via Wiki-As-Readme Action (en)`
+
+Best for: **Automated workflows** where you want docs to always stay in sync with the code.
+
+#### Commit Method: Pull Request
+
+When `commit_method` is `pull-request` (only available via manual trigger):
+
+1. A new branch `wiki-update-{run_id}` is created from the current branch.
+2. The generated `WIKI.md` is committed to that branch.
+3. A Pull Request is automatically opened against the current branch using [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request).
+4. The PR body includes a summary of what was generated and links back to Wiki-As-Readme.
+
+Best for:
+-   **Team workflows** where wiki changes should be reviewed before merging.
+-   **CI/CD environments** where pushes to `main`/`develop` trigger deployments — using a PR avoids accidentally kicking off a deploy pipeline from an auto-generated doc commit.
+
+#### Required Secrets
+
+| Secret | Required | Description |
+| :--- | :--- | :--- |
+| `GOOGLE_APPLICATION_CREDENTIALS` | If using Google/Vertex AI | GCP service account JSON key |
+| `GCP_PROJECT_NAME` | If using Google/Vertex AI | Vertex AI project ID |
+| `GCP_MODEL_LOCATION` | If using Google/Vertex AI | Vertex AI region |
+| `OPENAI_API_KEY` | If using OpenAI | OpenAI API key |
+| `ANTHROPIC_API_KEY` | If using Anthropic | Anthropic API key |
+| `NOTION_API_KEY` | If Notion sync enabled | Notion integration token |
+| `NOTION_DATABASE_ID` | If Notion sync enabled | Target Notion database ID |
+
+> `GITHUB_TOKEN` is automatically provided by GitHub Actions — no manual setup needed. It requires `contents: write` and `pull-requests: write` permissions as configured in the workflow.
+
 ### 2. Docker Compose (Local)
 
 Run the application locally with a single command. This is the easiest way to try out the UI.
 
 1.  **Configure `.env`**: 
-    Copy `.env example` to `.env`.
+    Copy `.env.example` to `.env`.
     -   Set your API keys (e.g., `LLM_PROVIDER`, `OPENAI_API_KEY`, or `GCP_...`).
     -   (Optional) Configure Notion Sync settings (`NOTION_SYNC_ENABLED`, etc.) or change the `LOCAL_REPO_PATH` to point to your target code.
 
@@ -286,7 +332,7 @@ For developers who want to modify the source code or run without Docker.
     ```
 
 2.  **Configure `.env`**:
-    Copy `.env example` to `.env` and set your variables.
+    Copy `.env.example` to `.env` and set your variables.
 
 3.  **Run Backend**:
     ```bash
@@ -308,23 +354,33 @@ You can deploy the API server to handle requests or webhooks (e.g., from GitHub)
 
 ### Configuration Reference (`.env`)
 
-Whether running locally or in Docker, you configure the app via environment variables:
+Whether running locally or in Docker, you configure the app via environment variables.
+See [`.env.example`](.env.example) for a complete template with comments.
 
-| Category | Variable | Description | Example |
+| Category | Variable | Description | Default |
 | :--- | :--- | :--- | :--- |
-| **LLM Provider** | `LLM_PROVIDER` | `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama` | `google` |
+| **LLM** | `LLM_PROVIDER` | `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama` | `google` |
 | | `MODEL_NAME` | Specific model identifier | `gemini-2.5-flash` |
-| | `LLM_BASE_URL` | Custom base URL (e.g., for Ollama/Proxies) | `http://localhost:11434/v1` |
-| **Auth** | `OPENAI_API_KEY` | OpenAI API Key | `sk-...` |
-| | `ANTHROPIC_API_KEY` | Anthropic API Key | `sk-ant...` |
-| | `GCP_PROJECT_NAME` | Vertex AI Project ID | `my-genai-project` |
-| **Notion Sync** | `NOTION_SYNC_ENABLED` | Sync to Notion after generation | `true` |
-| | `NOTION_API_KEY` | Notion Integration Token | `secret_...` |
-| | `NOTION_DATABASE_ID` | Target Notion Database ID | `abc123...` |
-| **Paths** | `WIKI_OUTPUT_PATH` | Path to save generated wiki (default: `WIKI.md` or `./output`) | `./output/WIKI.md` |
-| | `LOCAL_REPO_PATH` | Local repo path for Docker mounting | `/Users/me/project` |
-| **Advanced** | `USE_STRUCTURED_OUTPUT`| Use native JSON mode | `true` |
-| | `IGNORED_PATTERNS` | **JSON array** of glob patterns to exclude | `'["*.log", "node_modules/*"]'` |
+| | `LLM_BASE_URL` | Custom base URL (e.g., for Ollama or proxies) | — |
+| | `USE_STRUCTURED_OUTPUT`| Use native JSON mode (requires model support) | `true` |
+| | `temperature` | LLM randomness (0.0 = deterministic, 1.0 = creative) | `0.0` |
+| | `max_retries` | Retry count for failed LLM requests | `3` |
+| | `max_concurrency` | Max parallel LLM calls (prevents rate limits) | `5` |
+| **Auth** | `OPENAI_API_KEY` | OpenAI API Key | — |
+| | `ANTHROPIC_API_KEY` | Anthropic API Key | — |
+| | `OPENROUTER_API_KEY` | OpenRouter API Key | — |
+| | `XAI_API_KEY` | xAI API Key | — |
+| | `GIT_API_TOKEN` | GitHub/GitLab PAT for private repos | — |
+| **GCP** | `GCP_PROJECT_NAME` | Vertex AI Project ID | — |
+| | `GCP_MODEL_LOCATION` | Vertex AI Region | — |
+| **Output** | `language` | Wiki language (`ko`, `en`, `ja`, `zh`, `zh-tw`, `es`, `vi`, `pt-br`, `fr`, `ru`) | `en` |
+| | `WIKI_OUTPUT_PATH` | Path to save generated wiki | `./WIKI.md` |
+| | `LOCAL_REPO_PATH` | Local repo path for Docker mounting | `.` |
+| | `IGNORED_PATTERNS` | **JSON array** of glob patterns to exclude from analysis | (see `config.py`) |
+| **Notion** | `NOTION_SYNC_ENABLED` | Sync to Notion after generation | `false` |
+| | `NOTION_API_KEY` | Notion Integration Token | — |
+| | `NOTION_DATABASE_ID` | Target Notion Database ID | — |
+| **Webhook** | `GITHUB_WEBHOOK_SECRET`| HMAC secret for webhook signature verification | — |
 
 
 ## 🔌 API Reference
@@ -356,6 +412,11 @@ Retrieves the status and result of a generation task.
 
 #### `POST /api/v1/webhook/github`
 Endpoint for GitHub Webhooks (Push events). Triggers automatic wiki generation on pushes to the `main` branch.
+
+-   **HMAC Verification:** If `GITHUB_WEBHOOK_SECRET` is set, the endpoint verifies the `X-Hub-Signature-256` header.
+-   **Loop Prevention:** Commits made by `Wiki-As-Readme-Bot` or containing "via Wiki-As-Readme" in the message are automatically ignored to prevent infinite loops.
+-   **Branch Filter:** Only `refs/heads/main` pushes trigger generation; all other branches are ignored.
+-   **Requires:** `GITHUB_ACCESS_TOKEN` environment variable to commit the generated wiki back to the repository.
 
 
 ## 🛠️ Architecture
