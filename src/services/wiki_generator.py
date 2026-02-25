@@ -7,7 +7,6 @@ import os
 
 from loguru import logger
 
-from src.core.config import settings
 from src.models.api_schema import WikiGenerationRequest
 from src.models.wiki_schema import WikiStructure
 from src.services.repo_fetcher import RepositoryFetcher
@@ -97,7 +96,9 @@ class WikiGenerationService:
             pages: dict[str, str] = determiner.generated_pages
 
             return {
-                "markdown": WikiFormatter.consolidate_markdown(structure, pages),
+                "markdown": WikiFormatter.consolidate_markdown(
+                    structure, pages
+                ),
                 "structure": structure,
                 "pages": pages,
             }
@@ -131,12 +132,12 @@ class WikiGenerationService:
 
     async def save_to_file(self, markdown_content: str) -> str:
         """Saves the markdown content to a file."""
-        output_dir = settings.WIKI_OUTPUT_PATH or "output"
+        output_dir = "output"
         os.makedirs(output_dir, exist_ok=True)
 
         repo_name = self.request.repo_name or "repository"
         safe_name = WikiFormatter.sanitize_filename(repo_name)
-        file_path = os.path.join(output_dir, f"{safe_name}_README.md")
+        file_path = os.path.join(output_dir, f"{safe_name}.md")
 
         try:
             # TODO: Consider using aiofiles for async process

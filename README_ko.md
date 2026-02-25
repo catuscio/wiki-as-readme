@@ -103,9 +103,6 @@
 **📒 노션 동기화 (Notion Sync):**\
 생성된 콘텐츠를 노션 데이터베이스와 선택적으로 동기화합니다.
 
-**📤 Pull Requests:**\
-브랜치에 직접 푸시하는 대신 검토를 위한 Pull Request를 생성할 수 있습니다.
-
 1.  `.github/workflows/update-wiki.yml` 파일 생성:
 
     ```yaml
@@ -253,12 +250,61 @@
               add-paths: ${{ env.WIKI_OUTPUT_PATH }}
     ```
 
+#### 트리거 방식
+
+워크플로우는 두 가지 방식으로 실행됩니다:
+
+| 트리거 | 시점 | 커밋 방식 | 설정 |
+| :--- | :--- | :--- | :--- |
+| **`push`** | `main` 브랜치에 코드 푸시 시 | 항상 **직접 푸시** | 기본값 사용 (language: `en`, model: `gemini-2.5-flash`) |
+| **`workflow_dispatch`** | "Actions" 탭에서 수동 실행 | **Push** 또는 **Pull Request** 선택 | 실행 시 커스터마이징 가능 |
+
+> `README.md`, `WIKI.md`, 워크플로우 파일 자체의 변경은 `paths-ignore`로 제외되어 무한 루프를 방지합니다.
+
+#### 커밋 방식: 직접 푸시 (기본값)
+
+`commit_method`가 `push`이거나 자동 `push` 이벤트인 경우:
+
+1. 생성된 `WIKI.md`가 현재 브랜치에 직접 커밋됩니다.
+2. [`stefanzweifel/git-auto-commit-action`](https://github.com/stefanzweifel/git-auto-commit-action)이 변경사항을 감지하고, `WIKI.md`를 스테이징한 후 푸시합니다.
+3. 내용이 변경되지 않았다면 커밋이 생성되지 않습니다.
+4. 커밋 메시지 형식: `✨📚 Update WIKI.md via Wiki-As-Readme Action (en)`
+
+적합한 경우: 문서를 코드와 항상 동기화하려는 **자동화 워크플로우**.
+
+#### 커밋 방식: Pull Request
+
+`commit_method`가 `pull-request`인 경우 (수동 트리거에서만 선택 가능):
+
+1. 현재 브랜치에서 `wiki-update-{run_id}` 브랜치가 새로 생성됩니다.
+2. 생성된 `WIKI.md`가 해당 브랜치에 커밋됩니다.
+3. [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request)를 사용하여 현재 브랜치를 대상으로 Pull Request가 자동 생성됩니다.
+4. PR 본문에는 생성된 내용의 요약과 Wiki-As-Readme 링크가 포함됩니다.
+
+적합한 경우:
+-   위키 변경사항을 머지 전에 리뷰해야 하는 **팀 워크플로우**.
+-   `main`/`develop` 푸시 시 배포가 트리거되는 **CI/CD 환경** — PR을 사용하면 자동 생성된 문서 커밋으로 의도치 않은 배포가 실행되는 것을 방지할 수 있습니다.
+
+#### 필요한 Secrets
+
+| Secret | 필수 여부 | 설명 |
+| :--- | :--- | :--- |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Google/Vertex AI 사용 시 | GCP 서비스 계정 JSON 키 |
+| `GCP_PROJECT_NAME` | Google/Vertex AI 사용 시 | Vertex AI 프로젝트 ID |
+| `GCP_MODEL_LOCATION` | Google/Vertex AI 사용 시 | Vertex AI 리전 |
+| `OPENAI_API_KEY` | OpenAI 사용 시 | OpenAI API 키 |
+| `ANTHROPIC_API_KEY` | Anthropic 사용 시 | Anthropic API 키 |
+| `NOTION_API_KEY` | 노션 동기화 활성화 시 | 노션 통합 토큰 |
+| `NOTION_DATABASE_ID` | 노션 동기화 활성화 시 | 대상 노션 데이터베이스 ID |
+
+> `GITHUB_TOKEN`은 GitHub Actions에서 자동으로 제공되므로 별도 설정이 필요 없습니다. 워크플로우에 설정된 대로 `contents: write`와 `pull-requests: write` 권한이 필요합니다.
+
 ### 2. Docker Compose (로컬)
 
 명령어 한 줄로 로컬에서 애플리케이션을 실행하세요. UI를 체험해보기 가장 쉬운 방법입니다.
 
 1.  **`.env` 설정**:
-    `.env example`을 `.env`로 복사하세요.
+    `.env.example`을 `.env`로 복사하세요.
     -   API 키를 설정하세요 (예: `LLM_PROVIDER`, `OPENAI_API_KEY`, 또는 `GCP_...`).
     -   (선택 사항) 노션 동기화 설정(`NOTION_SYNC_ENABLED` 등)을 구성하거나 대상 코드를 가리키도록 `LOCAL_REPO_PATH`를 변경하세요.
 
@@ -286,7 +332,7 @@
     ```
 
 2.  **`.env` 설정**:
-    `.env example`을 `.env`로 복사하고 변수를 설정하세요.
+    `.env.example`을 `.env`로 복사하고 변수를 설정하세요.
 
 3.  **백엔드 실행**:
     ```bash
@@ -308,23 +354,33 @@ GitHub 등의 웹훅 요청을 처리할 수 있는 API 서버로 배포할 수 
 
 ### 설정 참조 (`.env`)
 
-로컬이나 도커 환경 모두 환경 변수를 통해 설정합니다:
+로컬이나 도커 환경 모두 환경 변수를 통해 설정합니다.
+전체 템플릿과 주석은 [`.env.example`](.env.example)을 참고하세요.
 
-| 카테고리 | 변수명 | 설명 | 예시 |
+| 카테고리 | 변수명 | 설명 | 기본값 |
 | :--- | :--- | :--- | :--- |
-| **LLM Provider** | `LLM_PROVIDER` | `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama` | `google` |
+| **LLM** | `LLM_PROVIDER` | `google`, `openai`, `anthropic`, `xai`, `openrouter`, `ollama` | `google` |
 | | `MODEL_NAME` | 사용할 모델 식별자 | `gemini-2.5-flash` |
-| | `LLM_BASE_URL` | 커스텀 기본 URL (예: Ollama/프록시) | `http://localhost:11434/v1` |
-| **인증** | `OPENAI_API_KEY` | OpenAI API 키 | `sk-...` |
-| | `ANTHROPIC_API_KEY` | Anthropic API 키 | `sk-ant...` |
-| | `GCP_PROJECT_NAME` | Vertex AI 프로젝트 ID | `my-genai-project` |
-| **노션 동기화** | `NOTION_SYNC_ENABLED` | 생성 후 노션 동기화 여부 | `true` |
-| | `NOTION_API_KEY` | 노션 통합 토큰 | `secret_...` |
-| | `NOTION_DATABASE_ID` | 대상 노션 데이터베이스 ID | `abc123...` |
-| **경로** | `WIKI_OUTPUT_PATH` | 생성된 위키 저장 경로 (기본값: `WIKI.md` 또는 `./output`) | `./output/WIKI.md` |
-| | `LOCAL_REPO_PATH` | 도커 마운트용 로컬 저장소 경로 | `/Users/me/project` |
-| **고급 설정** | `USE_STRUCTURED_OUTPUT`| 네이티브 JSON 모드 사용 여부 | `true` |
-| | `IGNORED_PATTERNS` | 제외할 파일 패턴 (**JSON 배열**) | `'["*.log", "node_modules/*"]'` |
+| | `LLM_BASE_URL` | 커스텀 기본 URL (예: Ollama/프록시) | — |
+| | `USE_STRUCTURED_OUTPUT`| 네이티브 JSON 모드 사용 (모델 지원 필요) | `true` |
+| | `temperature` | LLM 무작위성 (0.0 = 결정적, 1.0 = 창의적) | `0.0` |
+| | `max_retries` | LLM 요청 실패 시 재시도 횟수 | `3` |
+| | `max_concurrency` | 최대 병렬 LLM 호출 수 (rate limit 방지) | `5` |
+| **인증** | `OPENAI_API_KEY` | OpenAI API 키 | — |
+| | `ANTHROPIC_API_KEY` | Anthropic API 키 | — |
+| | `OPENROUTER_API_KEY` | OpenRouter API 키 | — |
+| | `XAI_API_KEY` | xAI API 키 | — |
+| | `GIT_API_TOKEN` | 비공개 저장소용 GitHub/GitLab PAT | — |
+| **GCP** | `GCP_PROJECT_NAME` | Vertex AI 프로젝트 ID | — |
+| | `GCP_MODEL_LOCATION` | Vertex AI 리전 | — |
+| **출력** | `language` | 위키 언어 (`ko`, `en`, `ja`, `zh`, `zh-tw`, `es`, `vi`, `pt-br`, `fr`, `ru`) | `en` |
+| | `WIKI_OUTPUT_PATH` | 생성된 위키 저장 경로 | `./WIKI.md` |
+| | `LOCAL_REPO_PATH` | 도커 마운트용 로컬 저장소 경로 | `.` |
+| | `IGNORED_PATTERNS` | 분석에서 제외할 파일 패턴 (**JSON 배열**) | (`config.py` 참조) |
+| **노션** | `NOTION_SYNC_ENABLED` | 생성 후 노션 동기화 여부 | `false` |
+| | `NOTION_API_KEY` | 노션 통합 토큰 | — |
+| | `NOTION_DATABASE_ID` | 대상 노션 데이터베이스 ID | — |
+| **웹훅** | `GITHUB_WEBHOOK_SECRET`| 웹훅 서명 검증용 HMAC 시크릿 | — |
 
 
 ## 🔌 API 명세
@@ -356,6 +412,11 @@ GitHub 등의 웹훅 요청을 처리할 수 있는 API 서버로 배포할 수 
 
 #### `POST /api/v1/webhook/github`
 GitHub 웹훅(Push 이벤트) 엔드포인트입니다. `main` 브랜치 푸시 시 자동으로 위키 생성을 트리거합니다.
+
+-   **HMAC 검증:** `GITHUB_WEBHOOK_SECRET` 설정 시 `X-Hub-Signature-256` 헤더를 검증합니다.
+-   **무한루프 방지:** `Wiki-As-Readme-Bot`이 만든 커밋이나 "via Wiki-As-Readme"이 포함된 커밋 메시지는 자동으로 무시됩니다.
+-   **브랜치 필터:** `refs/heads/main` 푸시만 생성을 트리거하며, 그 외 브랜치는 무시됩니다.
+-   **필수 설정:** 생성된 위키를 저장소에 커밋하려면 `GITHUB_ACCESS_TOKEN` 환경 변수가 필요합니다.
 
 ## 🛠️ 아키텍처
 
