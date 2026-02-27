@@ -189,7 +189,7 @@
 
           # 2. Generate Wiki Content & Sync
           - name: Generate Content (and Sync to Notion if enabled)
-            uses: catuscio/wiki-as-readme@v1.4.1
+            uses: catuscio/wiki-as-readme@v1.5.0
             env:
               # --- Basic Settings ---
               # Use input if available, otherwise default to 'en' (e.g., for push events)
