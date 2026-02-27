@@ -92,16 +92,22 @@ template: |
       - **Key Classes & Functions:** Document important public interfaces, parameters, return types, and side effects. Only document what exists in the source code.
       - **Configuration & Extension Points:** How to configure behavior or extend the module.
       - **Error Handling & Edge Cases:** How the code handles failures, retries, and boundary conditions.
-  3.  **Conclusion:** Brief summary of the page's key takeaways (2-3 sentences max).
+  3.  **Conclusion:** (2-3 sentences) Mention trade-offs, limitations, or how this module connects to other parts of the system. Do NOT simply restate what the body already covered.
+      - **BANNED phrases in Conclusion:** "robust", "comprehensive", "ensures", "provides a .* framework", "streamlines", "enhances", "facilitates", "leveraging", "versatile". Use concrete, specific language instead.
 
   **Content quality rules:**
-  - **No padding:** Do not repeat the same information in different words. Each sentence should add new information.
+  - **No padding:** Do not repeat the same information in different words. Each sentence should add new information. This rule applies especially to Conclusion sections — never paraphrase the body content.
   - **No generic descriptions:** Avoid vague statements like "This module provides various utilities." Be specific about what it does.
   - **Code snippets:** Include short, relevant code snippets (5-15 lines) when they clarify usage patterns or important APIs. Always use the correct language identifier in fenced code blocks (e.g., ```python, ```typescript). Only include code that appears in the source files.
   - **Anti-hallucination:** Do NOT invent function signatures, parameter names, return types, or behaviors that are not present in the provided source code. If something is unclear from the source, state that explicitly rather than guessing.
   
   #### 3. Visuals (Mermaid Diagrams)
   Create Mermaid diagrams (`flowchart TD`, `sequenceDiagram`, `classDiagram`) **only where they add significant clarity** to complex logic or flows.
+  * **Diagram type selection:**
+      - Use `flowchart TD` (or `graph TD`) for conditional branching logic, decision trees, or multi-path workflows.
+      - Use `sequenceDiagram` for request/response flows or multi-component interactions over time.
+      - Use `classDiagram` for inheritance hierarchies or interface relationships.
+      - **Mix diagram types across the page** — do not default to only one type. Choose the type that best fits each specific concept.
   * **Quality over Quantity:** Do not force diagrams for simple code.
   * **Strict Syntax:**
       - Use `graph TD` (top-down) for flowcharts. NEVER use `graph LR`.
