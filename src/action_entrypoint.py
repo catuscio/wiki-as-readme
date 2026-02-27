@@ -47,7 +47,7 @@ async def main():
         repo_owner="action",  # Placeholder
         repo_name="action",  # Placeholder
         language=language,
-        is_comprehensive_view=True,
+        is_comprehensive_view=settings.IS_COMPREHENSIVE_VIEW,
     )
 
     # 3. Initialize Service and Generate

@@ -139,6 +139,11 @@
             type: boolean
             required: false
             default: false
+          is_comprehensive_view:
+            description: 'Generate comprehensive wiki with more pages (true/false)'
+            type: boolean
+            required: false
+            default: true
           commit_method:
             description: 'How to apply changes'
             type: choice
@@ -146,6 +151,10 @@
               - push
               - pull-request
             default: 'push'
+
+    concurrency:
+      group: wiki-update-${{ github.ref }}
+      cancel-in-progress: true
 
     jobs:
       wiki-time:
@@ -180,13 +189,14 @@
 
           # 2. Generate Wiki Content & Sync
           - name: Generate Content (and Sync to Notion if enabled)
-            uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+            uses: catuscio/wiki-as-readme@v1.5.0
             env:
               # --- Basic Settings ---
               # Use input if available, otherwise default to 'en' (e.g., for push events)
               LANGUAGE: ${{ inputs.language || 'en' }}
               WIKI_OUTPUT_PATH: ${{ env.WIKI_OUTPUT_PATH }}
-              
+              IS_COMPREHENSIVE_VIEW: ${{ inputs.is_comprehensive_view == '' && 'true' || inputs.is_comprehensive_view }}
+
               # --- LLM Provider and Model Settings ---
               LLM_PROVIDER: ${{ inputs.llm_provider || 'google' }}
               MODEL_NAME: ${{ inputs.model_name || 'gemini-2.5-flash' }}
@@ -366,6 +376,7 @@ GitHub 등의 웹훅 요청을 처리할 수 있는 API 서버로 배포할 수 
 | | `temperature` | LLM 무작위성 (0.0 = 결정적, 1.0 = 창의적) | `0.0` |
 | | `max_retries` | LLM 요청 실패 시 재시도 횟수 | `3` |
 | | `max_concurrency` | 최대 병렬 LLM 호출 수 (rate limit 방지) | `5` |
+| | `llm_timeout` | LLM 요청당 타임아웃 (초) | `300` |
 | **인증** | `OPENAI_API_KEY` | OpenAI API 키 | — |
 | | `ANTHROPIC_API_KEY` | Anthropic API 키 | — |
 | | `OPENROUTER_API_KEY` | OpenRouter API 키 | — |
@@ -377,6 +388,7 @@ GitHub 등의 웹훅 요청을 처리할 수 있는 API 서버로 배포할 수 
 | | `WIKI_OUTPUT_PATH` | 생성된 위키 저장 경로 | `./WIKI.md` |
 | | `LOCAL_REPO_PATH` | 도커 마운트용 로컬 저장소 경로 | `.` |
 | | `IGNORED_PATTERNS` | 분석에서 제외할 파일 패턴 (**JSON 배열**) | (`config.py` 참조) |
+| | `IS_COMPREHENSIVE_VIEW` | 상세 위키(8-12페이지) vs 간결 위키(4-6페이지) | `true` |
 | **노션** | `NOTION_SYNC_ENABLED` | 생성 후 노션 동기화 여부 | `false` |
 | | `NOTION_API_KEY` | 노션 통합 토큰 | — |
 | | `NOTION_DATABASE_ID` | 대상 노션 데이터베이스 ID | — |

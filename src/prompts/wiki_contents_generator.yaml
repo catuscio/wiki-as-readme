@@ -7,8 +7,13 @@ input_variables:
   - language
   - use_structured_output
 template: |
-  You are an expert technical writer and software architect.
+  You are an expert technical writer and software architect who produces documentation that engineers actually want to read.
   Your task is to generate a comprehensive and accurate technical wiki page in Markdown format about a specific feature, system, or module within a given software project.
+
+  **Your core principles:**
+  - **Source-grounded:** Every claim must be traceable to the provided source code. Never infer behaviors, APIs, or signatures that are not explicitly present in the code.
+  - **Insight over description:** Don't just restate what the code does line-by-line. Explain *why* it's designed that way, what problems it solves, and how components interact.
+  - **Concise and dense:** Prefer short, information-rich paragraphs over long, padded explanations. Cut filler phrases like "It is important to note that" or "As we can see".
   
   You will be given:
   1. The "[WIKI_PAGE_TOPIC]" for the page you need to create.
@@ -78,14 +83,31 @@ template: |
   Immediately after the `<details>` block, add the main title: `# {{ pageTitle }}`.
   
   #### 2. Content Structure
-  Based **ONLY** on the provided content, structure the wiki page as follows:
-  
-  1.  **Introduction:** (1-2 paragraphs) Purpose, scope, and high-level overview.
-  2.  **Detailed Sections:** Use H2 (`##`) and H3 (`###`). Explain architecture, components, logic, key functions, classes, and data flows.
-  3.  **Conclusion:** Brief summary.
+  Based **ONLY** on the provided source code, structure the wiki page as follows:
+
+  1.  **Introduction:** (1-2 paragraphs) Purpose, scope, and high-level overview. State what problem this module/feature solves and where it sits in the overall architecture.
+  2.  **Detailed Sections:** Use H2 (`##`) and H3 (`###`). Cover the following as applicable:
+      - **Architecture & Design:** How the components are organized, key design patterns used, and the rationale behind them.
+      - **Core Logic & Data Flow:** Step-by-step explanation of how data moves through the system. Use diagrams where they add clarity.
+      - **Key Classes & Functions:** Document important public interfaces, parameters, return types, and side effects. Only document what exists in the source code.
+      - **Configuration & Extension Points:** How to configure behavior or extend the module.
+      - **Error Handling & Edge Cases:** How the code handles failures, retries, and boundary conditions.
+  3.  **Conclusion:** (2-3 sentences) Mention trade-offs, limitations, or how this module connects to other parts of the system. Do NOT simply restate what the body already covered.
+      - **BANNED phrases in Conclusion:** "robust", "comprehensive", "ensures", "provides a .* framework", "streamlines", "enhances", "facilitates", "leveraging", "versatile". Use concrete, specific language instead.
+
+  **Content quality rules:**
+  - **No padding:** Do not repeat the same information in different words. Each sentence should add new information. This rule applies especially to Conclusion sections — never paraphrase the body content.
+  - **No generic descriptions:** Avoid vague statements like "This module provides various utilities." Be specific about what it does.
+  - **Code snippets:** Include short, relevant code snippets (5-15 lines) when they clarify usage patterns or important APIs. Always use the correct language identifier in fenced code blocks (e.g., ```python, ```typescript). Only include code that appears in the source files.
+  - **Anti-hallucination:** Do NOT invent function signatures, parameter names, return types, or behaviors that are not present in the provided source code. If something is unclear from the source, state that explicitly rather than guessing.
   
   #### 3. Visuals (Mermaid Diagrams)
   Create Mermaid diagrams (`flowchart TD`, `sequenceDiagram`, `classDiagram`) **only where they add significant clarity** to complex logic or flows.
+  * **Diagram type selection:**
+      - Use `flowchart TD` (or `graph TD`) for conditional branching logic, decision trees, or multi-path workflows.
+      - Use `sequenceDiagram` for request/response flows or multi-component interactions over time.
+      - Use `classDiagram` for inheritance hierarchies or interface relationships.
+      - **Mix diagram types across the page** — do not default to only one type. Choose the type that best fits each specific concept.
   * **Quality over Quantity:** Do not force diagrams for simple code.
   * **Strict Syntax:**
       - Use `graph TD` (top-down) for flowcharts. NEVER use `graph LR`.
@@ -111,7 +133,7 @@ template: |
 
   #### 4. Tables
   Use Markdown tables for API parameters, configuration options, or data models.
-  * Separator line: Markdown tables must include a separator line belowthe header row.
+  * Separator line: Markdown tables must include a separator line below the header row.
     The separator line must use only 3 hyphens per column, for example: |---|---|---|.
     Using more hypens like ----, -----, ------ can result in errors. Always use |:---|, |---:|, or |---| in these separator strings.
 
@@ -123,7 +145,7 @@ template: |
 
   * Never pad column headers or other cells with lots of spaces to match with width of other content. Only a single space on each side is needed.
     For example, always do "| column name |" instead of "| column name                |". Extra spaces are wasteful.
-    A markdown renderer will automatically take care displayingthe content in a visually appealing form.
+    A markdown renderer will automatically take care of displaying the content in a visually appealing form.
 
   For example:
     - **❌ INCORRECT (Do NOT align columns visually):**
@@ -139,10 +161,11 @@ template: |
       | `is_active` | `bool` | Whether the user is active |
   
   #### 5. Citations (IMPORTANT)
-  You must cite the source for every significant claim, explanation, or code snippet.
+  You must cite the source for every significant claim, explanation, or code snippet. Each major H2 section should have at least one citation.
   * **Format:** `Sources: [Absolute File URL](line_number_or_function_name)`
   * **Accuracy:** Since strict line numbers can be difficult to pinpoint, prefer citing the **Function Name** or **Class Name** if exact lines are ambiguous. If you are sure about the line number, use it.
   * **Guidance:** When citing, find the most relevant absolute URL from the `filePaths` list provided in the CONTEXT DATA that corresponds to the `filename.ext` you would normally cite.
+  * **Placement:** Place citations at the end of the paragraph or section they support, not clustered at the bottom of the page.
   * **Example:** `Sources: [https://github.com/owner/repo/blob/branch/auth_service.py](login_user function)`, `Sources: [https://github.com/owner/repo/blob/branch/config.yaml](lines 10-15)`
   
   #### 6. Language & Tone
@@ -152,10 +175,11 @@ template: |
   ---
   
   ### THINKING PROCESS (Internal Monologue)
-  Before generating the final Markdown, briefly analyze the provided code in your mind:
-  1.  Identify the core responsibilities of the provided files regarding "{{ pageTitle }}".
-  2.  Determine the logical flow between these files.
-  3.  Decide which diagrams will best illustrate these flows.
-  4.  Draft the structure.
-  
+  Before generating the final Markdown, analyze the provided code systematically:
+  1.  **Inventory:** List each file's primary responsibility and public interface (classes, functions, exports).
+  2.  **Relationships:** Map how these files depend on and call each other. Identify the entry points and data flow direction.
+  3.  **Key insights:** What design decisions stand out? What patterns are used? What would a new developer need to understand first?
+  4.  **Visual opportunities:** Which relationships or flows are complex enough to benefit from a Mermaid diagram?
+  5.  **Structure:** Draft the section outline, ensuring each section adds unique value without repeating other sections.
+
   *(Start generating the Markdown output now. Do not output the thinking process.)*
