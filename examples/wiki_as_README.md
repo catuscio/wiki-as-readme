@@ -19,7 +19,7 @@ Comprehensive documentation for the Wiki As Readme project, covering its feature
 
 ---
 
-<a name="introduction-to-wiki-as-readme"></a>
+<a name="project-overview"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -33,7 +33,7 @@ The following files were used as context for generating this wiki page:
 - [pyproject.toml](pyproject.toml)
 </details>
 
-# Introduction to Wiki As Readme
+# Project Overview
 
 **Wiki As Readme** is an AI-powered documentation tool designed to transform any codebase into a comprehensive wiki or `README.md` file within minutes. It serves as a "drop-in" solution for automated, high-quality technical documentation by emphasizing universal compatibility across various Large Language Models (LLMs), Git platforms, and deployment environments. The project's core purpose is to reduce the manual effort associated with maintaining up-to-date project documentation by leveraging AI for deep context analysis and structured content generation.
 Sources: [README.md](Introduction section), [CLAUDE.md](Project Overview)
@@ -305,7 +305,7 @@ Sources: [README.md](1. GitHub Action (Recommended) section), [README.md](POST /
 
 ---
 
-<a name="core-features-overview"></a>
+<a name="universal-compatibility"></a>
 
 <details>
 <summary>Relevant source files</summary>
@@ -319,7 +319,7 @@ The following files were used as context for generating this wiki page:
 - [src/prompts/wiki_structure_generator.yaml](src/prompts/wiki_structure_generator.yaml)
 </details>
 
-# Core Features Overview
+# Universal Compatibility
 
 This document outlines the core features and architectural components of the wiki generation system. The system automates the creation of technical documentation by analyzing a software repository, determining a logical wiki structure, and generating detailed page content using Large Language Models (LLMs). It addresses the challenge of producing comprehensive, accurate, and engineer-friendly documentation from source code.
 
@@ -509,14 +509,19 @@ The system incorporates error handling at various stages to ensure robustness an
 *   **File Saving:** `WikiGenerationService.save_to_file` includes a `try-except` block to handle potential `OSError` during file system operations.
 Sources: [src/services/wiki_generator.py](validate_request), [src/services/wiki_generator.py](_initialize_and_determine), [src/services/structure_analyzer.py](determine_wiki_structure), [src/services/structure_analyzer.py](generate_page_content), [src/services/structure_analyzer.py](_build_error_placeholder), [src/services/wiki_generator.py](save_to_file)
 
----
+    B -- "OpenRouter" --> K["Prefix: openrouter/"]
+    K --> L["Set OPENROUTER_API_KEY"]
+    L --> E
 
 <a name="github-action-usage"></a>
 
-<details>
-<summary>Relevant source files</summary>
+    B -- "Ollama" --> O["Prefix: ollama/"]
+    O --> P{"LLM_BASE_URL?"}
+    P -- "Yes" --> Q["Set api_base"]
+    Q --> E
 
-The following files were used as context for generating this wiki page:
+    B -- "Unsupported" --> R["Raise ValueError"]
+```
 
 - [.github/workflows/wiki-as-readme-action.yml](.github/workflows/wiki-as-readme-action.yml)
 - [.github/workflows/version-sync.yml](.github/workflows/version-sync.yml)
@@ -1675,14 +1680,15 @@ The system incorporates several mechanisms for handling errors during LLM intera
 *   **User-Friendly Error Placeholders**: As per the design plan, if an LLM call fails, the raw error string is replaced with a user-friendly Markdown placeholder in the final wiki output, guiding the user on potential next steps.
     Sources: [docs/plans/2026-02-25-llm-timeout-handling-design.md](Error Placeholder Format section)
 
----
+1.  **Wiki Generation:** It makes an internal HTTP POST request to the `/api/v1/wiki/generate/file` endpoint of the same application. This request includes details like `repo_owner`, `repo_name`, `repo_url`, and desired language/view options. A timeout of 60 seconds is applied to accommodate generation time.
+2.  **Result Extraction:** Upon successful generation, it extracts the markdown content from the response.
+3.  **GitHub Update:** It then calls `update_github_readme` to commit the newly generated markdown content to the specified GitHub repository.
 
 <a name="git-&-notion-integrations"></a>
 
-<details>
-<summary>Relevant source files</summary>
+### Updating GitHub `WIKI.md` (`update_github_readme`)
 
-The following files were used as context for generating this wiki page:
+This function handles the interaction with the GitHub API to commit the generated markdown:
 
 - [src/providers/github.py](src/providers/github.py)
 - [src/providers/gitlab.py](src/providers/gitlab.py)
@@ -2276,6 +2282,7 @@ sequenceDiagram
     GA-->>BT: "200/201 OK"
     BT->>BT: "Log Success/Failure"
 ```
+Sources: [src/api/v1/endpoints/wiki.py](get_wiki_generation_status)
 
 ### GitHub Update Mechanism
 
@@ -2317,7 +2324,9 @@ Triggers an asynchronous wiki generation task. The generated Markdown content is
 **Request Body:** `WikiGenerationRequest`
 **Response Body:** `WikiGenerationResponse`
 
-| Parameter | Type | Description |
+This model represents the immediate response after successfully initiating a wiki generation task.
+
+| Field | Type | Description |
 |---|---|---|
 | `message` | `str` | A message indicating the status of the request. |
 | `task_id` | `str` | The ID of the background task initiated. |
@@ -2669,44 +2678,51 @@ The Korean LangGraph Wiki includes:
 *   **빠른 시작 ("Quickstart"):** Provides installation instructions and a simple workflow example. Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/langgraph_readme_ko.md](빠른 시작)
 *   **핵심 이점 ("Core Benefits"):** Lists key advantages such as durable execution, human-in-the-loop, comprehensive memory, debugging with LangSmith, and production-ready deployment. Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/langgraph_readme_ko.md](핵심 이점)
 
-### Simple Workflow Example (Korean)
+### Supported Versions
 
-The quickstart section includes the same Python example for creating a simple workflow:
+Only the **latest release** of "Wiki As Readme" is officially supported for security updates. Users and contributors are encouraged to always use the most recent version to benefit from the latest security patches and features.
 
-```python
-from langgraph.graph import START, StateGraph
-from typing_extensions import TypedDict
+| Version | Supported |
+|---|---|
+| Latest | :white_check_mark: |
+| Older | :x: |
 
+Sources: [SECURITY.md](SECURITY.md)
 
-class State(TypedDict):
-    text: str
+### How to Report a Vulnerability
 
+To report a security vulnerability, please follow these steps:
+1.  **Do NOT** report vulnerabilities through public GitHub issues or pull requests. This could expose the vulnerability before a fix is available, putting users at risk.
+2.  **Email your report** directly to the project maintainer at: **catuscio@hotmail.com**.
+3.  **Include comprehensive details** in your email. This should cover:
+    *   A clear description of the vulnerability.
+    *   Steps to reproduce the issue.
+    *   The version of "Wiki As Readme" affected.
+    *   Any potential impact or exploit scenarios.
+    *   If possible, provide a proof-of-concept.
 
-def node_a(state: State) -> dict:
-    return {"text": state["text"] + "a"}
+The project team aims to acknowledge your report within 48 hours and will keep you updated on the progress of the fix.
+Sources: [SECURITY.md](SECURITY.md)
 
+## Code Quality and Pre-commit Hooks
 
-def node_b(state: State) -> dict:
-    return {"text": state["text"] + "b"}
-
-
-graph = StateGraph(State)
-graph.add_node("node_a", node_a)
-graph.add_node("node_b", node_b)
-graph.add_edge(START, "node_a")
-graph.add_edge("node_a", "node_b")
+To maintain high code quality, consistency, and prevent common issues, "Wiki As Readme" utilizes `pre-commit` hooks. These hooks automatically run checks on your code before you commit it, ensuring that contributions adhere to project standards.
 
 print(graph.compile().invoke({"text": ""}))
 # {'text': 'ab'}
 ```
 Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/langgraph_readme_ko.md](간단한 워크플로우 생성)
 
-### Workflow Diagram (Korean)
+The project's pre-commit configuration is defined in `.pre-commit-config.yaml`. It currently uses `ruff` for both linting and formatting Python code.
 
-```mermaid
-graph TD
-    A["Start"] --> B["node_a"];
-    B --> C["node_b"];
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 ```
 Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/langgraph_readme_ko.md](워크플로우 시각화)
 
@@ -2723,7 +2739,7 @@ The "Wiki As Readme" documentation includes:
 *   **Usage Modes:** Covers using the tool as a GitHub Action, with Docker Compose, for local Python development, and as a server with webhooks. Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/wiki_as_README.md](Using as a GitHub Action)
 *   **Project Architecture Overview:** Provides an overview of the system's components (Streamlit Frontend, FastAPI Backend, LiteLLM, Pydantic, Mermaid.js) and their interactions. Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/wiki_as_README.md](Project Architecture Overview)
 
-### System Architecture Diagram
+### Ruff Linting and Formatting
 
 ```mermaid
 graph TD
@@ -2737,7 +2753,10 @@ graph TD
 ```
 Sources: [https://github.com/langchain-ai/langgraph/blob/main/examples/wiki_as_README.md](Project Architecture Overview)
 
-### GitHub Action Workflow Diagram
+**To set up pre-commit hooks locally:**
+1.  Ensure you have `pre-commit` installed (`pip install pre-commit`).
+2.  Navigate to the root of your project directory.
+3.  Run `pre-commit install`.
 
 ```mermaid
 sequenceDiagram
