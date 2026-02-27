@@ -139,6 +139,11 @@ Optionally sync the generated content to a Notion Database.
             type: boolean
             required: false
             default: false
+          is_comprehensive_view:
+            description: 'Generate comprehensive wiki with more pages (true/false)'
+            type: boolean
+            required: false
+            default: true
           commit_method:
             description: 'How to apply changes'
             type: choice
@@ -146,6 +151,10 @@ Optionally sync the generated content to a Notion Database.
               - push
               - pull-request
             default: 'push'
+
+    concurrency:
+      group: wiki-update-${{ github.ref }}
+      cancel-in-progress: true
 
     jobs:
       wiki-time:
@@ -180,13 +189,14 @@ Optionally sync the generated content to a Notion Database.
 
           # 2. Generate Wiki Content & Sync
           - name: Generate Content (and Sync to Notion if enabled)
-            uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+            uses: catuscio/wiki-as-readme@v1.4.1
             env:
               # --- Basic Settings ---
               # Use input if available, otherwise default to 'en' (e.g., for push events)
               LANGUAGE: ${{ inputs.language || 'en' }}
               WIKI_OUTPUT_PATH: ${{ env.WIKI_OUTPUT_PATH }}
-              
+              IS_COMPREHENSIVE_VIEW: ${{ inputs.is_comprehensive_view == '' && 'true' || inputs.is_comprehensive_view }}
+
               # --- LLM Provider and Model Settings ---
               LLM_PROVIDER: ${{ inputs.llm_provider || 'google' }}
               MODEL_NAME: ${{ inputs.model_name || 'gemini-2.5-flash' }}
@@ -366,6 +376,7 @@ See [`.env.example`](.env.example) for a complete template with comments.
 | | `temperature` | LLM randomness (0.0 = deterministic, 1.0 = creative) | `0.0` |
 | | `max_retries` | Retry count for failed LLM requests | `3` |
 | | `max_concurrency` | Max parallel LLM calls (prevents rate limits) | `5` |
+| | `llm_timeout` | Timeout in seconds for each LLM request | `300` |
 | **Auth** | `OPENAI_API_KEY` | OpenAI API Key | — |
 | | `ANTHROPIC_API_KEY` | Anthropic API Key | — |
 | | `OPENROUTER_API_KEY` | OpenRouter API Key | — |
@@ -377,6 +388,7 @@ See [`.env.example`](.env.example) for a complete template with comments.
 | | `WIKI_OUTPUT_PATH` | Path to save generated wiki | `./WIKI.md` |
 | | `LOCAL_REPO_PATH` | Local repo path for Docker mounting | `.` |
 | | `IGNORED_PATTERNS` | **JSON array** of glob patterns to exclude from analysis | (see `config.py`) |
+| | `IS_COMPREHENSIVE_VIEW` | Generate comprehensive wiki (8-12 pages) vs concise (4-6 pages) | `true` |
 | **Notion** | `NOTION_SYNC_ENABLED` | Sync to Notion after generation | `false` |
 | | `NOTION_API_KEY` | Notion Integration Token | — |
 | | `NOTION_DATABASE_ID` | Target Notion Database ID | — |
