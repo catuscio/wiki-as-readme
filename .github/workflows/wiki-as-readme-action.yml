@@ -31,6 +31,11 @@ on:
         type: boolean
         required: false
         default: false
+      is_comprehensive_view:
+        description: 'Generate comprehensive wiki with more pages (true/false)'
+        type: boolean
+        required: false
+        default: true
       commit_method:
         description: 'How to apply changes'
         type: choice
@@ -72,12 +77,13 @@ jobs:
 
       # 2. Generate Wiki Content & Sync
       - name: Generate Content (and Sync to Notion if enabled)
-        uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+        uses: catuscio/wiki-as-readme@v1.4.1
         env:
           # --- Basic Settings ---
           # Use input if available, otherwise default to 'en' (e.g., for push events)
           LANGUAGE: ${{ inputs.language || 'en' }}
           WIKI_OUTPUT_PATH: ${{ env.WIKI_OUTPUT_PATH }}
+          IS_COMPREHENSIVE_VIEW: ${{ inputs.is_comprehensive_view == '' && 'true' || inputs.is_comprehensive_view }}
           
           # --- LLM Provider and Model Settings ---
           LLM_PROVIDER: ${{ inputs.llm_provider || 'google' }}

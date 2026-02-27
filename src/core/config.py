@@ -110,6 +110,7 @@ class Settings(BaseSettings):
     NOTION_API_KEY: str | None = None
     NOTION_DATABASE_ID: str | None = None
     NOTION_SYNC_ENABLED: bool = False
+    IS_COMPREHENSIVE_VIEW: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"

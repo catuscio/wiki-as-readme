@@ -76,7 +76,7 @@ jobs:
 
       # 2. Generate Wiki Content & Sync
       - name: Generate Content (and Sync to Notion if enabled)
-        uses: docker://ghcr.io/catuscio/wiki-as-readme-action:latest
+        uses: catuscio/wiki-as-readme@v1.4.1
         env:
           # --- Basic Settings ---
           # Use input if available, otherwise default to 'en' (e.g., for push events)

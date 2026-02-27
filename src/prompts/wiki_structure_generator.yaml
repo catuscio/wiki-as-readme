@@ -83,8 +83,20 @@ template: |
   
   Guidelines for the wiki content:
   - Create {% if isComprehensiveView %}8-12{% else %}4-6{% endif %} pages that would make a {% if isComprehensiveView %}comprehensive{% else %}concise{% endif %} wiki for this repository.
-  - Each page (`WikiPage`) should focus on a specific aspect of the codebase (e.g., architecture, key features, setup).
-  - For `WikiPage.file_paths`, select actual file paths from the provided `fileTree` that you MUST use to generate that page's content. Ensure there is at least one file path.
+
+  **Page topic selection:**
+  - Each page (`WikiPage`) should focus on a **distinct, non-overlapping** aspect of the codebase. Avoid creating pages with similar scope (e.g., do not create both "Configuration" and "Settings & Environment").
+  - Prioritize pages that cover: project overview/architecture, getting started/setup, core features and modules, data flow and key workflows, API reference (if applicable), and deployment/configuration.
+  - {% if isComprehensiveView %}For comprehensive view, also consider: testing strategy, error handling patterns, security considerations, and extension/plugin points if relevant.{% else %}For concise view, focus on the most essential pages a new developer needs to get started and understand the codebase.{% endif %}
+
+  **File path assignment (`file_paths`):**
+  - Select actual file paths from the provided `fileTree` that are most relevant to each page's topic. Ensure there is at least one file path per page.
+  - **Coverage:** Distribute files so that all important source files (not config/lock files) appear in at least one page. Avoid leaving key files unassigned.
+  - **Overlap:** A file may appear in multiple pages if it is genuinely relevant to both topics, but avoid assigning the same file to more than 3 pages.
+  - **Relevance:** Only assign files that directly relate to the page's topic. Do not pad file lists with loosely related files.
+
+  **Structure rules:**
+  - For `WikiPage.content`, always set it to an empty string `""`. Content will be generated separately.
   - For `WikiPage.parent_id`, provide the `id` of the `WikiSection` it belongs to, or `null` if it's a top-level page.
   - Populate `WikiStructure.sections` with a logical hierarchy, and `WikiStructure.root_sections` with top-level section IDs. If no sections are deemed necessary, provide empty lists `[]` for both.
   - Ensure all `pages` are included in at least one `section.pages` list, or are top-level pages.
